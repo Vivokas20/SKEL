@@ -1,0 +1,40 @@
+db: tests-examples/textbook/tables/12.sqlite
+inputs:
+  - tests-examples/textbook/tables/12-1.txt
+output: tests-examples/textbook/tables/12.out
+aggrs:
+  - n
+filters:
+  - max(n)
+bools:
+  - ==
+loc: 2
+solution:
+  - summarise
+  - filter
+  - summarise
+  - natural_join
+sql: |
+  SELECT S.age, S.level
+  FROM Student S
+  GROUP BY S.age, S.level,
+  HAVING S.level IN (SELECT S1.level
+  FROM Student S1
+  WHERE S1.age = S.age
+  GROUP BY S1.level, S1.age
+  HAVING COUNT (*) >= ALL (SELECT COUNT (*)
+  FROM Student S2
+  WHERE s1.age = S2.age
+  GROUP BY S2.level, S2.age))
+comment: |
+  5.1.12 optimal solution
+
+  student %>% group_by(age,level) %>% summarise(n = n()) %>%
+  filter(n==max(n)) %>% select(-n)
+
+  summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) | n != max(n)'), summarise(line1, 'n = n()', 'age'), semi_join(line0, line2)
+
+  summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) & n == max(n)'), anti_join(input0, line1, "'age'"), union(line1, line2)
+
+  summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) | n != max(n)'), summarise(line1, 'n = n()', 'age'), natural_join(line0, line2)
+

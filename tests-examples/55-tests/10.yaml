@@ -1,0 +1,42 @@
+inputs:
+  - tests-examples/55-tests/tables/10-1.txt
+  - tests-examples/55-tests/tables/10-2.txt
+output: tests-examples/55-tests/tables/10.out
+functions:
+  - n
+filters:
+  - max(n)
+bools:
+  - ==
+loc: 3
+solution:
+  - natural_join
+  - summarise
+  - filter
+sql: |
+  SELECT S_name
+  FROM
+    (SELECT S_name,
+            n
+     FROM
+       (SELECT S_name,
+               n,
+               MAX(n) OVER () AS zzz3
+        FROM
+          (SELECT S_name,
+                  COUNT() AS n
+           FROM
+             (SELECT LHS.S_key AS S_key,
+                     LHS.C_name AS C_name,
+                     RHS.S_name AS S_name
+              FROM df_10_1 AS LHS
+              INNER JOIN df_10_2 AS RHS ON (LHS.S_key = RHS.S_key))
+           GROUP BY S_name))
+     WHERE (n = zzz3))
+comment: |
+  # 5.1.10 optimal solution
+
+  df1 <- inner_join(input1, input2)
+  df2 <- df1 %>% group_by(S_name) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == max(n))
+  out <- df3 %>% select(S_name)

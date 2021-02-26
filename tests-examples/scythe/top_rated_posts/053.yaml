@@ -1,0 +1,17 @@
+db: tests-examples/scythe/top_rated_posts/tables/053.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i053.csv
+output: tests-examples/scythe/top_rated_posts/tables/o053.csv
+sql: |-
+  SELECT
+    status,
+    CASE
+      WHEN STATUS IN('a1','a2','a3')
+      THEN 'Active'
+      WHEN STATUS = 'i'
+      THEN 'Inactive'
+      WHEN STATUS = 't'
+      THEN 'Terminated'
+    END AS STATUSTEXT
+  FROM
+    STATUS

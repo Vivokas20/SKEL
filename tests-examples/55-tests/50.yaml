@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/employees.txt
+  - tests-examples/55-tests/tables/certified.txt
+output: tests-examples/55-tests/tables/50.out
+constants:
+  - 100000
+  - 150000
+columns:
+  - salary
+loc: 2
+solution:
+  - filter
+  - natural_join4
+comment: |
+  5.3.1 modified optimal solution sql
+
+  df1 <- input2 %>% filter(salary > 100000 & salary <= 150000)
+  df2 <- inner_join(inner_join(inner_join(df1, input3), input1), input2)
+  out <- df2 %>% select(eid, ename) %>% distinct()

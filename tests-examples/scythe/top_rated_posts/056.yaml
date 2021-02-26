@@ -1,0 +1,25 @@
+db: tests-examples/scythe/top_rated_posts/tables/056.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i056.csv
+output: tests-examples/scythe/top_rated_posts/tables/o056.csv
+sql: |
+  select c1,c2,c3,c4,c5 -- for N columns, this goes to N*2-1
+  from
+  (
+      select value,
+          targetRow = row+col-1,
+          targetCol = ROW_NUMBER() over (partition by row+col-1 order by row)
+      from
+      (
+          select *,
+              row = DENSE_RANK() over (order by id),
+              col = ROW_NUMBER() over (partition by id order by
+                  CASE source when 'colA' then 3 -- number in reverse
+                              when 'colX' then 2
+                              when 'colZ' then 1 end)
+          from t45
+          unpivot (value for source in (colA,colX,colZ)) upv
+      ) x
+  ) p                                -- for N columns, this goes to N*2-1
+  pivot (max(value) for targetCol in (c1,c2,c3,c4,c5)) pv
+  order by targetRow

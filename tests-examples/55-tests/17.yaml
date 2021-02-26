@@ -1,0 +1,45 @@
+inputs:
+  - tests-examples/55-tests/tables/17-1.txt
+  #  - not used tests-examples/55-tests/tables/17-2.txt
+  - tests-examples/55-tests/tables/17-3.txt
+output: tests-examples/55-tests/tables/17.out
+functions:
+  - mean
+columns:
+  - cost
+bools:
+  - '>'
+solution:
+  - summarise
+  - natural_join3
+  - filter
+loc: 3
+sql: |
+  SELECT P_id,
+         S_name
+  FROM
+    (SELECT *
+     FROM
+       (SELECT *
+        FROM df_17_1 AS LHS
+        INNER JOIN df_17_3 AS RHS ON (LHS.S_key = RHS.S_key)) AS LHS
+     INNER JOIN
+       (SELECT P_id,
+               AVG(cost) AS meancost
+        FROM df_17_1
+        GROUP BY P_id) AS RHS ON (LHS.P_id = RHS.P_id))
+  WHERE (meancost < cost)
+comment: |
+  5.2.5 optimal solution
+
+  df3 <- input1 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df4 <- inner_join(input1, input2) %>% inner_join(df3)
+  df5 <- df4 %>% filter(meancost < cost)
+  out <- df5 %>% select(P_id, S_name) %>% arrange(P_id)
+
+  summarise(input0, 'meancost = mean(cost)', 'P_id'), natural_join3(input0, line0, input1), filter(line1, 'meancost < cost'), natural_join3(input1, line2, line0)
+  summarise(input0, 'meancost = mean(cost)', 'P_id'), natural_join3(input0, input1, line0), filter(line1, 'meancost < cost')
+  summarise(input0, 'meancost = mean(cost)', 'P_id'), natural_join3(input0, line0, input1), filter(line1, 'meancost < cost')
+
+
+

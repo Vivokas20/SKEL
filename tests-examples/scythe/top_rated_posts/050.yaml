@@ -1,0 +1,22 @@
+db: tests-examples/scythe/top_rated_posts/tables/050.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i050.csv
+output: tests-examples/scythe/top_rated_posts/tables/o050.csv
+functions:
+  - pmin
+columns:
+  - Col1
+  - Col2
+  - Col3
+loc: 1
+solution:
+  - mutate
+sql: |
+  SELECT ID, Col1, Col2, Col3, MinValue
+  FROM i050
+  CROSS APPLY (SELECT MIN(d) MinValue FROM (VALUES (Col1), (Col2), (Col3)) AS a(d)) A;
+comment: |
+  select least(col1, col2, col3) FROM yourtable;
+
+  df2 <- input1 %>% mutate(pminCol1Col2Col3 = pmin(Col1,Col2,Col3))
+  out <- df2 %>% select(ID, Col1, Col2, Col3, TheMin = pminCol1Col2Col3) %>% arrange(ID)

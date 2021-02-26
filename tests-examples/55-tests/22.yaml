@@ -1,0 +1,29 @@
+inputs:
+  - tests-examples/55-tests/tables/17-1.txt
+  - tests-examples/55-tests/tables/17-3.txt
+output: tests-examples/55-tests/tables/22.out
+constants:
+  - SN1
+functions:
+  - mean
+columns:
+  - cost
+  - S_name
+bools:
+  - '>'
+loc: 5
+solution:
+  - natural_join
+  - summarise
+  - inner_join
+  - filter
+comment: |
+  5.2.5 optimal solution modified (17)
+
+  df3 <- inner_join(input2, input1)
+  df4 <- df3 %>% group_by(P_id, S_name) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df5 <- inner_join(df3, df4, by=c('P_id' = 'P_id','S_name' = 'P_id'), suffix = c('', '.other'))
+  df6 <- df5 %>% filter(S_name != 'SN1' & meancost > cost)
+  out <- df6 %>% select(P_id, S_name = S_name.other) %>% distinct() %>% arrange(P_id)
+
+

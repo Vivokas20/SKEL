@@ -1,0 +1,28 @@
+db: tests-examples/scythe/recent_posts/tables/006.sqlite
+inputs:
+  - tests-examples/scythe/recent_posts/tables/006.csv
+output: tests-examples/scythe/recent_posts/tables/006_o.csv
+functions:
+  - concat
+columns:
+  - variants
+filters:
+  - like
+constants:
+  - hot
+solution:
+  - unite
+  - summarise
+  - left_join
+  - filter
+loc: 4
+sql: |
+  select * from t where variants like '%:hot' or variants like '%:hot,%'
+comment: |
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- unite(input1, variants, variants, variants_value, sep=":")
+  df2 <- df1 %>% group_by(product_name) %>% summarise(concatvariants = string_agg(variants, ',')) %>% ungroup()
+  df3 <- left_join(df1, df2)
+  df4 <- df3 %>% filter(str_detect(variants, 'hot'))
+  out <- df4 %>% select(code, product_variants_id, product_name, variants_and_values = concatvariants)

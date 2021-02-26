@@ -1,0 +1,23 @@
+db: tests-examples/textbook/tables/29.sqlite
+inputs:
+  - tests-examples/textbook/tables/aircraft.txt
+  - tests-examples/textbook/tables/flights.txt
+output: tests-examples/textbook/tables/29.out
+constants:
+  - Los Angeles
+  - Chicago
+functions:
+  - min
+columns:
+  - origin
+  - destination
+  - distance
+  - crusingrange
+sql: |
+  SELECT A.aid
+  FROM Aircraft A
+  WHERE A.crusingrange > ( SELECT MIN (F.distance)
+                            FROM Flights F
+                            WHERE F.origin = 'Los Angeles' AND F.destination = 'Chicago' )
+comment: |
+  5.3.6 optimal solution sql

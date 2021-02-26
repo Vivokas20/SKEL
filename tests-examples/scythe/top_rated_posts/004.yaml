@@ -1,0 +1,24 @@
+db: tests-examples/scythe/top_rated_posts/tables/004.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i004.csv
+output: tests-examples/scythe/top_rated_posts/tables/o004.csv
+functions:
+  - max
+columns:
+  - rev
+loc: 2
+solution:
+  - summarise
+  - natural_join
+sql: |
+  SELECT a.id, a.rev, a.content
+  FROM i004 a
+  INNER JOIN (
+      SELECT id, MAX(rev) AS maxrev
+      FROM i004
+      GROUP BY id
+  ) b ON a.id = b.id AND a.rev = b.maxrev
+comment: |
+  df1 <- df_i004 %>% group_by(id) %>% summarise(rev = max(rev)) %>% ungroup()
+  df2 <- inner_join(df_i004, df1)
+  out <- df2 %>% select(id, rev, content) %>% arrange(id)

@@ -1,0 +1,30 @@
+inputs:
+  - tests-examples/leetcode/tables/185_1.csv
+  - tests-examples/leetcode/tables/185_2.csv
+output: tests-examples/leetcode/tables/185_o.csv
+functions:
+  - n
+constants:
+  - 3
+columns:
+  - Salary
+loc: 3
+solution:
+  - inner_join
+  - summarise
+  - filter
+comment:
+  select e1.Name as 'Employee', e1.Salary
+  from Employee e1
+  where 3 > (
+  select count(distinct e2.Salary)
+  from Employee e2
+  where e2.Salary > e1.Salary
+  )
+
+  df3 <- inner_join(input2, input1, by=c('Id' = 'DepartmentId'), suffix = c('', '.other'))
+  df4 <- input1 %>% group_by(DepartmentId) %>% summarise(Salary = max(Salary)) %>% ungroup()
+  df5 <- inner_join(df3, df4)
+  out <- df5 %>% select(Department = Name, Employee = Name.other, Salary)
+
+

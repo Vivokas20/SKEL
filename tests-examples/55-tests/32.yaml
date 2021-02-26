@@ -1,0 +1,27 @@
+inputs:
+  - tests-examples/55-tests/tables/19-1.txt
+  - tests-examples/55-tests/tables/19-2.txt
+  - tests-examples/55-tests/tables/19-3.txt
+output: tests-examples/55-tests/tables/32.out
+constants:
+  - green
+  - S4
+functions:
+  - n
+columns:
+  - color
+  - S_key
+bools:
+  - ==
+loc: 3
+solution:
+  - summarise
+  - natural_join3
+  - filter
+comment: |
+  5.2.7 optimal solution modified
+
+  df1 <- input2 %>% group_by(P_id, color) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(inner_join(input1, input3), df1)
+  df3 <- df2 %>% filter(S_key != 'S4' & color == 'green')
+  out <- df3 %>% select(P_id, n) %>% distinct()

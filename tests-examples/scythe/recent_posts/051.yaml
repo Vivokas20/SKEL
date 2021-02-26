@@ -1,0 +1,22 @@
+db: tests-examples/scythe/recent_posts/tables/051.sqlite
+inputs:
+  - tests-examples/scythe/recent_posts/tables/051_1.csv
+  - tests-examples/scythe/recent_posts/tables/051_2.csv
+output: tests-examples/scythe/recent_posts/tables/051_o.csv
+columns:
+  - Author
+functions:
+  - concat
+loc: 2
+solution:
+  - natural_join
+  - summarise
+sql: |
+  Select a.isbn, a.title, group_concat(b.author )
+  from 051_1 a
+  INNER JOIN 051_2 b ON a.isbn = b.isbn
+  group by a.isbn, a.title
+comment: |
+  df3 <- inner_join(input2, input1)
+  df4 <- df3 %>% group_by(isbn, title) %>% summarise(concatAuthor = string_agg(Author, ', ')) %>% ungroup()
+  out <- df4 %>% select(isbn, title, author = concatAuthor)

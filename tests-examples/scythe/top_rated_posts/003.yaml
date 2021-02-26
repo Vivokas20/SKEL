@@ -1,0 +1,17 @@
+db: tests-examples/scythe/top_rated_posts/tables/003.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i003.csv
+output: tests-examples/scythe/top_rated_posts/tables/o003.csv
+functions:
+  - concat
+columns:
+  - c
+loc: 1
+solution:
+  - mutate
+sql: |
+  SELECT CONCAT(c)
+  FROM i003 t
+comment: |
+  df2 <- input1 %>% mutate(concatc = string_agg(c, ', '))
+  out <- df2 %>% select(concatc) %>% distinct() %>% arrange(concatc)

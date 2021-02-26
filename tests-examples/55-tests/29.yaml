@@ -1,0 +1,23 @@
+inputs:
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/employees.txt
+  - tests-examples/55-tests/tables/certified.txt
+output: tests-examples/55-tests/tables/28.out
+constants:
+  - 80000
+  - 100000
+  - 120000
+columns:
+  - salary
+loc: 3
+solution:
+  - filter
+  - natural_join3
+  - filter
+comment: |
+  5.3.1 modified optimal solution sql
+
+  df1 <- input2 %>% filter(salary < 100000 & salary > 80000)
+  df2 <- inner_join(inner_join(input3, input1), df1)
+  df3 <- df2 %>% filter(salary <= 120000)
+  out <- df3 %>% select(aname)

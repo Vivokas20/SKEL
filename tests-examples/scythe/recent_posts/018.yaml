@@ -1,0 +1,36 @@
+db: tests-examples/scythe/recent_posts/tables/018.sqlite
+inputs:
+  - tests-examples/scythe/recent_posts/tables/018.csv
+output: tests-examples/scythe/recent_posts/tables/018_o.csv
+constants:
+  - 10/17/2016
+  - 2
+functions:
+  - n
+columns:
+  - Date
+dateorder: mdy
+loc: 2
+solution:
+  - summarise
+  - filter
+sql: |
+  SELECT t1.Course, Count(t2.OrderID)
+  FROM 018 AS t1
+  LEFT JOIN
+   (
+     SELECT CustomerID, Min(OrderID) AS OrderID
+     FROM 018 AS t2
+     WHERE Date='17.10.2016'
+     GROUP BY CustomerID
+   ) AS t2
+  ON t1.CustomerID = t2.CustomerID
+  AND t1.OrderID = t2.OrderID
+  WHERE Date='17.10.2016'
+  GROUP BY t1.Course
+comment: |
+
+
+  df2 <- input1 %>% group_by(Course, Date) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n > 2 | Date < mdy('10/17/2016'))
+  out <- df3 %>% select(c1 = Course, c2 = n)

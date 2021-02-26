@@ -1,0 +1,23 @@
+db: tests-examples/scythe/top_rated_posts/tables/008.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i008_1.csv
+  - tests-examples/scythe/top_rated_posts/tables/i008_2.csv
+output: tests-examples/scythe/top_rated_posts/tables/o008.csv
+functions:
+  - first
+columns:
+  - OrderNumber
+loc: 2
+solution:
+  - natural_join
+  - summarise
+sql: |
+  SELECT Orders.OrderNumber, LineItems.Quantity, LineItems.Description
+  FROM i008_1 Orders
+      LEFT JOIN i008_2 LineItems
+      ON Orders.OrderID = LineItems.OrderID
+  GROUP BY Orders.OrderNumber
+comment: |
+  df3 <- inner_join(input2, input1)
+  df4 <- df3 %>% group_by(OrderID) %>% summarise_all(first) %>% ungroup()
+  out <- df4 %>% select(OrderNumber, Quantity, Description) %>% arrange(OrderNumber)

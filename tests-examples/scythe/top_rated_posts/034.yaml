@@ -1,0 +1,25 @@
+db: tests-examples/scythe/top_rated_posts/tables/034.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i034.csv
+output: tests-examples/scythe/top_rated_posts/tables/o034.csv
+functions:
+  - max
+columns:
+  - Time
+loc: 2
+solution:
+  - summarise
+  - inner_join
+sql: |
+  SELECT t.Train, t.Dest, r.MaxTime
+  FROM (
+        SELECT Train, MAX(Time) as MaxTime
+        FROM i034
+        GROUP BY Train
+  ) r
+  INNER JOIN i034 t
+  ON t.Train = r.Train AND t.Time = r.MaxTime
+comment: |
+  df2 <- input1 %>% group_by(Train) %>% summarise(maxTime = max(Time)) %>% ungroup()
+  df3 <- inner_join(df2, input1, by=c('maxTime' = 'Time'), suffix = c('', '.other')) %>% mutate(Time = maxTime)
+  out <- df3 %>% select(Train, Dest, Time = maxTime) %>% arrange(Train)

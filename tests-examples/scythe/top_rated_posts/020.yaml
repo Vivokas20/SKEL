@@ -1,0 +1,29 @@
+db: tests-examples/scythe/top_rated_posts/tables/020.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i020.csv
+output: tests-examples/scythe/top_rated_posts/tables/o020.csv
+functions:
+  - str_count
+constants:
+  - value
+columns:
+  - DESCRIPTION
+loc: 2
+solution:
+  - summarise
+  - natural_join
+sql: |
+  SELECT
+      title,
+      description,
+      ROUND (
+          (
+              LENGTH(description)
+              - LENGTH( REPLACE ( description, 'value', '') )
+          ) / LENGTH('value')
+      ) AS count
+  FROM i020
+comment: |
+  df2 <- input1 %>% group_by(DESCRIPTION) %>% summarise(str_countDESCRIPTION = str_count(DESCRIPTION, 'value')) %>% ungroup()
+  df3 <- inner_join(df2, input1)
+  out <- df3 %>% select(TITLE, DESCRIPTION, COUNT = str_countDESCRIPTION) %>% arrange(TITLE)

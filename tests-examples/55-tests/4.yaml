@@ -1,0 +1,34 @@
+inputs:
+  - tests-examples/55-tests/tables/4-1.txt
+  - tests-examples/55-tests/tables/4-2.txt
+  - tests-examples/55-tests/tables/4-3.txt
+output: tests-examples/55-tests/tables/4.out
+constants:
+  - 2
+functions:
+  - n
+bools:
+  - ==
+loc: 3
+solution:
+  - natural_join3
+  - summarise
+  - filter
+sql: |
+  SELECT t.S_name
+  FROM
+    (SELECT i1.S_name,
+            i1.meets_at,
+            COUNT() AS n
+     FROM df_4_1 i1
+          NATURAL JOIN df_4_2 i2
+          NATURAL JOIN df_4_3 i3
+     GROUP BY S_name, meets_at) t
+  WHERE (t.n = 2.0)
+comment: |
+  5.1.4 optimal solution
+
+  df4 <- inner_join(input2, input1) %>% inner_join(input3)
+  df5 <- df4 %>% group_by(S_name, meets_at) %>% summarise(n = n()) %>% ungroup()
+  df6 <- df5 %>% filter(n == 2)
+  out <- df6 %>% select(S_name) %>% arrange(S_name)

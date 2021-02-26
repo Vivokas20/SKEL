@@ -1,0 +1,23 @@
+db: tests-examples/scythe/top_rated_posts/tables/027.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i027.csv
+output: tests-examples/scythe/top_rated_posts/tables/o027.csv
+functions:
+  - max
+columns:
+  - avg
+loc: 2
+solution:
+  - summarise
+  - natural_join
+sql: |
+  SELECT m.cname, m.wmname, t.mx
+  FROM (
+      SELECT cname, MAX(avg) AS mx
+      FROM i027
+      GROUP BY cname
+      ) t JOIN i027 m ON m.cname = t.cname AND t.mx = m.avg;
+comment: |
+  df1 <- input1 %>% group_by(cname) %>% summarise(maxavg = max(avg))
+  df2 <- inner_join(df1, input1, by=c('cname' = 'cname','maxavg' = 'avg'), suffix = c("", ".other"))
+  out <- df2 %>% ungroup() %>% select(cname,wmname,maxavg)

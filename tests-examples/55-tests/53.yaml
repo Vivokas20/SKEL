@@ -1,0 +1,20 @@
+inputs:
+  - tests-examples/55-tests/tables/17-1.txt
+  - tests-examples/55-tests/tables/17-3.txt
+output: tests-examples/55-tests/tables/53.out
+functions:
+  - min
+columns:
+  - cost
+bools:
+  - ==
+loc: 2
+solution:
+  - summarise
+  - natural_join3
+comment: |
+  5.2.5 optimal solution
+
+  df3 <- input1 %>% group_by(P_id) %>% summarise(cost = min(cost)) %>% ungroup()
+  df4 <- inner_join(input2, input1) %>% inner_join(df3)
+  out <- df4 %>% select(P_id, S_name) %>% arrange(P_id)

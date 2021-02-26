@@ -1,0 +1,26 @@
+db: tests-examples/scythe/top_rated_posts/tables/011.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i011_1.csv
+  - tests-examples/scythe/top_rated_posts/tables/i011_2.csv
+output: tests-examples/scythe/top_rated_posts/tables/o011.csv
+functions:
+  - concat
+columns:
+  - City
+loc: 2
+solution:
+  - summarise
+  - natural_join
+sql: |
+  select i011_1.VehicleID, i011_1.Name, t.concatLocations
+  from (select VehicleID, concat(City) As concatLocations
+        from i011_2
+        group by VehicleID) t
+           join i011_1
+                on i011_1.VehicleID = t.VehicleID
+comment: |
+  string_agg <- function(v,s) {Reduce(function(x, y) paste(x, y, sep = s), v)}
+
+  df1 <- left_join(input1, input2)
+  df2 <- df1 %>% group_by(Name, VehicleID) %>% summarise(concatCity = string_agg(City, ', ')) %>% ungroup()
+  out <- df2 %>% select(VehicleID, Name, concatCity) %>% distinct()

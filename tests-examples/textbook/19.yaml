@@ -1,0 +1,38 @@
+db: tests-examples/textbook/tables/19.sqlite
+inputs:
+  - tests-examples/textbook/tables/19-1.txt
+  - tests-examples/textbook/tables/19-2.txt
+  - tests-examples/textbook/tables/19-3.txt
+output: tests-examples/textbook/tables/19.out
+constants:
+  - red
+columns:
+  - color
+bools:
+  - ==
+  - '!='
+loc: 3
+solution:
+  - natural_join3
+  - filter
+  - anti_join
+comment: |
+  # 5.2.7 optimal solution
+
+  df1 = inner_join(catalog,suppliers) %>%
+        inner_join(parts) %>%
+        filter(color == "red") %>%
+        select(sname)
+  df2 = inner_join(catalog,suppliers) %>%
+        inner_join(parts) %>%
+        filter(color != "red") %>%
+        select(sname)
+  anti_join(df1,df2)
+
+  df1 <- inner_join(input1, input2)
+  df2 <- df1 %>% filter(color != 'red')
+  df3 <- anti_join(input3, df2)
+  df4 <- left_join(df3, input1)
+  out <- df4 %>% select(S_name)
+
+

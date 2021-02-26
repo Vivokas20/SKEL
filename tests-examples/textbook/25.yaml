@@ -1,0 +1,34 @@
+db: tests-examples/textbook/tables/25.sqlite
+inputs:
+  - tests-examples/textbook/tables/aircraft.txt
+  - tests-examples/textbook/tables/certified.txt
+output: tests-examples/textbook/tables/25.out
+constants:
+  - 3
+functions:
+  - n
+  - max
+columns:
+  - crusingrange
+bools:
+  - '>'
+loc: 4
+solution:
+  - summarise
+  - natural_join3
+  - mutate
+  - filter
+sql: |
+  SELECT C.eid, MAX(A.crusingrange)
+  FROM certified C, aircraft A
+  WHERE C.aid = A.aid
+  GROUP BY C.eid
+  HAVING   COUNT(*) > 3
+comment: |
+  5.3.2 optimal solution sql
+
+  df3 <- input2 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+  df4 <- inner_join(df3, input2) %>% inner_join(input1)
+  df5 <- df4 %>% filter(crusingrange <= 3 | n > 3)
+  df6 <- df5 %>% group_by(eid) %>% summarise(crusingrange = max(crusingrange)) %>% ungroup()
+  out <- df6 %>% select(eid, maxcrusingrange = crusingrange) %>% arrange(eid)

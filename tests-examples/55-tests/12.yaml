@@ -1,0 +1,41 @@
+inputs:
+  - tests-examples/55-tests/tables/12-1.txt
+output: tests-examples/55-tests/tables/12.out
+functions:
+  - n
+filters:
+  - max(n)
+bools:
+  - ==
+loc: 2
+solution:
+  - summarise
+  - filter
+sql: |
+  SELECT age,
+         LEVEL
+  FROM
+    (SELECT age,
+            LEVEL,
+            n
+     FROM
+       (SELECT age,
+               LEVEL,
+               n,
+               MAX(n) OVER () AS zzz2,
+                           MAX(n) OVER () AS zzz3
+        FROM
+          (SELECT age,
+                  LEVEL,
+                  COUNT() AS n
+           FROM df_12_1
+           GROUP BY age,
+                    LEVEL))
+     WHERE (age != zzz2
+            AND n = zzz3))
+comment: |
+  5.1.12 optimal solution
+
+  df1 <- input1 %>% group_by(age, level) %>% summarise(n = n()) %>% ungroup()
+  df2 <- df1 %>% filter(n == max(n))
+  out <- df2 %>% select(age,level)

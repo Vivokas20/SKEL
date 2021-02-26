@@ -1,0 +1,28 @@
+db: tests-examples/textbook/tables/8.sqlite
+inputs:
+  - tests-examples/textbook/tables/8-1.txt
+output: tests-examples/textbook/tables/8.out
+constants:
+  - JR
+functions:
+  - mean
+columns:
+  - level
+  - age
+bools:
+  - '!='
+loc: 2
+solution:
+  - summarise
+  - filter
+sql: |
+  SELECT S.level, AVG(S.age)
+  FROM Student S
+  WHERE S.level <> 'JR'
+  GROUP BY S.level
+comment: |
+  5.1.8 optimal solution
+
+  df1 <- input1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+  df2 <- df1 %>% filter(level != 'JR')
+  out <- df2 %>% select(level, meanage)

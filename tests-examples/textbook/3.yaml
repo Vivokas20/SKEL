@@ -1,0 +1,35 @@
+db: tests-examples/textbook/tables/3.sqlite
+inputs:
+  - tests-examples/textbook/tables/3-1.txt
+  - tests-examples/textbook/tables/3-2.txt
+output: tests-examples/textbook/tables/3.out
+const:
+  - R128
+  - 4
+aggrs:
+  - n
+attrs:
+  - Room
+bools:
+  - '>'
+  - ==
+loc: 3
+solution:
+  - natural_join
+  - summarise
+  - filter
+sql: |
+  SELECT C.name
+  FROM Class C
+  WHERE C.room = 'R128'
+  OR C.name IN (SELECT E.cname
+  FROM Enrolled E
+  GROUP BY E.cname
+  HAVING COUNT (*) >= 5)
+comment: |
+  5.1.3 optimal solution
+
+  df1 <- inner_join(input2, input1)
+  df2 <- df1 %>% group_by(ID_key, Room) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(Room == 'R128' | n > 4)
+  out <- df3 %>% select(ID_key) %>% distinct()

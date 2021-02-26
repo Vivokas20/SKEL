@@ -1,0 +1,20 @@
+db: tests-examples/scythe/top_rated_posts/tables/019.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i019.csv
+output: tests-examples/scythe/top_rated_posts/tables/o019.csv
+functions:
+  - n
+loc: 2
+solution:
+  - summarise
+  - natural_join
+sql: |
+  SELECT S.id, S.age, C.cnt
+    FROM i019  S
+         INNER JOIN (SELECT age, count(age) as cnt
+                       FROM i019
+                      GROUP BY age) C ON S.age = C.age
+comment: |
+  df1 <- df_i019 %>% group_by(age) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(df_i019, df1)
+  out <- df2 %>% select(id, age, n) %>% arrange(id)

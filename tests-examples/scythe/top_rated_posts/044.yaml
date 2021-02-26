@@ -1,0 +1,22 @@
+db: tests-examples/scythe/top_rated_posts/tables/044.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i044.csv
+output: tests-examples/scythe/top_rated_posts/tables/o044.csv
+functions:
+  - cumsum
+columns:
+  - count
+loc: 1
+solution:
+  - mutate
+sql: |
+  SELECT t.id,
+         t.count,
+         (SELECT SUM(x.count)
+            FROM i044 x
+           WHERE x.id <= t.id) AS cumulative_sum
+  FROM i044 t
+  ORDER BY t.id
+comment: |
+  df2 <- input1 %>% mutate(cumsumcount = cumsum(count))
+  out <- df2 %>% select(id, count, sumcount = cumsumcount) %>% arrange(id)

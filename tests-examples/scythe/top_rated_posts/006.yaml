@@ -1,0 +1,25 @@
+db: tests-examples/scythe/top_rated_posts/tables/006.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i006.csv
+output: tests-examples/scythe/top_rated_posts/tables/o006.csv
+functions:
+  - max
+columns:
+  - Id
+loc: 2
+solution:
+  - summarise
+  - natural_join
+sql: |
+  SELECT
+      a.*
+  FROM i006 a
+  INNER JOIN (SELECT name, MAX(id) as maxid
+              FROM i006
+              GROUP BY name) AS b
+  ON a.id = b.maxid
+comment: |
+
+  df1 <- input1 %>% group_by(Name) %>% summarise(maxId = max(Id))
+  df2 <- inner_join(input1, df1, by=c('Id' = 'maxId','Name' = 'Name'))
+  out <- df2 %>% ungroup() %>% select(Id,Name,Other_Columns)

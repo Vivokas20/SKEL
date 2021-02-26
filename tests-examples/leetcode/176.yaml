@@ -1,0 +1,17 @@
+inputs:
+  - tests-examples/leetcode/tables/176.csv
+output: tests-examples/leetcode/tables/176_o.csv
+functions:
+  - max
+filters:
+  - max(Salary)
+columns:
+  - Salary
+loc: 2
+solution:
+  - filter
+  - mutate
+comment:
+  df2 <- input1 %>% filter(Id == max(Salary) | Salary != max(Salary))
+  df3 <- df2 %>% mutate(Salary = max(Salary))
+  out <- df3 %>% select(SecondHighestSalary = Salary) %>% distinct() %>% arrange(SecondHighestSalary)

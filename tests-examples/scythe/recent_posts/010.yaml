@@ -1,0 +1,59 @@
+db: tests-examples/scythe/recent_posts/tables/010.sqlite
+inputs:
+  - tests-examples/scythe/recent_posts/tables/010.csv
+output: tests-examples/scythe/recent_posts/tables/010_o.csv
+dateorder: ymd
+functions:
+  - max
+columns:
+  - d_End
+  - d_Start
+comment: |
+  with Src as(
+  SELECT  ROW_NUMBER() Over(Partition by Robot_ID, Certif_ID order by StartDate, EndDate) as RN
+                  ,a.*
+          FROM @certif_span as a
+  )
+
+    , Islands as(
+          SELECT RN, Robot_ID, Certif_ID, StartDate, EndDate, 0 as islandNo, EndDate AS MovingEnd
+          FROM Src as a WHERE a.RN=1
+          UNION ALL
+          SELECT a.RN, a.Robot_ID, a.Certif_ID, a.StartDate, a.EndDate
+               , b.islandNo + CASE WHEN DATEDIFF(d, a.StartDate, b.MovingEnd)>=-1 THEN 0 ELSE 1 END as IslandNO
+               , CASE WHEN a.EndDate>b.MovingEnd THEN a.EndDate ELSE b.MovingEnd END as MovingEnd
+          FROM Src as a
+          INNER JOIN Islands as b on a.Robot_ID=b.Robot_ID and a.Certif_ID=b.Certif_ID and a.RN=b.RN+1
+      )   --  SELECT * FROM Islands order by Robot_ID, Certif_ID, IslandNo
+
+    , LastIsland as(
+          SELECT Robot_ID, Certif_ID, islandNo, MIN(StartDate) as startDate, MAX(EndDate) as EndDate
+                ,ROW_NUMBER() over(partition by Robot_ID, Certif_ID order by IslandNO desc) as RN
+          FROM Islands
+          Group by Robot_ID, Certif_ID, islandNo
+  )
+      SELECT Robot_ID, Certif_ID, startDate, EndDate
+      FROM   LastIsland
+      where  RN=1
+
+  ;with cte0 as(
+                  Select A.*,GrpSeq=RetSeq-Row_Number() over (Order by RetSeq)
+                  From (
+                          Select Distinct RetSeq,RetVal
+                           From  [dbo].[udf-Range-Date]((Select min(d_Start) from #certif_span),(Select max(d_End) from #certif_span),'DD',1) A
+                           Join  #certif_span B on  A.RetVal between B.d_Start and B.d_End
+                       ) A
+               )
+      , cte1 as(
+                  Select d_Start  = min(A.RetVal)
+                        ,d_End    = max(A.RetVal)
+                   From  cte0 A
+                   Group By GrpSeq
+               )
+  Select Robot_ID  = min(Robot_ID)
+        ,Certif_ID = min(Certif_ID)
+        ,A.d_Start
+        ,A.d_End
+   from cte1 A
+   Join #certif_span B on B.d_Start Between A.d_Start and A.d_End
+   Group By A.d_Start,A.d_End

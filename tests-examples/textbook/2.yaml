@@ -1,0 +1,44 @@
+db: tests-examples/textbook/tables/2.sqlite3
+inputs:
+  - tests-examples/textbook/tables/2-1.txt
+  - tests-examples/textbook/tables/2-2.txt
+  - tests-examples/textbook/tables/2-3.txt
+  - tests-examples/textbook/tables/2-4.txt
+output: tests-examples/textbook/tables/2.out
+const:
+  - faculty1
+  - History
+aggrs:
+  - max
+attrs:
+  - F_name
+  - major
+  - age
+bools:
+  - ==
+loc: 3
+solution:
+  - natural_join4
+  - filter
+  - summarise
+sql: |
+  SELECT MAX(S.age)
+  FROM 2-4 S
+  WHERE (S.major = 'History')
+  OR S.s_key IN (SELECT E.s_key
+  FROM 2-1 C, 2-2 E, 2-3 F
+  WHERE E.c_name = C.c_name AND C.f_key = F.f_key
+  AND F.f_name = 'I.Teach' )
+comment: |
+  # 5.1.2 optimal solution
+
+  inner_join(class,enroll) %>% inner_join(faculty) %>% inner_join(student) %>%
+  filter (F_name == "faculty1" | major == "History"  ) %>%
+  summarize(age = max(age))
+
+  ALTERNATIVE SOLUTION?
+
+  df1 <- inner_join(inner_join(inner_join(input1, input2), input4), input3)
+  df2 <- df1 %>% filter(major != 'History' & F_name == 'faculty1')
+  df3 <- df2 %>% group_by(F_name) %>% summarise(maxage = max(age)) %>% ungroup()
+  out <- df3 %>% select(maxage) %>% distinct()

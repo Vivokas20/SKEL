@@ -1,0 +1,23 @@
+inputs:
+  - tests-examples/55-tests/tables/17-1.txt
+  - tests-examples/55-tests/tables/17-2.txt
+output: tests-examples/55-tests/tables/42.out
+functions:
+  - mean
+  - n
+columns:
+  - cost
+bools:
+  - '>'
+loc: 3
+solution:
+  - summarise
+  - summarise
+  - natural_join3
+comment: |
+  5.2.5 optimal solution
+
+  df1 <- input2 %>% group_by(S_name) %>% summarise(n = n()) %>% ungroup()
+  df2 <- input1 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df3 <- inner_join(inner_join(input2, df1), df2)
+  out <- df3 %>% select(S_name, n) %>% distinct()

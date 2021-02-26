@@ -1,0 +1,22 @@
+inputs:
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/certified.txt
+output: tests-examples/55-tests/tables/54.out
+constants:
+  - 3
+functions:
+  - n
+bools:
+  - '>'
+loc: 3
+solution:
+  - natural_join
+  - summarise
+  - filter
+comment: |
+  5.3.2 optimal solution sqlq
+
+  df1 <- inner_join(input1, input2)
+  df2 <- df1 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n < 3)
+  out <- df3 %>% select(eid) %>% distinct()

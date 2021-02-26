@@ -1,0 +1,25 @@
+inputs:
+  - tests-examples/55-tests/tables/21-1.txt
+  - tests-examples/55-tests/tables/21-2.txt
+  - tests-examples/55-tests/tables/21-3.txt
+output: tests-examples/55-tests/tables/36.out
+constants:
+  - red
+functions:
+  - n
+columns:
+  - color
+bools:
+  - ==
+loc: 3
+solution:
+  - filter
+  - natural_join3
+  - summarise
+comment: |
+  5.2.9 optimal solution
+
+  df1 <- input2 %>% filter(color == 'red')
+  df2 <- inner_join(inner_join(input1, df1), input3)
+  df3 <- df2 %>% group_by(S_key, S_name) %>% summarise(n = n()) %>% ungroup()
+  out <- df3 %>% select(S_name)

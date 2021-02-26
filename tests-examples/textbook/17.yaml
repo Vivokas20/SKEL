@@ -1,0 +1,32 @@
+db: tests-examples/textbook/tables/17.sqlite
+inputs:
+  - tests-examples/textbook/tables/17-1.txt
+  - tests-examples/textbook/tables/17-3.txt
+output: tests-examples/textbook/tables/17.out
+functions:
+  - mean
+columns:
+  - cost
+bools:
+  - '>'
+loc: 3
+solution:
+  - summarise
+  - natural_join3
+  - filter
+comment: |
+  5.2.5 optimal solution
+  catalog <- read.table("tests-examples/textbook/tables/17-1.txt", sep =",", header=T)
+  suppliers <- read.table("tests-examples/textbook/tables/17-3.txt", sep =",", header=T)
+
+  df1 = inner_join(catalog,suppliers) %>%
+        group_by(part_key) %>% summarise(mean = mean(cost))
+  inner_join(catalog,suppliers) %>% inner_join(df1) %>%
+  filter(cost > mean) %>% select(part_key,sname)
+
+  df1 <- input1 %>% group_by(P_id) %>% summarise(meancost = mean(cost)) %>% ungroup()
+  df2 <- inner_join(inner_join(input2, input1), df1)
+  df3 <- df2 %>% filter(meancost < cost)
+  out <- df3 %>% select(P_id, S_name) %>% distinct()
+
+  # not used tests-examples/textbook/tables/17-2.txt

@@ -1,0 +1,57 @@
+type: "object"
+
+required:
+  - output
+
+additionalProperties: false
+
+oneOf:
+  - required:
+      - inputs
+  - required:
+      - host
+      - database
+      - user
+      - tables
+
+properties:
+  db:
+    type: string
+  inputs:
+    type: array
+    items:
+      type: string
+  tables:
+    type: array
+    items:
+      type: string
+  output:
+    type: string
+  constants:
+    type: array
+  functions:
+    type: array
+  columns:
+    type: array
+  bools:
+    type: array
+  filters:
+    type: array
+  dateorder:
+    type: string
+  comment:
+    type: string
+  sql:
+    type: string
+  solution:
+    type: array
+    items:
+      type: string
+  loc:
+    type: integer
+  foreign-keys:
+    type: array
+    items:
+      type: array
+      items:
+        type: string

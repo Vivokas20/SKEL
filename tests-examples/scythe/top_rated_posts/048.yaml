@@ -1,0 +1,28 @@
+db: tests-examples/scythe/top_rated_posts/tables/048.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i048.csv
+output: tests-examples/scythe/top_rated_posts/tables/o048.csv
+functions:
+  - min
+columns:
+  - AddressID
+loc: 2
+solution:
+  - summarise
+  - natural_join
+sql: |
+  SELECT M.CName,
+         first,
+         M.AddressLine
+  FROM (
+           SELECT CName,
+                  MIN(AddressID) AS First
+           FROM i048
+           GROUP BY CName
+       ) foo
+           JOIN i048 M
+                ON foo.CName = M.CName AND foo.First = M.AddressID
+comment: |
+  df1 <- df_i048 %>% group_by(CName) %>% summarise(AddressID = min(AddressID)) %>% ungroup()
+  df2 <- inner_join(df_i048, df1)
+  out <- df2 %>% select(CName, minAddressID = AddressID, AddressLine) %>% arrange(CName)

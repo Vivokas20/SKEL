@@ -1,0 +1,7 @@
+inputs:
+- tests-examples/demo/tables/grades.csv
+output: tests-examples/demo/tables/test.out
+functions:
+  - max
+columns:
+  - grade

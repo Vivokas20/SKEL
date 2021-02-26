@@ -1,0 +1,52 @@
+db: tests-examples/scythe/top_rated_posts/tables/039.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i039.csv
+output: tests-examples/scythe/top_rated_posts/tables/o039.csv
+functions:
+  - n
+  - max
+columns:
+  - n
+loc: 2
+solution:
+  - summarise
+  - cross_join
+  - summarise
+sql: |
+  select t2.c
+  from (select max(cnt) as maxcnt
+        from (select c, count(*) cnt
+              from i039
+              group by c) t3) t1
+           join (select c, count(*) cnt
+                 from i039
+                 group by c) t2
+                on t1.maxcnt = t2.cnt
+comment: |
+  SELECT   `value`,
+            COUNT(`value`) AS `value_occurrence`
+  FROM     `my_table`
+  GROUP BY `value`
+  ORDER BY `value_occurrence` DESC
+  LIMIT    1;
+
+  df2 <- left_join(input1, input1)
+  df3 <- df2 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df4 <- input1 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df5 <- anti_join(df3, df4, by=c())
+  out <- df5 %>% select(c)
+
+  df2 <- input1 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df3 <- bind_rows(df2, df2)
+  df4 <- df3 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df5 <- inner_join(df3, df4) %>% inner_join(df2)
+  out <- df5 %>% select(c) %>% distinct()
+
+  df2 <- input1 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df3 <- full_join(df2 %>% mutate(tmp.col=1), df2 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(n > n.other & n.other != n)
+  out <- df3 %>% select(c) %>% distinct() %>% arrange(c)
+
+  df1 <- df_i039 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  df2 <- full_join(df1, df1, by=character(), suffix = c("", ".other")) %>% filter(n > n.other)
+  df3 <- df2 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
+  out <- df3 %>% select(c) %>% arrange(c)

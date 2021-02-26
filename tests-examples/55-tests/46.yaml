@@ -1,0 +1,27 @@
+inputs:
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/employees.txt
+  - tests-examples/55-tests/tables/certified.txt
+output: tests-examples/55-tests/tables/46.out
+constants:
+  - 1000
+functions:
+  - n
+filters:
+  - max(n)
+columns:
+  - crusingrange
+loc: 4
+solution:
+  - filter
+  - natural_join3
+  - summarise
+  - filter
+comment: |
+  5.3.4 optimal solution sql MODIFIED
+
+  df1 <- input1 %>% filter(crusingrange >= 1000)
+  df2 <- inner_join(inner_join(input2, input3), df1)
+  df3 <- df2 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+  df4 <- df3 %>% filter(n == max(n))
+  out <- df4 %>% select(eid, n)

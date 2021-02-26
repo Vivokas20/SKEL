@@ -1,0 +1,9 @@
+db: tests-examples/scythe/recent_posts/tables/020.sqlite
+inputs:
+  - tests-examples/scythe/recent_posts/tables/020.csv
+output: tests-examples/scythe/recent_posts/tables/020_o.csv
+dateorder: ymd
+sql: |-
+  SELECT uid,COLLECT_SET(CONCAT('<',timestamp, ',' ,action,'>'))
+  FROM 020
+  GROUP BY uid

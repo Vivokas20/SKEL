@@ -1,0 +1,22 @@
+db: tests-examples/scythe/top_rated_posts/tables/021.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i021.csv
+output: tests-examples/scythe/top_rated_posts/tables/o021.csv
+functions:
+  - max
+columns:
+  - SERVICEMONTH
+dateorder: mdy
+loc: 1
+solution:
+  - summarise
+sql: |
+  SELECT
+    CHARGEID,
+    CHARGETYPE,
+    MAX(SERVICEMONTH) AS "MostRecentServiceMonth"
+  FROM i021
+  GROUP BY CHARGEID, CHARGETYPE
+comment: |
+  df1 <- input1 %>% group_by(CHARGETYPE, CHARGEID) %>% summarise(maxSERVICEMONTH = max(SERVICEMONTH))
+  out <- df1 %>% ungroup() %>% select(CHARGEID,CHARGETYPE,maxSERVICEMONTH) %>% distinct()

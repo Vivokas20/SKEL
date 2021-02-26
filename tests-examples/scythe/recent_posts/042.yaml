@@ -1,0 +1,14 @@
+db: tests-examples/scythe/recent_posts/tables/042.sqlite
+inputs:
+  - tests-examples/scythe/recent_posts/tables/042.csv
+output: tests-examples/scythe/recent_posts/tables/042_o.csv
+loc: 1
+solution:
+  - union
+sql: |
+  SELECT id, name
+  FROM 042
+  ORDER BY school ASC, id ASC
+comment: |
+  df2 <- bind_rows(input1, input1)
+  out <- df2 %>% select(id, name) %>% distinct() %>% arrange(id)

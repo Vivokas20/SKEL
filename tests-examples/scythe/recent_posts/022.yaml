@@ -1,0 +1,34 @@
+db: tests-examples/scythe/recent_posts/tables/022.sqlite
+inputs:
+#  - tests-examples/scythe/recent_posts/tables/022_1.csv
+  - tests-examples/scythe/recent_posts/tables/022_2.csv
+output: tests-examples/scythe/recent_posts/tables/022_o.csv
+functions:
+  - n
+  - max
+columns:
+  - c1
+constants:
+  - 3
+loc: 3
+solution:
+  - summarise
+  - filter
+  - mutate
+sql: |
+  SELECT t3.c1
+  FROM (
+           SELECT t2.c1
+           FROM (
+                    SELECT COUNT(*) AS value, t1.c1
+                    FROM `022_2` AS t1
+                    GROUP BY t1.c1
+                ) AS t2
+           ORDER BY t2.value DESC, c1 DESC
+           LIMIT 1
+       ) AS t3
+comment: |
+  df2 <- input1 %>% group_by(c1) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == 3 | n > c1)
+  df4 <- df3 %>% mutate(c1 = max(c1))
+  out <- df4 %>% select(c3 = c1) %>% distinct() %>% arrange(c3)

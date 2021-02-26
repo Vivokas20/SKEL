@@ -1,0 +1,26 @@
+db: tests-examples/scythe/top_rated_posts/tables/007.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i007.csv
+output: tests-examples/scythe/top_rated_posts/tables/o007.csv
+functions:
+  - max
+columns:
+  - datetime
+dateorder: mdy
+loc: 2
+solution:
+  - summarise
+  - inner_join
+sql: |
+  SELECT tt.*
+  FROM i007 tt
+  INNER JOIN
+      (SELECT home, MAX(datetime) AS MaxDateTime
+      FROM i007
+      GROUP BY home) groupedtt
+  ON tt.home = groupedtt.home
+  AND tt.datetime = groupedtt.MaxDateTime
+comment: |
+  df1 <- input1 %>% group_by(home, player) %>% summarise(maxdatetime = max(datetime))
+  df2 <- inner_join(input1, df1, by=c('home' = 'home','datetime' = 'maxdatetime'), suffix = c("", ".other"))
+  out <- df2 %>% ungroup() %>% select(id,home,datetime,player,resource) %>% distinct()

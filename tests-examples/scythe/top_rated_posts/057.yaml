@@ -1,0 +1,20 @@
+db: tests-examples/scythe/top_rated_posts/tables/057.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i057.csv
+output: tests-examples/scythe/top_rated_posts/tables/o057.csv
+functions:
+  - min
+columns:
+  - Birthyear
+loc: 2
+sql: |
+  SELECT Name, City, Birthyear
+  FROM i057
+  WHERE Birthyear IN (SELECT MIN(Birthyear)
+                      FROM i057
+                      GROUP by City)
+  GROUP BY City;
+comment: |
+  df1 <- input1 %>% group_by(City) %>% summarise(minBirthyear = min(Birthyear)) %>% ungroup()
+  df2 <- inner_join(df1, input1, by=c('minBirthyear' = 'Birthyear','City' = 'City'), suffix = c('', '.other'))
+  out <- df2 %>% select(Name, City, minBirthyear)

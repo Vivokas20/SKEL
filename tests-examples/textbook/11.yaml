@@ -1,0 +1,18 @@
+db: tests-examples/textbook/tables/11.sqlite3
+inputs:
+  - tests-examples/textbook/tables/11-1.txt
+  - tests-examples/textbook/tables/11-2.txt
+output: tests-examples/textbook/tables/11.out
+loc: 1
+solution:
+  - anti_join
+sql: |
+  SELECT DISTINCT S.s_name
+  FROM 11-1 S
+  WHERE S.s_key NOT IN (SELECT E.s_key
+  FROM 11-2 E )
+comment: |
+  5.1.11 optimal solution
+
+  df1 <- anti_join(input1, input2)
+  out <- df1 %>% select(S_name)

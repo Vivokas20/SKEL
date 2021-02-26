@@ -1,0 +1,23 @@
+inputs:
+  - tests-examples/55-tests/tables/aircraft.txt
+  - tests-examples/55-tests/tables/certified.txt
+output: tests-examples/55-tests/tables/38.out
+functions:
+  - n
+  - max
+columns:
+  - crusingrange
+loc: 4
+solution:
+  - summarise
+  - natural_join
+  - summarise
+  - natural_join
+comment: |
+  5.3.2 optimal solution sql modified
+
+  df1 <- input2 %>% group_by(eid) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(input1, input2)
+  df3 <- df2 %>% group_by(eid) %>% summarise(maxcrusingrange = max(crusingrange)) %>% ungroup()
+  df4 <- inner_join(df1, df3)
+  out <- df4 %>% select(eid, n, maxcrusingrange)

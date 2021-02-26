@@ -1,0 +1,32 @@
+db: tests-examples/textbook/tables/4.sqlite
+inputs:
+  - tests-examples/textbook/tables/4-1.txt
+  - tests-examples/textbook/tables/4-2.txt
+  - tests-examples/textbook/tables/4-3.txt
+output: tests-examples/textbook/tables/4.out
+const:
+  - 2
+aggrs:
+  - n
+bools:
+  - ==
+loc: 3
+solution:
+  - natural_join3
+  - summarise
+  - filter
+sql: |
+  SELECT DISTINCT S.sname
+  FROM Student S
+  WHERE S.snum IN (SELECT E1.snum
+  FROM Enrolled E1, Enrolled E2, Class C1, Class C2
+  WHERE E1.snum = E2.snum AND E1.cname <> E2.cname
+  AND E1.cname = C1.name
+  AND E2.cname = C2.name AND C1.meets at = C2.meets at)
+comment: |
+  5.1.4 optimal solution
+
+  df1 <- inner_join(inner_join(input1, input2), input3)
+  df2 <- df1 %>% group_by(meets_at, S_name) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == 2)
+  out <- df3 %>% select(S_name)

@@ -1,0 +1,30 @@
+db: tests-examples/scythe/recent_posts/tables/050.sqlite
+inputs:
+  - tests-examples/scythe/recent_posts/tables/050_1.csv
+  - tests-examples/scythe/recent_posts/tables/050_2.csv
+  - tests-examples/scythe/recent_posts/tables/050_3.csv
+output: tests-examples/scythe/recent_posts/tables/050_o.csv
+functions:
+  - coalesce
+constants:
+  - A
+  - B
+columns:
+  - role_type
+  - employee_name
+  - org_id
+  - employee_id
+  - ref_id
+sql: |-
+  SELECT t1.role_id,
+         t1.role_type,
+         t1.ref_id,
+         COALESCE(e.employee_name, o.org_name) AS ref_name,
+         COALESCE(e.joining_date, o.org_max)   AS ref_joining_date
+  FROM `050_1` t1
+           LEFT JOIN `050_2` e
+                     ON e.employee_id = t1.ref_id
+                         AND t1.role_type = 'A'
+           LEFT JOIN `050_3` o
+                     ON o.org_id = t1.ref_id
+                         AND t1.role_type = 'B'

@@ -1,0 +1,19 @@
+inputs:
+  - tests-examples/55-tests/tables/21-1.txt
+  - tests-examples/55-tests/tables/21-2.txt
+  - tests-examples/55-tests/tables/21-3.txt
+output: tests-examples/55-tests/tables/51.out
+functions:
+  - n
+loc: 3
+solution:
+  - summarise
+  - natural_join3
+  - left_join
+comment: |
+  5.2.9 optimal solution
+
+  df4 <- input1 %>% group_by(P_id) %>% summarise(n = n()) %>% ungroup()
+  df5 <- inner_join(df4, input2) %>% inner_join(input1)
+  df6 <- left_join(df5, input3)
+  out <- df6 %>% select(S_name, n) %>% distinct() %>% arrange(S_name)

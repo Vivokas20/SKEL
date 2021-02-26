@@ -1,0 +1,30 @@
+db: tests-examples/textbook/tables/30.sqlite
+inputs:
+  - tests-examples/textbook/tables/aircraft.txt
+  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/30.out
+const:
+  - 100000
+attrs:
+  - distance
+  - crusingrange
+  - salary
+loc: 5
+sql: |
+  SELECT DISTINCT F.origin, F.destination
+  FROM Flights F
+  WHERE NOT EXISTS ( SELECT *
+                     FROM Employees E
+                     WHERE E.salary > 100000
+                       AND
+                         NOT EXISTS (SELECT *
+                                     FROM Aircraft A, Certified C
+                                     WHERE A.crusingrange > F.distance
+                                       AND E.eid = C.eid
+                                       AND A.aid = C.aid) )
+comment: |
+  5.3.7 optimal solution sql
+
+  EMPTY OUTPUT

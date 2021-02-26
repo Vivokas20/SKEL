@@ -1,0 +1,25 @@
+db: tests-examples/scythe/top_rated_posts/tables/036.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i036.csv
+output: tests-examples/scythe/top_rated_posts/tables/o036.csv
+functions:
+  - max
+columns:
+  - date
+dateorder: ymd
+loc: 2
+solution:
+  - summarise
+  - inner_join
+sql: |
+  SELECT t.username, t.date, t.value
+  FROM i036 t
+  INNER JOIN (
+      SELECT username, MAX(date) AS MaxDate
+      FROM i036
+      GROUP BY username
+  ) tm ON t.username = tm.username AND t.date = tm.MaxDate
+comment: |
+  df1 <- df_i036 %>% group_by(username) %>% summarise(maxdate = max(date)) %>% ungroup()
+  df2 <- inner_join(df_i036, df1, by=c('date' = 'maxdate'), suffix = c('', '.other')) %>% mutate(maxdate = date)
+  out <- df2 %>% select(username, date, value) %>% arrange(username)

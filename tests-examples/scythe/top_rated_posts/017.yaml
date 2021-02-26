@@ -1,0 +1,31 @@
+db: tests-examples/scythe/top_rated_posts/tables/017.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i017.csv
+output: tests-examples/scythe/top_rated_posts/tables/o017.csv
+functions:
+  - min
+columns:
+  - ID
+  - SKU
+filters:
+  - like
+constants:
+  - "FOO-"
+loc: 3
+solution:
+  - summarise
+  - cross_join
+  - filter
+sql: |
+  SELECT t.*
+  FROM i017 t
+           INNER JOIN (SELECT MIN(ID) as MinID
+                       FROM i017
+                       WHERE SKU LIKE 'FOO-%'
+                       GROUP BY PRODUCT
+  ) dt ON t.ID = dt.MinID
+comment: |
+  df1 <- df_i017 %>% group_by(PRODUCT) %>% summarise(ID = min(ID)) %>% ungroup()
+  df2 <- full_join(df1, df_i017, by=character(), suffix = c("", ".other")) %>% filter(ID >= ID.other)
+  df3 <- df2 %>% filter(str_detect(SKU, 'FOO-'))
+  out <- df3 %>% select(ID = ID.other, SKU, PRODUCT = PRODUCT.other) %>% distinct() %>% arrange(ID)

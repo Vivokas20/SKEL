@@ -1,0 +1,27 @@
+db: tests-examples/textbook/tables/20.sqlite
+inputs:
+  - tests-examples/textbook/tables/20-1.txt
+  - tests-examples/textbook/tables/20-2.txt
+  - tests-examples/textbook/tables/20-3.txt
+output: tests-examples/textbook/tables/20.out
+constants:
+  - red
+  - green
+columns:
+  - color
+bools:
+  - ==
+loc: 4
+solution:
+  - natural_join3
+  - filter
+  - filter
+  - inner_join
+comment: |
+  # 5.2.8 optimal solution
+
+  df4 <- inner_join(input1, input2) %>% inner_join(input3)
+  df5 <- df4 %>% filter(color == 'red')
+  df6 <- df4 %>% filter(color == 'green')
+  df7 <- inner_join(df5, df6, by=c('S_key','S_name'), suffix = c('', '.other'))
+  out <- df7 %>% select(S_name) %>% distinct() %>% arrange(S_name)

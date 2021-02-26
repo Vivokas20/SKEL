@@ -1,0 +1,34 @@
+inputs:
+  - tests-examples/55-tests/tables/8-1.txt
+output: tests-examples/55-tests/tables/8.out
+constants:
+  - JR
+functions:
+  - mean
+columns:
+  - level
+  - age
+bools:
+  - '!='
+loc: 2
+solution:
+  - filter
+  - summarise
+sql: |
+  SELECT level,
+         meanage
+  FROM
+    (SELECT level,
+            AVG(age) AS meanage
+     FROM
+       (SELECT *
+        FROM df_8_1
+        WHERE (level != 'JR'))
+     GROUP BY LEVEL)
+  ORDER BY LEVEL
+comment: |
+  5.1.8 optimal solution
+
+  df1 <- input1 %>% filter(level != 'JR')
+  df2 <- df1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+  out <- df2 %>% select(level,meanage) %>% distinct()

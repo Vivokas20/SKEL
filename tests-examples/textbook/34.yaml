@@ -1,0 +1,33 @@
+db: tests-examples/textbook/tables/34.sqlite
+inputs:
+#  - tests-examples/textbook/tables/aircraft.txt
+#  - tests-examples/textbook/tables/flights.txt
+  - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/employees.txt
+output: tests-examples/textbook/tables/34.out
+functions:
+  - mean
+columns:
+  - salary
+loc: 3
+solution:
+  - mutate
+  - anti_join
+  - filter
+sql: |
+  SELECT E.ename, E.salary
+  FROM Employees E
+  WHERE E.eid NOT IN (SELECT DISTINCT C.eid
+                      FROM Certified C)
+    AND E.salary > (SELECT AVG(E1.salary)
+                    FROM Employees E1
+                    WHERE E1.eid IN
+                          (SELECT DISTINCT C1.eid
+                           FROM Certified C1))
+comment: |
+  5.3.11 optimal solution sql
+
+  df3 <- input2 %>% mutate(meansalary = mean(salary))
+  df4 <- anti_join(input2, input1, by=c())
+  df5 <- full_join(df3 %>% mutate(tmp.col=1), df4 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(salary >= salary.other & meansalary <= salary.other)
+  out <- df5 %>% select(ename = ename.other, salary = salary.other) %>% distinct() %>% arrange(ename)

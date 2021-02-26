@@ -1,0 +1,36 @@
+db: tests-examples/textbook/tables/9.sqlite
+inputs:
+  - tests-examples/textbook/tables/9-1.txt
+  - tests-examples/textbook/tables/9-2.txt
+output: tests-examples/textbook/tables/9.out
+constants:
+  - R128
+functions:
+  - n
+columns:
+  - Room
+bools:
+  - ==
+loc: 4
+solution:
+  - summarise
+  - filter
+  - summarise
+  - natural_join3
+sql: |
+  SELECT F.fname, COUNT(*) AS CourseCount
+  FROM Faculty F, Class C
+  WHERE F.fid = C.fid
+  GROUP BY F.fid, F.fname
+  HAVING EVERY ( C.room = 'R128' )
+comment: |
+  5.1.9 optimal solution
+
+  df1 <- input1 %>% group_by(ID_key) %>% summarise(n = n()) %>% ungroup()
+  df2 <- inner_join(input2, df1)
+  df3 <- input1 %>% filter(Room != 'R128')
+  df4 <- anti_join(df2, df3)
+  out <- df4 %>% select(F_name, n)
+
+  summarise(input0, 'n = n()', 'ID_key,Room'), filter(line0, "Room == 'R128'"), summarise(input0, 'n = n()', 'ID_key'), natural_join3(line2, input1, line1)
+

@@ -1,0 +1,51 @@
+inputs:
+  - tests-examples/55-tests/tables/15-1.txt
+  - tests-examples/55-tests/tables/15-2.txt
+  - tests-examples/55-tests/tables/15-3.txt
+output: tests-examples/55-tests/tables/15.out
+constants:
+  - red
+functions:
+  - n
+filters:
+  - max(n)
+columns:
+  - color
+bools:
+  - ==
+loc: 3
+solution:
+  - natural_join3
+  - summarise
+  - filter
+sql: |
+  SELECT S_name
+  FROM
+    (SELECT *
+     FROM
+       (SELECT S_name,
+               color,
+               n,
+               MAX(n) OVER () AS zzz4
+        FROM
+          (SELECT S_name,
+                  color,
+                  COUNT() AS n
+           FROM
+             (SELECT *
+              FROM
+                (SELECT *
+                 FROM df_15_1 AS LHS
+                 INNER JOIN df_15_2 AS RHS ON (LHS.P_id = RHS.P_id)) AS LHS
+              INNER JOIN df_15_3 AS RHS ON (LHS.S_key = RHS.S_key))
+           GROUP BY S_name,
+                    color))
+     WHERE (color = 'red'
+            AND n = zzz4))
+comment: |
+  5.2.3 optimal solution
+
+  df1 <- inner_join(inner_join(input3, input1), input2)
+  df2 <- df1 %>% group_by(color, S_name) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n == max(n) & color == 'red')
+  out <- df3 %>% select(S_name)

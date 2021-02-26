@@ -1,0 +1,27 @@
+db: tests-examples/scythe/top_rated_posts/tables/031.sqlite
+inputs:
+  - tests-examples/scythe/top_rated_posts/tables/i031.csv
+output: tests-examples/scythe/top_rated_posts/tables/o031.csv
+functions:
+  - n
+constants:
+  - Beta
+columns:
+  - name
+solution:
+  - union
+  - filter
+  - summarise
+sql: |
+  SELECT t.id,
+         (SELECT COUNT(*)
+            FROM i031 x
+           WHERE x.name <= t.name) AS position,
+         t.name
+    FROM i031 t
+   WHERE t.name = 'Beta'
+comment: |
+  df1 <- bind_rows(df_i031, df_i031)
+  df2 <- df1 %>% filter(name == 'Beta')
+  df3 <- df2 %>% group_by(id,name) %>% summarise(n = n()) %>% ungroup()
+  out <- df3 %>% select(id, n, name) %>% arrange(id)

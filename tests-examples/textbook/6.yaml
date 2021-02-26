@@ -1,0 +1,31 @@
+db: tests-examples/textbook/tables/6.sqlite
+inputs:
+  - tests-examples/textbook/tables/6-1.txt
+  - tests-examples/textbook/tables/6-2.txt
+  - tests-examples/textbook/tables/6-3.txt
+output: tests-examples/textbook/tables/6.out
+constants:
+  - 5
+functions:
+  - n
+bools:
+  - <=
+loc: 3
+solution:
+  - natural_join3
+  - summarise
+  - filter
+sql: |
+  SELECT DISTINCT F.fname
+  FROM Faculty F
+  WHERE 5 > (SELECT COUNT (E.snum)
+  FROM Class C, Enrolled E
+  WHERE C.name = E.cname
+  AND C.fid = F.fid)
+comment: |
+  5.1.6 optimal solution
+
+  df1 <- inner_join(inner_join(input1, input2), input3)
+  df2 <- df1 %>% group_by(F_key, F_name) %>% summarise(n = n()) %>% ungroup()
+  df3 <- df2 %>% filter(n <= 5)
+  out <- df3 %>% select(F_name) %>% distinct()

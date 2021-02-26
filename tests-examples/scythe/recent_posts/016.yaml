@@ -1,0 +1,34 @@
+db: tests-examples/scythe/recent_posts/tables/016.sqlite
+inputs:
+#  - tests-examples/scythe/recent_posts/tables/016_1.csv
+  - tests-examples/scythe/recent_posts/tables/016_2.csv
+output: tests-examples/scythe/recent_posts/tables/016_o.csv
+constants:
+  - 10/19/2016
+  - 1
+functions:
+  - max
+  - n
+columns:
+  - ReportDt
+dateorder: mdy
+loc: 4
+solution:
+  - summarise
+  - summarise
+  - natural_join3
+  - filter
+sql: |
+  SELECT C.CustomerId,
+         MAX(C.ReportDt) as LastReportPullDt,
+         COUNT(*) AS ReportCount
+  FROM 016_2 C
+  GROUP BY C.CustomerId
+  HAVING COUNT(*) > 1
+  AND MAX(C.ReportDt) >= "10/19/2016"
+comment: |
+  df2 <- input1 %>% group_by(CustomerId) %>% summarise(maxReportDt = max(ReportDt)) %>% ungroup()
+  df3 <- input1 %>% group_by(CustomerId) %>% summarise(n = n()) %>% ungroup()
+  df4 <- inner_join(df2, df3) %>% inner_join(input1)
+  df5 <- df4 %>% filter(n > 1 & ReportDt > mdy('10/19/2016'))
+  out <- df5 %>% select(c1 = CustomerId, c2 = maxReportDt, c3 = n) %>% distinct()
