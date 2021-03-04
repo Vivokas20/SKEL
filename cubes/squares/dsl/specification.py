@@ -42,6 +42,7 @@ class Specification:
         self.inputs = spec['inputs']
         self.output = spec['output']
         self.consts = spec['constants'] or []
+        self.sketch = spec['sketch'] or []
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:

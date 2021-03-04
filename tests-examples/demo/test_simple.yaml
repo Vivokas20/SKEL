@@ -1,0 +1,5 @@
+inputs:
+  - tests-examples/demo/tables/courses.csv
+output: tests-examples/demo/tables/test_simple.out
+sketch: |
+  SELECT MAX(column_1) FROM grades

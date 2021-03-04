@@ -1,7 +1,9 @@
 inputs:
-- tests-examples/demo/tables/grades.csv
+  - tests-examples/demo/tables/grades.csv
 output: tests-examples/demo/tables/test.out
 functions:
   - max
 columns:
   - grade
+sketch: |
+  SELECT MAX(column_1) FROM grades

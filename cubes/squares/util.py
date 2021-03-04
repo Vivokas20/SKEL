@@ -206,12 +206,9 @@ def parse_specification(filename):
         logger.warning('"const" field is deprecated. Please use "constants"')
         spec['constants'] = spec['const']
 
-    for field in ['constants', 'functions', 'columns', 'filters']:
+    for field in ['sketch', 'constants', 'functions', 'columns', 'filters', 'dateorder']:
         if field not in spec:
             spec[field] = None
-
-    if 'dateorder' not in spec:
-        spec['dateorder'] = None
 
     return spec
 
