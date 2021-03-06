@@ -2,6 +2,8 @@ import io
 import math
 import os
 import re
+import subprocess
+import json
 from collections import defaultdict
 from functools import reduce
 from logging import getLogger
@@ -36,13 +38,35 @@ def add_is_not_parent_if_enabled(pred_spec: PredicateSpec, a: Any, b: Any) -> No
         pred_spec.add_predicate('is_not_parent', [a, b])
 
 
+def parse_sketch(sketch: str):
+    if not sketch:
+        return []
+
+    with open("sketch.sql", 'w') as file:
+        file.write(sketch)
+    file.close()
+
+    subprocess.run(["java", "-jar", "sql-to-json-parser.jar", "sketch.sql", "out.json"], stdout=subprocess.DEVNULL)
+
+    with open("out.json", 'r') as file:
+        out_file = file.read()
+    file.close()
+
+    os.remove("sketch.sql")
+    os.remove("out.json")
+
+    parsed_sketch = json.loads(out_file)
+    print(parsed_sketch)
+    return parsed_sketch
+
+
 class Specification:
 
     def __init__(self, spec) -> None:
         self.inputs = spec['inputs']
         self.output = spec['output']
         self.consts = spec['constants'] or []
-        self.sketch = spec['sketch'] or []
+        self.sketch = parse_sketch(spec['sketch'])
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
