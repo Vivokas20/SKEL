@@ -38,25 +38,25 @@ def add_is_not_parent_if_enabled(pred_spec: PredicateSpec, a: Any, b: Any) -> No
         pred_spec.add_predicate('is_not_parent', [a, b])
 
 
-def parse_sketch(sketch: str):
-    if not sketch:
-        return []
-
-    with open("sketch.sql", 'w') as file:
-        file.write(sketch)
-    file.close()
-
-    subprocess.run(["java", "-jar", "sql-to-json-parser.jar", "sketch.sql", "out.json"], stdout=subprocess.DEVNULL)
-
-    with open("out.json", 'r') as file:
-        out_file = file.read()
-    file.close()
-
-    os.remove("sketch.sql")
-    os.remove("out.json")
-
-    parsed_sketch = json.loads(out_file)
-    return parsed_sketch
+# def parse_sketch(sketch: str):
+#     if not sketch:
+#         return []
+#
+#     with open("sketch.sql", 'w') as file:
+#         file.write(sketch)
+#     file.close()
+#
+#     subprocess.run(["java", "-jar", "sql-to-json-parser.jar", "sketch.sql", "out.json"], stdout=subprocess.DEVNULL)
+#
+#     with open("out.json", 'r') as file:
+#         out_file = file.read()
+#     file.close()
+#
+#     os.remove("sketch.sql")
+#     os.remove("out.json")
+#
+#     parsed_sketch = json.loads(out_file)
+#     return parsed_sketch
 
 
 class Specification:
@@ -66,7 +66,7 @@ class Specification:
         self.output = spec['output']
         self.consts = spec['constants'] or []
         self.sketch = spec['sketch']
-        self.parsed_sketch = parse_sketch(self.sketch)
+        # self.parsed_sketch = parse_sketch(self.sketch)
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
@@ -346,6 +346,9 @@ class Specification:
                   in self.tyrell_spec.get_function_productions() if prod.name != 'empty'}
         logger.debug(function_difficulty)
         function_difficulty = {key: value / sum( function_difficulty.values()) for key, value in function_difficulty.items()}
+        logger.debug(function_difficulty)
+        function_difficulty = {key: value / sum(function_difficulty.values()) for key, value in
+                               function_difficulty.items()}
         logger.debug(function_difficulty)
 
         return self.tyrell_spec
