@@ -56,7 +56,6 @@ def parse_sketch(sketch: str):
     os.remove("out.json")
 
     parsed_sketch = json.loads(out_file)
-    print(parsed_sketch)
     return parsed_sketch
 
 
@@ -66,7 +65,8 @@ class Specification:
         self.inputs = spec['inputs']
         self.output = spec['output']
         self.consts = spec['constants'] or []
-        self.sketch = parse_sketch(spec['sketch'])
+        self.sketch = spec['sketch']
+        self.parsed_sketch = parse_sketch(self.sketch)
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
@@ -83,7 +83,7 @@ class Specification:
             util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
 
         self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
-                           util.get_config().minimum_loc)  # TODO
+                           util.get_config().minimum_loc)  # TODO change for loc to be fixed
 
         self.aggrs_use_const = False
 
@@ -113,7 +113,6 @@ class Specification:
 
             self.data_frames[table_name] = df
             self.columns |= df.columns
-
         self.columns = OrderedSet(sorted(self.columns))
         self.all_columns = self.columns.copy()
 
@@ -348,6 +347,7 @@ class Specification:
         logger.debug(function_difficulty)
         function_difficulty = {key: value / sum( function_difficulty.values()) for key, value in function_difficulty.items()}
         logger.debug(function_difficulty)
+
         return self.tyrell_spec
 
     def get_bitvecnum(self, columns: Sequence[str]) -> int:

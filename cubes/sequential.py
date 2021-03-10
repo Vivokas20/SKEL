@@ -48,6 +48,10 @@ def main():
 
     configs = [base_config]
 
+    if util.get_config().verbosity >= 3:
+        with open('dump.dsl', 'w') as f:
+            f.write(str(specification))
+
     if os.name == 'nt':
         logger.warning('Running on Windows is currently untested.')
 

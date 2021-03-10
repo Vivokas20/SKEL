@@ -54,7 +54,7 @@ class Root(Node):
         return var
 
     def __repr__(self) -> str:
-        return f'Root({self.id}, children={len(self.children)})'
+        return f'Root({self.id}, children={len(self.children)}, var={self.var})'
 
 
 class Leaf(Node):
@@ -93,7 +93,7 @@ class Leaf(Node):
         return lines
 
     def __repr__(self) -> str:
-        return f'Leaf(parent={self.parent}, child_id={self.child_id})'
+        return f'Leaf(parent={self.parent}, child_id={self.child_id}, var={self.var})'
 
 
 class BitEnumerator(Enumerator):
@@ -593,6 +593,9 @@ class BitEnumerator(Enumerator):
         return len(models) - 1
 
     def construct_program(self, model) -> Program:
+        # print(self.roots)
+        # print(self.leaves)
+        # print(model)
         prog = [program.Line(self.get_production(model[root.var].as_long()),
                              tuple(self.get_production(model[child.var].as_long()) for child in root.children)) for root in
                 self.roots]

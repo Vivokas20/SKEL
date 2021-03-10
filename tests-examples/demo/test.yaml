@@ -2,8 +2,15 @@ inputs:
   - tests-examples/demo/tables/grades.csv
 output: tests-examples/demo/tables/test.out
 functions:
-  - max
+  - min
 columns:
   - grade
+  - courseId
+bools:
+  - ==
+constants:
+  - 11
+sql: |
+  SELECT MIN(grade) FROM grades WHERE courseId = 11
 sketch: |
-  SELECT MAX(column_1) FROM grades
+  SELECT MIN(grade) FROM grades WHERE courseId = 11
