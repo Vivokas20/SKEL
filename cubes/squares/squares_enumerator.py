@@ -63,12 +63,14 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
     while loc <= util.get_config().maximum_loc:
         start = time.time()
         enumerator = BitEnumerator(spec, specification, loc=loc)
-        results.init_time += time.time() - start
+        t = time.time() - start
+        logger.debug(f'Enumeration time: {t}')
+        results.init_time += t
 
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
         found = False
-        print(util.get_config().top_programs)
+        # print(util.get_config().top_programs)
         for prog, attempts in synthesizer.multi_synth(util.get_config().top_programs):
             if prog:
                 logger.info(f'Solution found: {prog}')

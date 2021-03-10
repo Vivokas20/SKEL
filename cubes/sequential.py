@@ -93,7 +93,6 @@ def main():
     for p in processes:
         p.kill()
 
-    results.print_results()
     exit(results.exit_code)
 
 
