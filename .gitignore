@@ -2,6 +2,7 @@ output.err
 users/*
 .cenv
 dump.dsl
+comments.yaml
 .RDataFiles/
 .idea/
 profiles/

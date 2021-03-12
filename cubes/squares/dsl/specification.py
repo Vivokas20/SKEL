@@ -62,9 +62,8 @@ class Sketch:
 
     def __init__(self, sketch):
         self.sketch = sketch
-        print(self.sketch)
-        self.loc = len(self.sketch) - 1
-        print(self.loc)
+        self.lines = sketch.splitlines()
+        self.loc = len(self.lines) - 1
 
 class Specification:
 
