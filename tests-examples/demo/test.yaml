@@ -13,4 +13,6 @@ constants:
 sql: |
   SELECT MIN(grade) FROM grades WHERE courseId = 11
 sketch: |
-  SELECT MIN(grade) FROM grades WHERE courseId = 11
+  df1 <- df_grades %>% filter(courseId == 11)
+  df2 <- df1 %>% summarise(grade = min(grade))
+  out <- df2 %>% select(mingrade = grade) %>% arrange(mingrade)

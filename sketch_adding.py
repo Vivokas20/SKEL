@@ -2,7 +2,7 @@ import glob
 import yaml
 
 if __name__ == '__main__':
-    no_sql = []
+    no_comment = []
 
     for file in glob.glob('tests-examples/**/**/*.yaml', recursive=True):
     # file = "tests-examples/demo/demo.yaml"
@@ -12,16 +12,21 @@ if __name__ == '__main__':
         with open(file) as f:
             spec = yaml.safe_load(f)
 
-            if 'sql' in spec:
+            if 'comment' in spec:
                 if 'sketch' not in spec:
-                    with open(file, 'a') as file:
-                        sketch = "\nsketch: |\n"
-                        # yaml.dump(spec['sql'],file)
-                        for l in spec['sql'].split("\n"):
-                            sketch += "  " + l + "\n"
-                        print(sketch)
-                        file.write(sketch)
-                    file.close()
+                    sketch = []
+                    instance = {}
 
+                    for l in spec['comment'].splitlines():
+                        if (l.startswith("df") or l.startswith("out")) and "<-" in l:
+                            sketch.append(l)
+                            if l.startswith("out"):
+                                break
+
+                    instance['sketch'] = sketch
+                    output = yaml.dump(instance, default_flow_style=False, sort_keys=False)
+                    with open(file, 'a') as out:
+                        out.write(output)
+                    out.close()
             else:
-                no_sql.append(file)
+                no_comment.append(file)

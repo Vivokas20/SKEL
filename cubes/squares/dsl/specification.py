@@ -58,6 +58,13 @@ def add_is_not_parent_if_enabled(pred_spec: PredicateSpec, a: Any, b: Any) -> No
 #     parsed_sketch = json.loads(out_file)
 #     return parsed_sketch
 
+class Sketch:
+
+    def __init__(self, sketch):
+        self.sketch = sketch
+        print(self.sketch)
+        self.loc = len(self.sketch) - 1
+        print(self.loc)
 
 class Specification:
 
@@ -65,8 +72,8 @@ class Specification:
         self.inputs = spec['inputs']
         self.output = spec['output']
         self.consts = spec['constants'] or []
-        self.sketch = spec['sketch']
-        # self.parsed_sketch = parse_sketch(self.sketch)
+        if spec['sketch']:
+            self.sketch = Sketch(spec['sketch'])
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
@@ -82,8 +89,9 @@ class Specification:
         if util.get_config().use_solution_dsl and self.solution:
             util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
 
-        self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
-                           util.get_config().minimum_loc)  # TODO change for loc to be fixed
+        # self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
+        #                    util.get_config().minimum_loc)  # TODO change for loc to be fixed
+        self.min_loc = self.sketch.loc
 
         self.aggrs_use_const = False
 
