@@ -78,7 +78,7 @@ def print_results():
     logger.info('\tTotal time spent in evaluation & testing: %f (approx)', analysis_time)
     logger.info('\tTotal time spent blocking cubes/programs: %f (approx)', block_time)
 
-    if solution is not None:
+    if solution:
         logger.info(f'Solution found: {solution}')
         logger.info(f'Solution size: {solution_size}')
         old_cache = util.get_config().cache_ops

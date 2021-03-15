@@ -23,9 +23,9 @@ options(warn=-1)
 suppressMessages(library(tidyr))
 suppressMessages(library(stringr))
 suppressMessages(library(readr))
-suppressMessages(library(lubridate))
 suppressMessages(library(dplyr))
 suppressMessages(library(dbplyr))''')
+# suppressMessages(library(lubridate))      Used for queries with date
 
 def do_not_print(msg):
     pass
@@ -36,8 +36,6 @@ rpy2.rinterface_lib.callbacks.consolewrite_warnerror = do_not_print
 
 
 def main(args, specification, id: int, conf: Config, queue: Queue):
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    signal.signal(signal.SIGTERM, signal.SIG_DFL)
 
     util.seed(conf.seed)
     util.store_config(conf)
@@ -69,17 +67,14 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
 
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
-        found = False
         # print(util.get_config().top_programs)
-        for prog, attempts in synthesizer.multi_synth(util.get_config().top_programs):
-            if prog:
-                logger.info(f'Solution found: {prog}')
-                queue.put((util.Message.SOLUTION, id, prog, loc, True))
-                found = True
-
-        if found:
+        prog, attempts = synthesizer.synthesize()
+        if prog:
+            logger.info(f'Solution found: {prog}')
+            queue.put((util.Message.SOLUTION, id, prog, loc, True))
             queue.put((util.Message.DONE, None, None, None, None))
             return
+
         else:
             logger.info('Increasing the number of lines of code to %d.', loc + 1)
             loc = loc + 1

@@ -187,3 +187,7 @@ class LineProduction(Production):
 
     def is_function(self) -> bool:
         return False
+
+    def __repr__(self) -> str:
+        return 'LineProduction(id={}, line={})'.format(
+            self._id, self.line)

@@ -88,9 +88,11 @@ class Specification:
         if util.get_config().use_solution_dsl and self.solution:
             util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
 
-        # self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
-        #                    util.get_config().minimum_loc)  # TODO change for loc to be fixed
-        self.min_loc = self.sketch.loc
+        if spec['sketch']:
+            self.min_loc = self.sketch.loc
+        else:
+            self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
+                           util.get_config().minimum_loc)  # TODO change for loc to be fixed
 
         self.aggrs_use_const = False
 

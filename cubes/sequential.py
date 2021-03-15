@@ -5,7 +5,7 @@ import copy
 import random
 from itertools import product
 from logging import getLogger
-from multiprocessing import Process, SimpleQueue
+from multiprocessing import Process, Queue
 from time import sleep
 
 import signal
@@ -55,22 +55,9 @@ def main():
     if os.name == 'nt':
         logger.warning('Running on Windows is currently untested.')
 
-    else:
-        if len(configs) > len(os.sched_getaffinity(0)):
-            logger.warning('Starting more processes than available CPU cores!')
+    queue = Queue()
 
-    queue = SimpleQueue()
-
-    processes = []
-    for i in range(len(configs)):
-        process = Process(target=squares_enumerator.main, name=f'process{i}',
-                          args=(args, specification, i, configs[i], queue),
-                          daemon=True)
-        process.start()
-        processes.append(process)
-
-    signal.signal(signal.SIGINT, results.handle_sigint)
-    signal.signal(signal.SIGTERM, results.handle_sigint)
+    squares_enumerator.main(args, specification, 0, configs[0], queue)
 
     while True:
         packet = queue.get()
@@ -83,15 +70,12 @@ def main():
             results.store_solution(*packet[2:])
 
             results.print_results()
-            results.specification = Specification(spec)
+            # results.specification = Specification(spec)   # Can delete?
         elif packet[0] == util.Message.EVAL_INFO:
             pass
         else:
             logger.error('Unexpected message %s', packet[0])
             raise NotImplementedError
-
-    for p in processes:
-        p.kill()
 
     exit(results.exit_code)
 
