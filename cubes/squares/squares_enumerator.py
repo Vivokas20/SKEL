@@ -7,7 +7,7 @@ from multiprocessing import Queue
 import rpy2
 import rpy2.robjects as robjects
 
-from squares.dsl.interpreter import SquaresInterpreter
+from .dsl.interpreter import SquaresInterpreter
 from . import util, results
 from .config import Config
 from .decider import LinesDecider
