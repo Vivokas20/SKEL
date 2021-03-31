@@ -65,13 +65,14 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
         logger.debug(f'Enumeration time: {t}')
         results.init_time += t
 
-        start = time.time()
         synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
+
+        # print(util.get_config().top_programs)
+        start = time.time()
+        prog, attempts = synthesizer.synthesize()
         t = time.time() - start
         logger.debug(f'Synthesis time: {t}')
 
-        # print(util.get_config().top_programs)
-        prog, attempts = synthesizer.synthesize()
         if prog:
             logger.info(f'Solution found: {prog}')
             queue.put((util.Message.SOLUTION, id, prog, loc, True))
