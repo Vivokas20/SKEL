@@ -156,6 +156,13 @@ class ProductionSpec:
         '''
         return self._enum_map[(ty, value)]
 
+    def get_enum_productions(self) -> List[Production]:
+        '''
+        Return all param productions
+        If no production is found, return an empty list
+        '''
+        return list(self._enum_map.values())
+
     def _get_next_id(self) -> int:
         return len(self._productions)
 
@@ -368,6 +375,9 @@ class TyrellSpec:
 
     def get_enum_production_or_raise(self, ty: EnumType, value: str) -> Optional[Production]:
         return self._prod_spec.get_enum_production_or_raise(ty, value)
+
+    def get_enum_productions(self) -> List[Production]:
+        return self._prod_spec.get_enum_productions()
 
     def productions(self) -> Iterable[Production]:
         return self._prod_spec.productions()

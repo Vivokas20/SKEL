@@ -43,6 +43,8 @@ properties:
     type: string
   sql:
     type: string
+  sketch:
+    type: string
   solution:
     type: array
     items:

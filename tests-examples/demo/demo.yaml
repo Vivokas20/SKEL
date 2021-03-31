@@ -6,3 +6,6 @@ loc: 1
 comment: |
   df1 <- left_join(input2, input1)
   out <- df1 %>% select(PartName) %>% distinct()
+sketch: |
+  df1 <- left_join(supplier, parts)
+  out <- df1 %>% select(PartName) %>% distinct()

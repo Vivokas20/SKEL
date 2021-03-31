@@ -11,8 +11,6 @@ from ...dsl.interpreter import RedudantError
 
 logger = getLogger('squares.synthesizer')
 
-# counter = 0
-
 
 class AbstractSynthesizer(ABC):
 
@@ -52,7 +50,7 @@ class Synthesizer(AbstractSynthesizer):
         prog = self.enumerator.next()
         enum_time += time.time() - start
         # pr = cProfile.Profile()
-        while prog is not None:
+        while prog:
             # logger.debug('Testing program %s', prog)
             total_attempts += 1
             attempts += 1
@@ -80,8 +78,6 @@ class Synthesizer(AbstractSynthesizer):
                          block_time, results.redundant_lines))
                     results.empty_output = 0
                     results.redundant_lines = 0
-                    # pr.dump_stats(f'profiles/{counter}.cProfile')
-                    # counter += 1
                     self.enumerator.update(None)
                     return prog, attempts
 
