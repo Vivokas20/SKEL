@@ -14,5 +14,5 @@ sql: |
   SELECT MIN(grade) FROM grades WHERE courseId = 11
 sketch: |
   df1 <- df_grades %>% filter(courseId == 11)
-  df2 <- df1 %>% summarise(grade = min(grade))
+  df2 <- df1 %>% group_by() %>% summarise(grade = min(grade)) %>% ungroup()
   out <- df2 %>% select(mingrade = grade) %>% arrange(mingrade)

@@ -1,9 +1,6 @@
 import io
-import math
 import os
 import re
-import subprocess
-import json
 from collections import defaultdict
 from functools import reduce
 from logging import getLogger
@@ -23,6 +20,7 @@ from ..exceptions import SquaresException
 from ..tyrell.spec import TyrellSpec, TypeSpec, ProductionSpec, ProgramSpec, ValueType
 from ..tyrell.spec.spec import PredicateSpec
 from ..util import powerset_except_empty
+from .sketch import Sketch
 
 logger = getLogger('squares')
 
@@ -38,33 +36,6 @@ def add_is_not_parent_if_enabled(pred_spec: PredicateSpec, a: Any, b: Any) -> No
         pred_spec.add_predicate('is_not_parent', [a, b])
 
 
-# def parse_sketch(sketch: str):
-#     if not sketch:
-#         return []
-#
-#     with open("sketch.sql", 'w') as file:
-#         file.write(sketch)
-#     file.close()
-#
-#     subprocess.run(["java", "-jar", "sql-to-json-parser.jar", "sketch.sql", "out.json"], stdout=subprocess.DEVNULL)
-#
-#     with open("out.json", 'r') as file:
-#         out_file = file.read()
-#     file.close()
-#
-#     os.remove("sketch.sql")
-#     os.remove("out.json")
-#
-#     parsed_sketch = json.loads(out_file)
-#     return parsed_sketch
-
-class Sketch:
-
-    def __init__(self, sketch):
-        self.sketch = sketch
-        self.lines = sketch.splitlines()
-        self.loc = len(self.lines) - 1
-
 class Specification:
 
     def __init__(self, spec) -> None:
@@ -73,6 +44,9 @@ class Specification:
         self.consts = spec['constants'] or []
         if spec['sketch']:
             self.sketch = Sketch(spec['sketch'])
+            self.sketch.sketch_parser(self.inputs)
+        else:
+            self.sketch = None
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
@@ -89,7 +63,7 @@ class Specification:
             util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
 
         if spec['sketch']:
-            self.min_loc = self.sketch.loc
+            self.min_loc = self.sketch.loc      # TODO fazer mais hard lock e tirar o while
         else:
             self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
                            util.get_config().minimum_loc)  # TODO change for loc to be fixed

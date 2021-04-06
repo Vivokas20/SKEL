@@ -140,7 +140,7 @@ class BitEnumerator(Enumerator):
         self.num_variables = 0
 
         self.clean_model = {}
-        self.num_prods = self.spec.num_productions()
+        self.num_prods = self.spec.num_productions()    # TODO check if it can be changed to -1
         self.max_children = self.spec.max_rhs
         self.create_line_productions()
         self.line_vars_by_line = defaultdict(list)
@@ -153,6 +153,10 @@ class BitEnumerator(Enumerator):
             self.create_input_constraints()
         self.create_output_constraints()
         self.create_lines_constraints()
+
+        if self.specification.sketch:
+            self.create_sketch_constraints()
+
         self.create_type_constraints()
         self.create_children_constraints()
         self._production_id_cache = defaultdict(OrderedSet)
@@ -211,6 +215,7 @@ class BitEnumerator(Enumerator):
             return self.spec.get_production(prod_id)
 
     def create_line_productions(self) -> None:
+        """Creates new LineProductions that can be used by other productions"""
         for l in range(0, self.loc - 1):
             line_productions = []
             for t in self.types:
@@ -222,6 +227,20 @@ class BitEnumerator(Enumerator):
 
     def build_trees(self) -> Tuple[List[Root], List[Leaf]]:
         """Builds a loc trees, each tree will be a line of the program"""
+        # print("PRODUCTIONS")
+        # print(self.spec.productions())
+        # print("FUNCTIONS")
+        # print(self.spec.get_function_productions())
+        # print(self.spec.get_function_production("left_join"))
+        # print("ENUM")
+        # print(self.spec.get_enum_productions())
+        # print(self.spec.get_enum_production(self.spec.get_type("SummariseCondition"), "grade=min(grade)"))
+        # print("PARAM")
+        # print(self.spec.get_param_productions())
+        # print(self.spec.get_param_production(0))
+        # print("LINES")
+        # print(self.line_productions)
+        # print(self.line_productions[0].id)
         nodes = []
         leaves = []
         for i in range(1, self.loc + 1):
@@ -232,6 +251,27 @@ class BitEnumerator(Enumerator):
                 leaves.append(child)
             nodes.append(n)
         return nodes, leaves
+
+    def create_sketch_constraints(self) -> None:
+        """Adds the sketch constraints to each line in z3"""
+        ctr = []
+        sketch = self.specification.sketch
+        sketch.fill_vars(self.spec, self.line_productions)
+
+        for i in range(len(self.roots)):
+            root = self.roots[i]
+            line = sketch.lines_encoding[i]
+
+            if line.var:
+                ctr.append(root.var == line.var)
+
+            for c in range(self.max_children):  # TODO check when we don't know which function
+                if line.children[c].var:
+                    ctr.append(root.children[c].var == line.children[c].var)
+
+        # TODO check bitvectors of assigned vars
+        print(ctr)
+        self.assert_expr(z3.And(ctr), 'sketch_constraints')     # Why when len = 1, have 2 models?
 
     def create_output_constraints(self) -> None:
         """The output production matches the output type"""
@@ -276,6 +316,7 @@ class BitEnumerator(Enumerator):
                 aux = r.var == p.id
                 for c in range(len(r.children)):
                     ctr = []
+                    # If production has less arguments than the tree has children than all other children are 0
                     if c >= len(p.rhs):
                         self.assert_expr(z3.Implies(aux, z3.And(r.children[c].var == 0,
                                                                 r.children[c].bitvec == self.mk_bitvec(0),
