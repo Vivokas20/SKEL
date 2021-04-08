@@ -92,6 +92,8 @@ class Sketch:
         self.lines_encoding = []
         self.functions = []
 
+    # parse functions can be out of sketch class and return lines
+
     def check_summarise(self, line):
         # TODO implement the summarise_
         root = "summarise"
