@@ -10,7 +10,7 @@ class Child:
     def __init__(self, child_type = None, child = None):
         self.child = child
         self.type = None
-        if child_type:      # fix cause we can know rhs and not function so type but can't be both cause then if name is "" is like none
+        if child_type is not None and child is not None:
             self.check_type(child_type)
             self.var = None
         else:
@@ -199,7 +199,7 @@ class Sketch:
                             else:
                                 logger.warning('Unknown table production "%s"', prod_name)
                         elif prod_type == "Line":
-                            prod = line_productions[prod_name][0]
+                            prod = line_productions[prod_name][0]       # check type if not more line prods
                             if prod:
                                 child.var = prod.id
                             else:

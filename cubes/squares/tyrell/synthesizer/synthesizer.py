@@ -50,7 +50,7 @@ class Synthesizer(AbstractSynthesizer):
         prog = self.enumerator.next()
         enum_time += time.time() - start
         # pr = cProfile.Profile()
-        while prog:
+        while prog is not None:
             # logger.debug('Testing program %s', prog)
             total_attempts += 1
             attempts += 1
