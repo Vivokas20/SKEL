@@ -42,18 +42,26 @@ class Specification:
         self.inputs = spec['inputs']
         self.output = spec['output']
         self.consts = spec['constants'] or []
-        if spec['sketch']:
-            self.sketch = Sketch(spec['sketch'])
-            self.sketch.sketch_parser(self.inputs)
-        else:
-            self.sketch = None
+
         if util.get_config().ignore_aggrs:
             self.aggrs = util.get_config().aggregation_functions
         else:
             self.aggrs = spec['functions'] or []
+
         self.attrs = spec['columns'] or []
         self.dateorder = spec['dateorder'] or 'parse_datetime'
         self.filters = spec['filters'] or []
+
+        if spec['sketch']:
+            self.sketch = Sketch(spec['sketch'])
+            self.sketch.sketch_parser(self.inputs)
+            self.min_loc = self.sketch.loc  # TODO fazer mais hard lock e tirar o while
+        else:
+            self.sketch = None
+            self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (
+                1 if self.filters or self.consts else 0),
+                               util.get_config().minimum_loc)  # TODO change for loc to be fixed
+
         if 'solution' in spec:
             self.solution = spec['solution']
         else:
@@ -61,12 +69,6 @@ class Specification:
 
         if util.get_config().use_solution_dsl and self.solution:
             util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
-
-        if spec['sketch']:
-            self.min_loc = self.sketch.loc      # TODO fazer mais hard lock e tirar o while
-        else:
-            self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (1 if self.filters or self.consts else 0),
-                           util.get_config().minimum_loc)  # TODO change for loc to be fixed
 
         self.aggrs_use_const = False
 

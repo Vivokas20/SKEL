@@ -23,9 +23,9 @@ options(warn=-1)
 suppressMessages(library(tidyr))
 suppressMessages(library(stringr))
 suppressMessages(library(readr))
+suppressMessages(library(lubridate))
 suppressMessages(library(dplyr))
 suppressMessages(library(dbplyr))''')
-# suppressMessages(library(lubridate))      Used for queries with date
 
 def do_not_print(msg):
     pass

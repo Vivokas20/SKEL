@@ -6,8 +6,6 @@ functions:
 columns:
   - grade
   - courseId
-bools:
-  - ==
 constants:
   - 11
 sql: |

@@ -3,6 +3,7 @@ users/*
 .cenv
 dump.dsl
 comments.yaml
+test_dirs.txt
 .RDataFiles/
 .idea/
 profiles/
