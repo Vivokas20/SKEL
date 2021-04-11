@@ -1,5 +1,10 @@
+import signal
+import sys
+import time
 import yaml
 import subprocess
+
+last = ""
 
 class literal(str):
     pass
@@ -10,11 +15,20 @@ def literal_presenter(dumper, data):
 
 yaml.add_representer(literal, literal_presenter)
 
+
+def signal_handler(sig, frame):
+    print('Current File: ' + last)
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
 if __name__ == '__main__':
     # for file in glob.glob('tests-examples/**/**/*.yaml', recursive=True):
     with open("test_dirs.txt") as dirs:
         for file in dirs:
             file = file[:-1]
+            last = file
             if 'schema.yaml' in file:
                 continue
 

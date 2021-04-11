@@ -52,16 +52,6 @@ class Specification:
         self.dateorder = spec['dateorder'] or 'parse_datetime'
         self.filters = spec['filters'] or []
 
-        if spec['sketch']:
-            self.sketch = Sketch(spec['sketch'])
-            self.sketch.sketch_parser(self.inputs)
-            self.min_loc = self.sketch.loc  # TODO fazer mais hard lock e tirar o while
-        else:
-            self.sketch = None
-            self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (
-                1 if self.filters or self.consts else 0),
-                               util.get_config().minimum_loc)  # TODO change for loc to be fixed
-
         if 'solution' in spec:
             self.solution = spec['solution']
         else:
@@ -100,6 +90,17 @@ class Specification:
             self.columns |= df.columns
         self.columns = OrderedSet(sorted(self.columns))
         self.all_columns = self.columns.copy()
+
+        if spec['sketch']:
+            self.sketch = Sketch(spec['sketch'])
+            self.sketch.sketch_parser(self.tables)
+            self.min_loc = self.sketch.loc  # TODO fazer mais hard lock e tirar o while
+        else:
+            self.sketch = None
+            self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (
+                1 if self.filters or self.consts else 0),
+                               util.get_config().minimum_loc)  # TODO change for loc to be fixed
+
 
         self.data_frames['expected_output'] = self.read_table(self.output, 'expected_output')
         self.output_cols = self.data_frames['expected_output'].columns
