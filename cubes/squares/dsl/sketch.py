@@ -33,16 +33,14 @@ class Child:
                     self.child = i
                     return
 
-            for i in range(len(df_tables_names)):
-                if df_tables_names[i] == self.child:
-                    self.child = i
-                    return
-
             for i in range(len(lines_names)):
                 if lines_names[i] == self.child:
                     self.child = i
                     self.type = "Line"
                     return
+
+    def __repr__(self) -> str:
+        return f'Child({self.child}, type={self.type}, var={self.var})'
 
 
 class Line:
@@ -69,8 +67,14 @@ class Line:
         self.children.append(child)
 
     def __repr__(self) -> str:
-        return f'Line({self.name}, root={self.root}, var={self.var})'
+        string = f'Line({self.name}, root={self.root}, var={self.var}, children=['
+        for c in self.children:
+            string += str(c) + ","
+        string += "])"
+        return string
 
+
+######## AUXILIARY PARSE FUNCTIONS ########
 
 def args_in_brackets(string: str) -> List[str]:
     open_b = 0
@@ -95,9 +99,51 @@ def args_in_brackets(string: str) -> List[str]:
 
     return matches
 
-######## AUXILIARY PARSE FUNCTIONS ########
 
-def check_filter_or_mutate(line, name):
+def split_args(string: str) -> List[str]:
+    brackets = 0
+    start = 0
+    matches = []
+
+    for i in range(len(string)):
+        brackets += string[i] == '('
+        brackets -= string[i] == ')'
+        if string[i] == "," and not brackets:
+            matches.append(string[start:i])
+            start = i + 1
+
+    matches.append(string[start:len(string)])
+    return matches
+
+
+def check_underscore_args(string: str, func: str, arg: str) -> str:
+    matches = re.findall(rf'{func}[^(]*?\(', string)
+    match = matches[0].replace(f"{func}", "")[:-1]
+
+    if match:
+        arg = match[1:] + "$" + arg
+
+    return arg
+
+def add_quotes(string: str) -> str:
+    new_string = ""
+
+    if string:
+        string = string.replace(" ", "").split(",")
+        for s in string:
+            if "=" in s:
+                new = s.split("=")
+                new_string += "'" + new[0] + "'" + " = " + "'" + new[1] + "'" + ","
+            else:
+                new_string += "'" + s + "'" + ","
+        new_string = new_string[:-1]
+
+    return new_string
+
+
+############# PARSE FUNCTIONS #############
+
+def check_filter_mutate_summarise(line, name):
     children = []
 
     new_table = line.split("%>%")[0].replace(" ","")
@@ -107,46 +153,34 @@ def check_filter_or_mutate(line, name):
     if name == "filter":
         children.append(Child("FilterCondition", args[0]))
     elif name == "mutate":
-        children.append(Child("SummariseCondition", args[0]))
+        arg = check_underscore_args(line, name, args[0])
+        children.append(Child("SummariseCondition", arg))
+    elif name == "summarise":
+        arg = check_underscore_args(line, name, args[1])
+        children.append(Child("SummariseCondition", arg))
+        arg0 = add_quotes(args[0])
+        children.append(Child("Cols", arg0))
 
     return children
 
-# TODO summarise can join with filter and mutate
-# TODO left join can join anti join
 
-def check_left_join(line):
+def check_union_inner_left_anti_join(line, name):
     children = []
-
-    args = args_in_brackets(line)[0].replace(" ", "").split(",")
+    args = args_in_brackets(line)[0].replace(" ", "")    # If I take spaces Cols gonna fail
+    args = split_args(args)
 
     children.append(Child("Table", args[0]))
     children.append(Child("Table", args[1]))
 
-    return children
+    if name == "anti_join":
+        args2 = args_in_brackets(args[2])[0]
+        args2 = add_quotes(args2)
+        children.append(Child("Cols", args2))
 
-
-def check_anti_join(line):
-    children = []
-
-    args = args_in_brackets(line)[0].replace(" ", "").split(",")
-    args2 = args_in_brackets(args[2])[0]
-
-    children.append(Child("Table", args[0]))
-    children.append(Child("Table", args[1]))
-    children.append(Child("Cols", args2))
-
-    return children
-
-
-def check_summarise(line):
-    children = []
-
-    new_table = line.split("%>%")[0].replace(" ","")
-    args = args_in_brackets(line)
-
-    children.append(Child("Table", new_table))
-    children.append(Child("SummariseCondition", args[1]))
-    children.append(Child("Cols", args[0]))
+    elif name == "inner_join":
+        args2 = args_in_brackets(args[2])[0]
+        args2 = add_quotes(args2)
+        children.append(Child("JoinCondition", args2))
 
     return children
 
@@ -166,11 +200,10 @@ class Sketch:
         # TODO verificar os types
         # TODO if none function - ??
 
-        # table names and columns cannot have ()
         # arguments have to be spaced
         for table in names:
-            df_tables_names.append(table)
-            tables_names.append(table[3:])
+            table = table.split(".")[0].split("/")[-1]
+            tables_names.append(table)
 
         for sketch_line in self.lines[:-1]:
             line = sketch_line.split("<-")
@@ -180,45 +213,48 @@ class Sketch:
             children = None
 
             if "natural_join" in line: #eval all natural_joins cause they're too special
+                root = "natural_join"
+                children = check_union_inner_left_anti_join(line, root)
                 pass
 
             elif "summarise" in line:
-                # TODO implement the summarise_
                 root = "summarise"
-                children = check_summarise(line)
+                children = check_filter_mutate_summarise(line, root)
 
             elif "anti_join" in line:
                 root = "anti_join"
-                children = check_anti_join(line)
+                children = check_union_inner_left_anti_join(line, root)
 
             elif "left_join" in line:
                 root = "left_join"
-                children = check_left_join(line)
+                children = check_union_inner_left_anti_join(line, root)
 
             elif "bind_rows" in line:   #eval_union
-                pass
+                root = "union"
+                children = check_union_inner_left_anti_join(line, root)
 
             elif "intersect" in line:  #after natural_joins and it appears in select (out)!
                 pass
 
             elif "semi_join" in line:
                 root = "semi_join"
-                children = check_left_join(line)
+                children = check_union_inner_left_anti_join(line, root)
 
             elif "inner_join" in line:  #after natural_joins
-                pass
+                root = "inner_join"
+                children = check_union_inner_left_anti_join(line, root)
 
             elif "mutate" in line:  #after inner_join
-                # TODO implement the mutate_
                 root = "mutate"
-                children = check_filter_or_mutate(line, root)
+                children = check_filter_mutate_summarise(line, root)
 
-            elif "full_join" in line:  #after natural_joins
+            elif "full_join" in line:  #cross_join(Table, Table, CrossJoinCondition)  #after natural_joins
+                root = "cross_join"
                 pass
 
             elif "filter" in line:  #after full_join
                 root = "filter"
-                children = check_filter_or_mutate(line, root)
+                children = check_filter_mutate_summarise(line, root)
 
             elif "unite" in line:
                 pass
@@ -231,7 +267,7 @@ class Sketch:
                 self.functions.append(root)
 
             self.lines_encoding.append(Line(name, root, children))
-
+            print(self.lines_encoding[-1])
         if not parsed:
             logger.warning('Sketch could not be completely parsed')
 
@@ -264,13 +300,13 @@ class Sketch:
                             if prod:
                                 child.var = prod.id
                             else:
-                                logger.warning('Unknown table production "%s"', prod_name)
+                                logger.warning('Unknown Table production "%s"', prod_name)
                         elif prod_type == "Line":
                             prod = line_productions[prod_name][0]       # check type if not more line prods
                             if prod:
                                 child.var = prod.id
                             else:
-                                logger.warning('Unknown line production "%s"', prod_name)
+                                logger.warning('Unknown Line production "%s"', prod_name)
                         else:
                             prod = spec.get_enum_production(spec.get_type(prod_type), prod_name)
                             if prod:
