@@ -166,21 +166,34 @@ def check_filter_mutate_summarise(line, name):
 
 def check_union_inner_left_anti_join(line, name):
     children = []
-    args = args_in_brackets(line)[0].replace(" ", "")    # If I take spaces Cols gonna fail
-    args = split_args(args)
+    all_args = args_in_brackets(line)[0].replace(" ", "")    # If I take spaces Cols gonna fail
+    args = split_args(all_args)
 
     children.append(Child("Table", args[0]))
-    children.append(Child("Table", args[1]))
+
+    if name != "unite":
+        children.append(Child("Table", args[1]))
+    else:
+        children.append(Child("Col", args[1]))
+        children.append(Child("Col", args[3]))
+        return children
 
     if name == "anti_join":
-        args2 = args_in_brackets(args[2])[0]
-        args2 = add_quotes(args2)
-        children.append(Child("Cols", args2))
+        brackets = args_in_brackets(args[2])
+        arg = add_quotes(brackets[0])
+        children.append(Child("Cols", arg))
 
     elif name == "inner_join":
-        args2 = args_in_brackets(args[2])[0]
-        args2 = add_quotes(args2)
-        children.append(Child("JoinCondition", args2))
+        brackets = args_in_brackets(args[2])
+        arg = add_quotes(brackets[0])
+        children.append(Child("JoinCondition", arg))
+
+    elif name == "cross_join":
+        if "%>%" in line:
+            arg = args_in_brackets(line.split("filter")[1])[0]
+        else:
+            arg = ''
+        children.append(Child("CrossJoinCondition", arg))
 
     return children
 
@@ -250,14 +263,15 @@ class Sketch:
 
             elif "full_join" in line:  #cross_join(Table, Table, CrossJoinCondition)  #after natural_joins
                 root = "cross_join"
-                pass
+                children = check_union_inner_left_anti_join(line, root)
 
             elif "filter" in line:  #after full_join
                 root = "filter"
                 children = check_filter_mutate_summarise(line, root)
 
             elif "unite" in line:
-                pass
+                root = "unite"
+                children = check_union_inner_left_anti_join(line, root)
 
             else:
                 name = None
@@ -267,7 +281,7 @@ class Sketch:
                 self.functions.append(root)
 
             self.lines_encoding.append(Line(name, root, children))
-            print(self.lines_encoding[-1])
+            # print(self.lines_encoding[-1])
         if not parsed:
             logger.warning('Sketch could not be completely parsed')
 
