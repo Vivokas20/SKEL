@@ -4,6 +4,7 @@ users/*
 dump.dsl
 comments.yaml
 test_dirs.txt
+all_dirs.txt
 .RDataFiles/
 .idea/
 profiles/
