@@ -9,3 +9,6 @@ comment: |
 #sketch: |
 #  df1 <- left_join(supplier, parts)
 #  out <- df1 %>% select(PartName) %>% distinct()
+sketch: |
+  T1 = left_join(supplier, parts)
+  out = select(T1,PartName)

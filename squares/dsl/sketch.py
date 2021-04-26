@@ -5,8 +5,9 @@ from typing import List
 logger = getLogger('squares')
 
 tables_names = []
-df_tables_names = []
 lines_names = []
+aggregate_functions = ['max', 'min', 'sum', 'count', 'avg']
+attrs = []
 
 class Child:
     def __init__(self, child_type: str = None, child: str = None) -> None:
@@ -39,17 +40,21 @@ class Child:
                     self.type = "Line"
                     return
 
+        else:
+            for column in columns_names:
+                if column in self.child and column not in attrs:
+                    attrs.append(column)
+
     def __repr__(self) -> str:
         return f'Child({self.child}, type={self.type}, var={self.var})'
 
 
 class Line:
-    def __init__(self, name: str = None, root: str = None, children: List[Child] = None) -> None:
+    def __init__(self, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None) -> None:
         self.name = name
         self.root = root
         self.children = children
-        if self.children is not None:
-            self.n_children = len(children)
+        self.n_children = n_children
         self.var = None
         if self.name is not None:
             lines_names.append(name)
@@ -77,51 +82,34 @@ class Line:
 ######## AUXILIARY PARSE FUNCTIONS ########
 
 def args_in_brackets(string: str) -> List[str]:
-    open_b = 0
-    close_b = 0
-    start = 0
-    matches = []
-
-    for i in range(len(string)):
-        if string[i] == '(':
-            open_b += 1
-            if open_b == 1:
-                start = i + 1
-        close_b += string[i] == ')'
-        if open_b > 0 and open_b == close_b:
-            open_b = 0
-            close_b = 0
-            matches.append(string[start:i])
-
-    # matches = re.findall(r'\(+.*?\)+', string)
-    # for i in range(len(matches)):
-    #     matches[i] = matches[i][1:-1]
-
-    return matches
-
-
-def split_args(string: str) -> List[str]:
     brackets = 0
     start = 0
     matches = []
+    string = string.strip()
+    string = string.rpartition(")")[0]
 
     for i in range(len(string)):
-        brackets += string[i] == '('
-        brackets -= string[i] == ')'
-        if string[i] == "," and not brackets:
-            matches.append(string[start:i])
+        if string[i] == '(':
+            brackets += 1
+        elif string[i] == ')':
+            brackets -= 1
+        elif string[i] == "," and not brackets:
+            match = string[start:i].strip()
+            if match[0] == "(" and match[-1] == ")":
+                match = match[1:-1].strip()
+            matches.append(match)
             start = i + 1
 
-    matches.append(string[start:len(string)])
+    match = string[start:len(string)].strip()
+    matches.append(match)
     return matches
 
+def check_underscore_args(function: str, arg: str) -> str:
+    variations = ["all", "at", "if"]
+    var = function.partition("_")[2]
 
-def check_underscore_args(string: str, func: str, arg: str) -> str:
-    matches = re.findall(rf'{func}[^(]*?\(', string)
-    match = matches[0].replace(f"{func}", "")[:-1]
-
-    if match:
-        arg = match[1:] + "$" + arg
+    if var in variations:
+        arg = var + "$" + arg
 
     return arg
 
@@ -141,63 +129,6 @@ def add_quotes(string: str) -> str:
     return new_string
 
 
-############# PARSE FUNCTIONS #############
-
-def check_filter_mutate_summarise(line, name):
-    children = []
-
-    new_table = line.split("%>%")[0].replace(" ","")
-    args = args_in_brackets(line)
-
-    children.append(Child("Table", new_table))
-    if name == "filter":
-        children.append(Child("FilterCondition", args[0]))
-    elif name == "mutate":
-        arg = check_underscore_args(line, name, args[0])
-        children.append(Child("SummariseCondition", arg))
-    elif name == "summarise":
-        arg = check_underscore_args(line, name, args[1])
-        children.append(Child("SummariseCondition", arg))
-        arg0 = add_quotes(args[0])
-        children.append(Child("Cols", arg0))
-
-    return children
-
-
-def check_union_inner_left_anti_join(line, name):
-    children = []
-    all_args = args_in_brackets(line)[0].replace(" ", "")    # If I take spaces Cols gonna fail
-    args = split_args(all_args)
-
-    children.append(Child("Table", args[0]))
-
-    if name != "unite":
-        children.append(Child("Table", args[1]))
-    else:
-        children.append(Child("Col", args[1]))
-        children.append(Child("Col", args[3]))
-        return children
-
-    if name == "anti_join":
-        brackets = args_in_brackets(args[2])
-        arg = add_quotes(brackets[0])
-        children.append(Child("Cols", arg))
-
-    elif name == "inner_join":
-        brackets = args_in_brackets(args[2])
-        arg = add_quotes(brackets[0])
-        children.append(Child("JoinCondition", arg))
-
-    elif name == "cross_join":
-        if "%>%" in line:
-            arg = args_in_brackets(line.split("filter")[1])[0]
-        else:
-            arg = ''
-        children.append(Child("CrossJoinCondition", arg))
-
-    return children
-
-
 class Sketch:
 
     def __init__(self, sketch) -> None:
@@ -205,90 +136,148 @@ class Sketch:
         self.lines = sketch.splitlines()
         self.loc = len(self.lines) - 1
         self.lines_encoding = []
-        self.functions = []
+        self.aggrs = []
 
-    def sketch_parser(self, names: List[str]) -> None:
-        parsed = True
-
+    def sketch_parser(self, tables: List[str], columns: List[str]) -> None:
         # TODO verificar os types
         # TODO if none function - ??
+        logger.info("Parsing sketch...")
 
-        # arguments have to be spaced
-        for table in names:
+        for table in tables:
             table = table.split(".")[0].split("/")[-1]
             tables_names.append(table)
 
-        for sketch_line in self.lines[:-1]:
-            line = sketch_line.split("<-")
+        global columns_names
+        columns_names = columns
+
+        for sketch_line in self.lines[:-1]: # TODO parse last line
+            parsed = True
+            line = sketch_line.partition("=")
             name = line[0].replace(" ", "")
-            line = line[1]
-            root = None
-            children = None
+            line = line[2].partition("(")
+            function = line[0].replace(" ", "")
+            args = args_in_brackets(line[2])
+            children = []
+            n_children = 0
 
-            if "natural_join" in line: #eval all natural_joins cause they're too special
-                root = "natural_join"
-                children = check_union_inner_left_anti_join(line, root)
-                pass
+            # TODO SELECT statement
+            try:
+                if "natural_join" == function:
+                    n_children = 2
+                    if len(args) > 4:
+                        logger.error('Can only support Natural Join up to 4 tables')
+                        parsed = False
+                    else:
+                        for arg in args:
+                            children.append(Child("Table", arg))
 
-            elif "summarise" in line:
-                root = "summarise"
-                children = check_filter_mutate_summarise(line, root)
+                        if len(children) > 2:
+                            n_children = len(children)
+                            function += str(len(children))
 
-            elif "anti_join" in line:
-                root = "anti_join"
-                children = check_union_inner_left_anti_join(line, root)
+                elif "inner_join" == function:  # Build error function if args != from the right #
+                    n_children = 3
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("Table", args[1]))
+                    arg = add_quotes(args[2])
+                    children.append(Child("JoinCondition", arg))
 
-            elif "left_join" in line:
-                root = "left_join"
-                children = check_union_inner_left_anti_join(line, root)
+                elif "anti_join" == function:
+                    n_children = 3
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("Table", args[1]))
+                    if len(args) > 2:
+                        arg = add_quotes(args[2])
+                    else:
+                        arg = ''
+                    children.append(Child("Cols", arg))
 
-            elif "bind_rows" in line:   #eval_union
-                root = "union"
-                children = check_union_inner_left_anti_join(line, root)
+                elif "left_join" == function or "union" == function or "semi_join" == function:
+                    n_children = 2
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("Table", args[1]))
 
-            elif "intersect" in line:  #after natural_joins and it appears in select (out)!
-                pass
+                elif "intersect" == function:   # TODO test
+                    n_children = 3
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("Table", args[1]))
+                    children.append(Child("Col", args[2]))
 
-            elif "semi_join" in line:
-                root = "semi_join"
-                children = check_union_inner_left_anti_join(line, root)
+                elif "cross_join" == function:
+                    n_children = 3
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("Table", args[1]))
+                    children.append(Child("CrossJoinCondition", args[2]))
 
-            elif "inner_join" in line:  #after natural_joins
-                root = "inner_join"
-                children = check_union_inner_left_anti_join(line, root)
+                elif "unite" == function:
+                    n_children = 3
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("Col", args[1]))
+                    children.append(Child("Col", args[2]))
 
-            elif "mutate" in line:  #after inner_join
-                root = "mutate"
-                children = check_filter_mutate_summarise(line, root)
+                elif "filter" == function:
+                    n_children = 2
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("FilterCondition", args[1]))
 
-            elif "full_join" in line:  #cross_join(Table, Table, CrossJoinCondition)  #after natural_joins
-                root = "cross_join"
-                children = check_union_inner_left_anti_join(line, root)
+                elif "summarise" in function:
+                    n_children = 3
+                    arg = check_underscore_args(function, args[1])
+                    function = "summarise"
 
-            elif "filter" in line:  #after full_join
-                root = "filter"
-                children = check_filter_mutate_summarise(line, root)
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("SummariseCondition", arg))
 
-            elif "unite" in line:
-                root = "unite"
-                children = check_union_inner_left_anti_join(line, root)
+                    for aggr in aggregate_functions:        #TODO check if table is called max/min something
+                        if aggr in arg:
+                            self.aggrs.append(aggr)
 
-            else:
-                name = None
-                logger.warning('Sketch line "%s" not be completely parsed', sketch_line)
+                    if len(args) > 2:
+                        arg = add_quotes(args[2])
+                    else:
+                        arg = ''
+                    children.append(Child("Cols", arg))
 
-            if root is not None:
-                self.functions.append(root)
+                elif "mutate" in function:
+                    n_children = 2
+                    arg = check_underscore_args(function, args[1])
+                    function = "mutate"
 
-            self.lines_encoding.append(Line(name, root, children))
-            # print(self.lines_encoding[-1])
-        if not parsed:
-            logger.warning('Sketch could not be completely parsed')
+                    children.append(Child("Table", args[0]))
+                    children.append(Child("SummariseCondition", arg))
+
+                    for aggr in aggregate_functions:        #TODO check if table is called max/min something
+                        if aggr in arg:
+                            self.aggrs.append(aggr)
+
+                else:   # TODO something similar for children
+                    function = None
+                    name = None
+                    logger.warning('Sketch line "%s" could not be completely parsed', sketch_line)
+
+            except IndexError:
+                logger.error('Sketch line "%s" has not enough arguments', sketch_line)
+                parsed = False
+
+            if n_children < len(args) and parsed:
+                logger.error('Sketch line "%s" has too many arguments', sketch_line)
+                parsed = False
+
+            if not parsed:
+                raise RuntimeError("Could not parse sketch")
+
+            self.lines_encoding.append(Line(name, function, children, n_children))
+            logger.debug("Sketch creation: " + str(self.lines_encoding[-1]))
+
+    def get_aggrs(self) -> List[str]:
+        return self.aggrs
+
+    def get_attrs(self) -> List[str]:
+        return attrs
 
     def fill_vars(self, spec, line_productions) -> None:
         # TODO have to check if there's root and children
         for line in self.lines_encoding:       # It assumes the lines in sketch are exact
-
             prod_name = line.get_root()
             prod = spec.get_function_production(prod_name)
 
@@ -332,3 +321,5 @@ class Sketch:
                     child = Child()
                     child.var = 0
                     line.add_child(child)
+
+        logger.debug(self.lines_encoding)

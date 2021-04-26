@@ -10,7 +10,12 @@ constants:
   - 11
 sql: |
   SELECT MIN(grade) FROM grades WHERE courseId = 11
+#sketch: |
+#  df1 <- grades %>% filter(courseId == 11)
+#  df2 <- df1 %>% group_by() %>% summarise(grade = min(grade)) %>% ungroup()
+#  out <- df2 %>% select(mingrade = grade) %>% arrange(mingrade)
+#  T1 = ?? courseId == 11
 sketch: |
-  df1 <- df_grades %>% filter(courseId == 11)
-  df2 <- df1 %>% group_by() %>% summarise(grade = min(grade)) %>% ungroup()
-  out <- df2 %>% select(mingrade = grade) %>% arrange(mingrade)
+  T1 = filter(grades, courseId == 11)
+  T2 = summarise(T1, grade = min(grade))
+  out = select(T2, mingrade = grade, mingrade)

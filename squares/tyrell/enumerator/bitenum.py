@@ -275,12 +275,9 @@ class BitEnumerator(Enumerator):
         leaves = []
         for i in range(1, self.loc + 1):
             line = self.sketch.lines_encoding[i-1]      # TODO Have to make sure there is one line per root even if empty
-            # print(f'Root: {i}')
-            # print(f'Func: {line.var}')
             n = Root(self, i, line.var)
             for x in range(self.max_children):  # TODO check when we don't know which function
                 var = line.children[x].var
-                # print(var)
                 child_type = line.children[x].type
                 child = Leaf(self, n, x, var, child_type)
 
