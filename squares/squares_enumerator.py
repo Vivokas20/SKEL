@@ -60,30 +60,30 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
     loc = specification.min_loc
     # loc = max(specification.min_loc, conf.minimum_loc)
 
-    # while loc <= util.get_config().maximum_loc:
-    start = time.time()
-    enumerator = BitEnumerator(spec, specification, loc=loc)
-    t = time.time() - start
-    logger.debug(f'Enumeration time: {t}')
-    results.init_time += t
+    while loc <= specification.max_loc:
+        start = time.time()
+        enumerator = BitEnumerator(spec, specification, loc=loc)
+        t = time.time() - start
+        logger.debug(f'Enumeration time: {t}')
+        results.init_time += t
 
-    synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
+        synthesizer = Synthesizer(enumerator=enumerator, decider=decider)
 
-    # print(util.get_config().top_programs)
-    start = time.time()
-    prog, attempts = synthesizer.synthesize()
-    t = time.time() - start
-    logger.debug(f'Synthesis time: {t}')
+        # print(util.get_config().top_programs)
+        start = time.time()
+        prog, attempts = synthesizer.synthesize()
+        t = time.time() - start
+        logger.debug(f'Synthesis time: {t}')
 
-    if prog:
-        logger.info(f'Solution found: {prog}')
-        queue.put((util.Message.SOLUTION, id, prog, loc, True))
-        queue.put((util.Message.DONE, None, None, None, None))
-        return
+        if prog:
+            logger.info(f'Solution found: {prog}')
+            queue.put((util.Message.SOLUTION, id, prog, loc, True))
+            queue.put((util.Message.DONE, None, None, None, None))
+            return
 
-    # else:
-    #     logger.info('Increasing the number of lines of code to %d.', loc + 1)
-    #     loc = loc + 1
+        else:
+            logger.info('Increasing the number of lines of code to %d.', loc + 1)
+            loc = loc + 1
 
     results.exceeded_max_loc = True
     logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, util.get_config().maximum_loc)

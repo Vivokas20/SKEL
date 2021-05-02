@@ -1,19 +1,21 @@
 from logging import getLogger
 import re
 from typing import List
+from itertools import product
 
 logger = getLogger('squares')
 
 tables_names = []
-lines_names = []
+lines_names = {}
 aggregate_functions = ['max', 'min', 'sum', 'count', 'avg']
 attrs = []
 
 class Child:
-    def __init__(self, child_type: str = None, child: str = None) -> None:
+    def __init__(self, child: str = None, child_type: str = None) -> None:
         self.child = child
+        self.productions = []
         self.type = None
-        if child_type is not None and child is not None:
+        if child_type:
             self.check_type(child_type)
             self.var = None
         else:
@@ -34,30 +36,44 @@ class Child:
                     self.child = i
                     return
 
-            for i in range(len(lines_names)):
+            for i in lines_names:
                 if lines_names[i] == self.child:
-                    self.child = i
+                    self.child = i - 1
                     self.type = "Line"
                     return
+
+            if self.child == "T??":     # TODO implement and test
+                self.child = "??"
+                self.type = "Line"
+                return
 
         else:
             for column in columns_names:
                 if column in self.child and column not in attrs:
                     attrs.append(column)
 
+            if child_type == "FilterCondition" or child_type == "CrossJoinCondition":
+                self.productions = redundant_boolean_conditions(self.child)
+
+            else:
+                if child_type == "Cols" or child_type == "JoinCondition":
+                    if self.child != '':
+                        self.child = add_quotes(self.child)
+                self.productions = redundant_conditions(self.child)
+
     def __repr__(self) -> str:
         return f'Child({self.child}, type={self.type}, var={self.var})'
 
 
 class Line:
-    def __init__(self, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None) -> None:
+    def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None) -> None:
         self.name = name
         self.root = root
         self.children = children
         self.n_children = n_children
         self.var = None
-        if self.name is not None:
-            lines_names.append(name)
+        if name and line_id != float('inf'):
+            lines_names[line_id] = name
 
     def get_root(self) -> str:
         return self.root
@@ -81,12 +97,13 @@ class Line:
 
 ######## AUXILIARY PARSE FUNCTIONS ########
 
-def args_in_brackets(string: str) -> List[str]:
+def args_in_brackets(string: str):
     brackets = 0
     start = 0
     matches = []
-    string = string.strip()
+    string = string.partition("(")[2]
     string = string.rpartition(")")[0]
+    string = string.strip()
 
     for i in range(len(string)):
         if string[i] == '(':
@@ -100,8 +117,14 @@ def args_in_brackets(string: str) -> List[str]:
             matches.append(match)
             start = i + 1
 
+    if brackets != 0:
+        return None
+
     match = string[start:len(string)].strip()
+    if match and match[0] == "(" and match[-1] == ")":
+        match = match[1:-1].strip()
     matches.append(match)
+
     return matches
 
 def check_underscore_args(function: str, arg: str) -> str:
@@ -116,17 +139,82 @@ def check_underscore_args(function: str, arg: str) -> str:
 def add_quotes(string: str) -> str:
     new_string = ""
 
-    if string:
-        string = string.replace(" ", "").split(",")
-        for s in string:
-            if "=" in s:
-                new = s.split("=")
-                new_string += "'" + new[0] + "'" + " = " + "'" + new[1] + "'" + ","
-            else:
-                new_string += "'" + s + "'" + ","
-        new_string = new_string[:-1]
+    string = string.replace(" ", "").replace("'", "").split(",")
+    for s in string:
+        if "=" in s:
+            new = s.split("=")
+            new_string += "'" + new[0] + "'" + " = " + "'" + new[1] + "'" + ","
+        else:
+            new_string += "'" + s + "'" + ","
+    new_string = new_string[:-1]
 
     return new_string
+
+def redundant_conditions(condition: str) -> List[str]:
+    conditions = []
+    final = []
+
+    if "," in condition:
+        conditions = condition.split(",")
+
+    if len(conditions) > 1:
+        final.append(str(conditions[0].strip() + "," + conditions[1].strip()))
+        final.append(str(conditions[1].strip() + "," + conditions[0].strip()))
+
+    else:
+        if "=" in condition:
+            parts = condition.split("=")
+            final.append(str(parts[0].strip() + " = " + parts[1].strip()))
+            final.append(str(parts[1].strip() + " = " + parts[0].strip()))
+        else:
+            final.append(condition)
+
+    return final
+
+def redundant_boolean_conditions(condition: str) -> List[str]:
+    separators = ["|", "&"]
+    comparators = ["==", "!=", "<=", ">=", "<", ">"]
+    final = []
+    conditions = []
+    productions = []
+    condition = condition.replace("=>", ">=").replace("=<", "<=")
+
+    for separator in separators:
+        if separator in condition:
+            conditions = condition.split(separator)
+            break
+
+    if not conditions:
+        conditions.append(condition)
+
+    for condition in conditions:
+        production_part = []
+        condition = condition.strip()
+        for comparator in comparators:
+            parts = condition.split(comparator)
+            if comparator in condition:
+                production_part.append(str(parts[0].strip()) + " " + str(comparator) + " " + str(parts[1].strip()))
+                if comparator == ">":
+                    comparator = "<="
+                elif comparator == "<":
+                    comparator = ">="
+                elif comparator == "<=":
+                    comparator = ">"
+                elif comparator == ">=":
+                    comparator = "<"
+                production_part.append(str(parts[1].strip()) + " " + str(comparator) + " " + str(parts[0].strip()))
+                productions.append(production_part)
+                break
+
+    if len(productions) > 1:
+        combinations = list(product(*productions))
+        for combination in combinations:
+            final.append(str(combination[0]) + " " + separator + " " + str(combination[1]))
+            final.append(str(combination[1]) + " " + separator + " " + str(combination[0]))
+    else:
+        final = productions[0]
+
+    return final
 
 
 class Sketch:
@@ -135,7 +223,11 @@ class Sketch:
         self.sketch = sketch
         self.lines = sketch.splitlines()
         self.loc = len(self.lines) - 1
-        self.lines_encoding = []
+        self.min_loc = 0
+        self.max_loc = 0
+        self.lines_encoding = {}
+        self.free_children = []
+        self.free_lines = []
         self.aggrs = []
 
     def sketch_parser(self, tables: List[str], columns: List[str]) -> None:
@@ -149,125 +241,174 @@ class Sketch:
 
         global columns_names
         columns_names = columns
+        parsed = True
 
-        for sketch_line in self.lines[:-1]: # TODO parse last line
-            parsed = True
-            line = sketch_line.partition("=")
-            name = line[0].replace(" ", "")
-            line = line[2].partition("(")
-            function = line[0].replace(" ", "")
-            args = args_in_brackets(line[2])
-            children = []
-            n_children = 0
+        for sketch_line in self.lines:
 
-            # TODO SELECT statement
-            try:
-                if "natural_join" == function:
-                    n_children = 2
-                    if len(args) > 4:
-                        logger.error('Can only support Natural Join up to 4 tables')
+            if sketch_line.startswith("out"):
+                pass # TODO parse Select
+
+            elif sketch_line.startswith("child"):
+                pass # TODO implement child we don't know the place
+
+            elif sketch_line.startswith("??"):
+                # TODO implement in bitenum
+                line = sketch_line.strip()
+                if line == "??+":
+                    self.max_loc = float('inf')
+                    self.min_loc += 1
+
+                elif line == "??*":
+                    self.max_loc = float('inf')
+
+                else:
+                    logger.error('Sketch line "%s" could not be parsed', sketch_line)
+                    parsed = False
+                    break
+            else:
+                self.min_loc += 1
+                self.max_loc += 1
+                line = sketch_line.partition("=")
+                name = line[0].replace(" ", "")
+                args = args_in_brackets(line[2].strip())
+                line = line[2].partition("(")
+                function = line[0].replace(" ", "")
+
+                if not args:
+                    logger.error('Sketch line "%s" has missing brackets', sketch_line)
+                    parsed = False
+                    break
+
+                children = []
+                n_children = 0
+
+                # TODO SELECT statement
+                try:
+                    if "??" == function:
+                        # A line with no function. Can have children or not
+                        if self.max_loc != float('inf'):
+                            lines_names[self.max_loc] = name
+
+                        if args[0]:
+                            self.min_loc -= 1
+                            self.max_loc -= 1
+                            args = args_in_brackets(sketch_line)
+                            for arg in args:
+                                self.free_children.append(Child(arg))  # TODO parse do arg para ter aspas e todas as redundancias
+
+                            # TODO parse free children and children that we know were they are. we can also roughly know the place in cases of ??*+
+
+                    elif "natural_join" == function:
+                        n_children = 2
+                        if len(args) > 4:
+                            logger.error('Can only support Natural Join up to 4 tables')
+                            parsed = False
+                            break
+                        else:
+                            for arg in args:
+                                children.append(Child(arg, "Table"))
+
+                            if len(children) > 2:
+                                n_children = len(children)
+                                function += str(len(children))
+
+                    elif "inner_join" == function:  # Build error function if args != from the right #
+                        n_children = 3
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(args[1], "Table"))
+                        children.append(Child(args[2], "JoinCondition"))
+
+                    elif "anti_join" == function:
+                        n_children = 3
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(args[1], "Table"))
+                        if len(args) > 2:
+                            children.append(Child(args[2], "Cols"))
+                        else:
+                            children.append(Child('', "Cols"))
+
+                    elif "left_join" == function or "union" == function or "semi_join" == function:
+                        n_children = 2
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(args[1], "Table"))
+
+                    elif "intersect" == function:   # TODO test
+                        n_children = 3
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(args[1], "Table"))
+                        children.append(Child(args[2], "Col"))
+
+                    elif "cross_join" == function:
+                        n_children = 3
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(args[1], "Table"))
+                        children.append(Child(args[2], "CrossJoinCondition"))
+
+                    elif "unite" == function:
+                        n_children = 3
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(args[1], "Col"))
+                        children.append(Child(args[2], "Col"))
+
+                    elif "filter" == function:
+                        n_children = 2
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(args[1], "FilterCondition"))
+
+                    elif "summarise" in function:
+                        n_children = 3
+                        arg = check_underscore_args(function, args[1])
+                        function = "summarise"
+
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(arg, "SummariseCondition"))
+
+                        for aggr in aggregate_functions:        #TODO check if table is called max/min something
+                            if aggr in arg:
+                                self.aggrs.append(aggr)
+
+                        if len(args) > 2:
+                            children.append(Child(args[2], "Cols"))
+                        else:
+                            children.append(Child('', "Cols"))
+
+                    elif "mutate" in function:
+                        n_children = 2
+                        arg = check_underscore_args(function, args[1])
+                        function = "mutate"
+
+                        children.append(Child(args[0], "Table"))
+                        children.append(Child(arg, "SummariseCondition"))
+
+                        for aggr in aggregate_functions:        #TODO check if table is called max/min something
+                            if aggr in arg:
+                                self.aggrs.append(aggr)
+
+                    else:   # TODO something similar for children
+                        logger.error('Sketch line "%s" could not be parsed', sketch_line)
                         parsed = False
-                    else:
-                        for arg in args:
-                            children.append(Child("Table", arg))
+                        break
 
-                        if len(children) > 2:
-                            n_children = len(children)
-                            function += str(len(children))
+                except IndexError:
+                    logger.error('Sketch line "%s" has not enough arguments', sketch_line)
+                    parsed = False
+                    break
 
-                elif "inner_join" == function:  # Build error function if args != from the right #
-                    n_children = 3
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("Table", args[1]))
-                    arg = add_quotes(args[2])
-                    children.append(Child("JoinCondition", arg))
+                if n_children < len(args) and parsed:
+                    logger.error('Sketch line "%s" has too many arguments', sketch_line)
+                    parsed = False
+                    break
 
-                elif "anti_join" == function:
-                    n_children = 3
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("Table", args[1]))
-                    if len(args) > 2:
-                        arg = add_quotes(args[2])
-                    else:
-                        arg = ''
-                    children.append(Child("Cols", arg))
+                line = Line(self.max_loc, name, function, children, n_children)
+                if self.max_loc != float('inf'):
+                    self.lines_encoding[self.max_loc] = line
+                else:
+                    self.free_lines.append(line)
 
-                elif "left_join" == function or "union" == function or "semi_join" == function:
-                    n_children = 2
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("Table", args[1]))
+                logger.debug("Sketch creation: " + str(line))
 
-                elif "intersect" == function:   # TODO test
-                    n_children = 3
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("Table", args[1]))
-                    children.append(Child("Col", args[2]))
-
-                elif "cross_join" == function:
-                    n_children = 3
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("Table", args[1]))
-                    children.append(Child("CrossJoinCondition", args[2]))
-
-                elif "unite" == function:
-                    n_children = 3
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("Col", args[1]))
-                    children.append(Child("Col", args[2]))
-
-                elif "filter" == function:
-                    n_children = 2
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("FilterCondition", args[1]))
-
-                elif "summarise" in function:
-                    n_children = 3
-                    arg = check_underscore_args(function, args[1])
-                    function = "summarise"
-
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("SummariseCondition", arg))
-
-                    for aggr in aggregate_functions:        #TODO check if table is called max/min something
-                        if aggr in arg:
-                            self.aggrs.append(aggr)
-
-                    if len(args) > 2:
-                        arg = add_quotes(args[2])
-                    else:
-                        arg = ''
-                    children.append(Child("Cols", arg))
-
-                elif "mutate" in function:
-                    n_children = 2
-                    arg = check_underscore_args(function, args[1])
-                    function = "mutate"
-
-                    children.append(Child("Table", args[0]))
-                    children.append(Child("SummariseCondition", arg))
-
-                    for aggr in aggregate_functions:        #TODO check if table is called max/min something
-                        if aggr in arg:
-                            self.aggrs.append(aggr)
-
-                else:   # TODO something similar for children
-                    function = None
-                    name = None
-                    logger.warning('Sketch line "%s" could not be completely parsed', sketch_line)
-
-            except IndexError:
-                logger.error('Sketch line "%s" has not enough arguments', sketch_line)
-                parsed = False
-
-            if n_children < len(args) and parsed:
-                logger.error('Sketch line "%s" has too many arguments', sketch_line)
-                parsed = False
-
-            if not parsed:
-                raise RuntimeError("Could not parse sketch")
-
-            self.lines_encoding.append(Line(name, function, children, n_children))
-            logger.debug("Sketch creation: " + str(self.lines_encoding[-1]))
+        if not parsed:
+            raise RuntimeError("Could not parse sketch")
 
     def get_aggrs(self) -> List[str]:
         return self.aggrs
@@ -277,7 +418,7 @@ class Sketch:
 
     def fill_vars(self, spec, line_productions) -> None:
         # TODO have to check if there's root and children
-        for line in self.lines_encoding:       # It assumes the lines in sketch are exact
+        for line in self.lines_encoding.values():
             prod_name = line.get_root()
             prod = spec.get_function_production(prod_name)
 
@@ -311,10 +452,14 @@ class Sketch:
                             else:
                                 logger.warning('Unknown Line production "%s"', prod_name)
                         else:
-                            prod = spec.get_enum_production(spec.get_type(prod_type), prod_name)
-                            if prod:
-                               child.var = prod.id
-                            else:
+                            prod_type = spec.get_type(prod_type)
+                            for name in child.productions:
+                                prod = spec.get_enum_production(prod_type, name)
+                                if prod:
+                                    child.var = prod.id
+                                    break
+
+                            if not prod:
                                 logger.warning('Unknown %s production "%s"', prod_type, prod_name)
 
                 else:

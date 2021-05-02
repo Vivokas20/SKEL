@@ -16,6 +16,7 @@ from ... import util, program
 from ...program import Program
 from ...decider import RejectionInfo, RowNumberInfo
 from ...dsl.specification import Specification
+from ...dsl.sketch import Line
 from ...util import flatten
 
 logger = getLogger('squares.enumerator')
@@ -274,11 +275,18 @@ class BitEnumerator(Enumerator):
         nodes = []
         leaves = []
         for i in range(1, self.loc + 1):
-            line = self.sketch.lines_encoding[i-1]      # TODO Have to make sure there is one line per root even if empty
+            if i in self.sketch.lines_encoding:
+                line = self.sketch.lines_encoding[i]
+            else:
+                line = Line()
             n = Root(self, i, line.var)
             for x in range(self.max_children):  # TODO check when we don't know which function
-                var = line.children[x].var
-                child_type = line.children[x].type
+                if line.children:
+                    var = line.children[x].var
+                    child_type = line.children[x].type
+                else:
+                    var = None
+                    child_type = None
                 child = Leaf(self, n, x, var, child_type)
 
                 if var is None:

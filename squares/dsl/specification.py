@@ -105,14 +105,18 @@ class Specification:
         if spec['sketch']:
             self.sketch = Sketch(spec['sketch'])
             self.sketch.sketch_parser(self.inputs, self.all_columns)
-            self.min_loc = self.sketch.loc  # TODO fazer mais hard lock e tirar o while
-            self.aggrs = self.sketch.get_aggrs()
-            self.attrs = self.sketch.get_attrs()
+            self.min_loc = self.sketch.min_loc
+            if self.sketch.max_loc != float('inf'):
+                self.max_loc = self.sketch.max_loc
+            else:
+                self.max_loc = util.get_config().maximum_loc
+            # self.aggrs = self.sketch.get_aggrs()
+            # self.attrs = self.sketch.get_attrs()
         else:
             self.sketch = None
             self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (
-                1 if self.filters or self.consts else 0),
-                               util.get_config().minimum_loc)  # TODO change for loc to be fixed
+                1 if self.filters or self.consts else 0), util.get_config().minimum_loc)
+            self.max_loc = util.get_config().maximum_loc
 
         self.condition_generator = ConditionGenerator(self)
         self.condition_generator.generate()

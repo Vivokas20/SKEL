@@ -1,0 +1,61 @@
+Sketch format:
+    Table_Name_1 = Function_1(Child_1,...,Child_n)
+    ...
+    Table_Name_N = Function_N(Child_1,...,Child_n)
+    out = TODO
+
+        Functions:  natural_join(Table, Table, [Table], [Table])
+                    inner_join(Table, Table, Condition(s))
+                    anti_join(Table, Table, [Column(s)])
+                    left_join(Table, Table)
+                    union(Table, Table)
+                    intersect(Table, Table, Column)
+                    semi_join(Table, Table)
+                    cross_join(Table, Table, Condition(s))
+                    unite(Table, Column, Column)
+                    filter(Table, Condition(s))
+                    summarise(Table, Condition(s), [Column(s)])
+                    mutate(Table, Condition(s))
+                    ??()
+                Note: Arguments in [] are optional
+
+        Child:      an input table name
+                    a previous table name
+                    column(s) name(s)
+                    condition(s)
+                    T?? -> used to reference a table generated in previous lines
+                    ??
+                Note: Multiple columns or conditions must be separated by "," and inside parenthesis
+
+Special cases:
+    ??+ - represents one or more lines
+    ??* - represents zero or more lines
+
+
+
+
+
+SELECT column_N__c1_c2
+FROM table_N__t1_t2
+WHERE op_N__aggregate__c1_c2__column_N__c1_c2
+
+N = 1,2,3,...,any
+op = >,<,=,>=,=<,!=,between,in,not in
+
+
+SELECT column_EN__c1_c2
+FROM table_EN__t1_t2
+WHERE op_EN_column_EN__c1_c2
+
+E -> exactly
+
+
+SELECT aggregate__c1_c2__column_N__c1_c2
+FROM join_inner_table_N__t1_t2__on_column_N__c1_c2
+GROUP BY column_N__c1_c2
+HAVING op_N__aggregate__c1_c2__column_N__c1_c2
+ORDER BY column_N__c1_c2
+
+
+N = 1,2,3,...,any
+aggregate = COUNT, MIN, MAX, SUM, AVG
