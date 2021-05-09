@@ -41,3 +41,8 @@ comment: |
   df5 <- df4 %>% group_by(F_key, F_name) %>% summarise(n = n()) %>% ungroup()
   df6 <- df5 %>% filter(n <= 5)
   out <- df6 %>% select(F_name) %>% arrange(F_name)
+full_sketch: |
+  T1 = natural_join(6-1, 6-2, 6-3)
+  T2 = summarise(T1, n = n(), (F_key, F_name))
+  T3 = filter(T2, n <= 5)
+  out = select(T3, F_name)

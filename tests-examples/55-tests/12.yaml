@@ -39,3 +39,7 @@ comment: |
   df1 <- input1 %>% group_by(age, level) %>% summarise(n = n()) %>% ungroup()
   df2 <- df1 %>% filter(n == max(n))
   out <- df2 %>% select(age,level)
+full_sketch: |
+  T1 = summarise(12-1, n = n(), (age, level))
+  T2 = filter(T1, n == max(n))
+  out = select(T2, (age,level))

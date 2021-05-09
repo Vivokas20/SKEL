@@ -40,3 +40,8 @@ comment: |
   df2 <- df1 %>% group_by(S_name) %>% summarise(n = n()) %>% ungroup()
   df3 <- df2 %>% filter(n == max(n))
   out <- df3 %>% select(S_name)
+full_sketch: |
+  T1 = natural_join(10-1, 10-2)
+  T2 = summarise(T1, n = n(), S_name)
+  T3 = filter(T2, n == max(n))
+  out = select(T3, S_name)

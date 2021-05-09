@@ -28,3 +28,6 @@ comment: |
 
   df2 <- input1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
   out <- df2 %>% select(level, meanage) %>% arrange(level)
+full_sketch: |
+  T1 = summarise(7-1, meanage = mean(age), level)
+  out = select(T1, (level, meanage)))

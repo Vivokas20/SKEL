@@ -56,3 +56,9 @@ comment: |
   df3 <- input1 %>% filter(Room != 'R128')
   df4 <- anti_join(df2, df3)
   out <- df4 %>% select(F_name, n) %>% distinct()
+full_sketch: |
+  T1 = natural_join(9-1, 9-2)
+  T2 = summarise(T1, n = n(), (F_name, ID_key))
+  T3 = filter(9-1, Room != 'R128')
+  T4 = anti_join(T2, T3)
+  out = select(T4, (F_name, n))

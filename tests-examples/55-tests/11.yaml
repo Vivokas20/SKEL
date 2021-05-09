@@ -17,3 +17,6 @@ comment: |
 
   df1 <- anti_join(input1, input2)
   out <- df1 %>% select(S_name)
+full_sketch: |
+  T1 = anti_join(11-1, 11-2)
+  out = select(T1, S_name)

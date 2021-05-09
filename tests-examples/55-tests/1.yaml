@@ -30,3 +30,7 @@ comment: |
   df1 <- inner_join(inner_join(inner_join(input2, input1), input3), input4)
   df2 <- df1 %>% filter(level == 'JR' & F_name == 'faculty1')
   out <- df2 %>% select(S_name)
+full_sketch: |
+  T1 = natural_join(1-1, 1-2, 1-3, 1-4)
+  T2 = filter(T1, F_name == 'faculty1' & level == 'JR')
+  out = select(T2, S_name)
