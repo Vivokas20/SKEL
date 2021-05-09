@@ -36,6 +36,7 @@ class Root(Node):
         self.id = id
         self.children = []
         self.empty_children = []
+        self.free_children = False
         self.sketch_var = sketch_var
         self.type = self._create_type_variable(enumerator)
         self.var = self._create_root_variable(enumerator)
@@ -61,16 +62,15 @@ class Root(Node):
         return var
 
     def __repr__(self) -> str:
-        return f'Root({self.id}, children={len(self.children)}, var={self.var})'
+        return f'Root({self.id}, children={len(self.children)}, var={self.var}, sketch={self.sketch_var})'
 
 
 class Leaf(Node):
-    def __init__(self, enumerator: 'BitEnumerator', parent: Root, child_id: int, sketch_var: int = None, sketch_type: str = None):
+    def __init__(self, enumerator: 'BitEnumerator', parent: Root, child_id: int, sketch_child = None):
         super().__init__()
         self.parent = parent
         self.child_id = child_id
-        self.sketch_var = sketch_var
-        self.type = sketch_type
+        self.sketch_child = sketch_child
         self.var = self._create_leaf_variable(enumerator)
         # don't need to create this vars if there is solution in sketch already?
         self.lines = self._create_lines_variables(enumerator)
@@ -83,8 +83,16 @@ class Leaf(Node):
 
         ctr = []
 
-        if self.sketch_var is not None:
-            enumerator.assert_expr(var == self.sketch_var)
+        if self.sketch_child:
+            for child in self.sketch_child:
+                if child.var or child.var == 0:       # can be removed?
+                    if isinstance(child.var, list):
+                        for v in child.var:
+                            ctr.append(var == v) # TODO improve to not repeat vars between children
+                    else:
+                        ctr.append(var == child.var)
+            # if self.parent.free_children and len(ctr) < enumerator.max_children:
+            #     ctr.append(var == 0)      # Why doesn't this work?
         else:
             for p in enumerator.spec.productions():
                 if not p.is_function() or p.lhs.name == 'Empty':  # FIXME: improve empty integration
@@ -95,7 +103,7 @@ class Leaf(Node):
                 for line_production in line_productions:
                     ctr.append(var == line_production.id)
 
-            enumerator.assert_expr(z3.Or(ctr), f'leaf_{self.parent.id}_{self.child_id}_domain')
+        enumerator.assert_expr(z3.Or(ctr), f'leaf_{self.parent.id}_{self.child_id}_domain')
 
         return var
 
@@ -108,7 +116,7 @@ class Leaf(Node):
         return lines
 
     def __repr__(self) -> str:
-        return f'Leaf(parent={self.parent}, child_id={self.child_id}, var={self.var})'
+        return f'Leaf(parent={self.parent}, child_id={self.child_id}, var={self.var}, sketch={self.sketch_child})'
 
 
 class BitEnumerator(Enumerator):
@@ -187,10 +195,6 @@ class BitEnumerator(Enumerator):
         self.more_restrictive = self.specification.condition_generator.more_restrictive.compile(tyrell_spec)
         self.less_restrictive = self.specification.condition_generator.less_restrictive.compile(tyrell_spec)
 
-        self.natural_join = self.spec.get_function_production('natural_join')
-        self.natural_join3 = self.spec.get_function_production('natural_join3')
-        self.natural_join4 = self.spec.get_function_production('natural_join4')
-
         self.blocked_models = set()
 
         logger.debug('Enumerator for loc %d constructed using %d variables and %d constraints', self.loc, self.num_variables,
@@ -244,20 +248,6 @@ class BitEnumerator(Enumerator):
 
     def build_trees(self) -> Tuple[List[Root], List[Leaf]]:
         """Builds a loc trees, each tree will be a line of the program"""
-        # print("PRODUCTIONS")
-        # print(self.spec.productions())
-        # print("FUNCTIONS")
-        # print(self.spec.get_function_productions())
-        # print(self.spec.get_function_production("left_join"))
-        # print("ENUM")
-        # print(self.spec.get_enum_productions())
-        # print(self.spec.get_enum_production(self.spec.get_type("SummariseCondition"), "grade=min(grade)"))
-        # print("PARAM")
-        # print(self.spec.get_param_productions())
-        # print(self.spec.get_param_production(0))
-        # print("LINES")
-        # print(self.line_productions)
-        # print(self.line_productions[0].id)
         nodes = []
         leaves = []
         for i in range(1, self.loc + 1):
@@ -279,24 +269,44 @@ class BitEnumerator(Enumerator):
                 line = self.sketch.lines_encoding[i]
             else:
                 line = Line()
+
             n = Root(self, i, line.var)
-            for x in range(self.max_children):  # TODO check when we don't know which function
+
+            if line.root and line.root != "??":
+                for x in range(self.max_children):
+                    if line.children[x] and line.children[x].var is not None:
+                        var = [line.children[x]]
+                    else:
+                        var = None
+
+                    child = Leaf(self, n, x, var)
+
+                    if var is None:
+                        n.empty_children.append(len(n.children))
+
+                    n.children.append(child)
+                    leaves.append(child)
+            else:
                 if line.children:
-                    var = line.children[x].var
-                    child_type = line.children[x].type
+                    n.free_children = True
+                    var = line.children
                 else:
                     var = None
-                    child_type = None
-                child = Leaf(self, n, x, var, child_type)
 
-                if var is None:
-                    n.empty_children.append(len(n.children))
+                for x in range(self.max_children):
+                    child = Leaf(self, n, x, var)
 
-                n.children.append(child)
-                leaves.append(child)
+                    if var is None:
+                        n.empty_children.append(len(n.children))
+
+                    n.children.append(child)
+                    leaves.append(child)
 
             nodes.append(n)
         # TODO check bitvectors of assigned vars
+        print("Nodes and Leaves")
+        print(nodes)
+        print(leaves)
         return nodes, leaves
 
     def create_output_constraints(self) -> None:
@@ -336,11 +346,12 @@ class BitEnumerator(Enumerator):
 
     def create_children_constraints(self) -> None:
         for r in self.roots:
-            for p in self.spec.productions():
-                if not p.is_function() or p.lhs.name == 'Empty':
-                    continue
-                aux = r.var == p.id
-                if len(r.empty_children) > 0:
+            if len(r.empty_children) > 0:
+                for p in self.spec.productions():
+                    if not p.is_function() or p.lhs.name == 'Empty':
+                        continue
+                    aux = r.var == p.id
+
                     for c in r.empty_children:
                         ctr = []
                         # If production has less arguments than the tree has children than all other children are 0
@@ -370,6 +381,7 @@ class BitEnumerator(Enumerator):
                                     self.assert_expr(line_var == (r.children[c].var == line_production.id))
 
                         self.assert_expr(z3.Implies(aux, z3.Or(ctr)), f'arg_{r.id}_{p.id}_{c}')
+
 
     def create_bitvector_constraints(self) -> None:
         if not util.get_config().bitenum_enabled:

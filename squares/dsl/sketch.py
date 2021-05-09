@@ -12,57 +12,69 @@ attrs = []
 
 class Child:
     def __init__(self, child: str = None, child_type: str = None) -> None:
-        self.child = child
+        self.name = child
         self.productions = []
         self.type = None
+        self.var = None
         if child_type:
             self.check_type(child_type)
-            self.var = None
-        else:
-            self.var = 0
 
     def get_name(self) -> str:
-        return self.child
+        return self.name
 
     def get_type(self) -> str:
         return self.type
 
     def check_type(self, child_type) -> None:
+        if child_type == "Unknown":
+            if self.name in tables_names or self.name in lines_names.values():
+                child_type = "Table"
+
         self.type = child_type
 
         if child_type == "Table":
             for i in range(len(tables_names)):
-                if tables_names[i] == self.child:
-                    self.child = i
+                if tables_names[i] == self.name:
+                    self.name = i
                     return
 
             for i in lines_names:
-                if lines_names[i] == self.child:
-                    self.child = i - 1
+                if lines_names[i] == self.name:
+                    self.name = i - 1
                     self.type = "Line"
                     return
 
-            if self.child == "T??":     # TODO implement and test
-                self.child = "??"
+            if self.name == "T??":     # TODO implement and test
+                self.name = "??"
                 self.type = "Line"
                 return
 
-        else:
-            for column in columns_names:
-                if column in self.child and column not in attrs:
-                    attrs.append(column)
+        elif child_type != "Unknown":
+            # for column in columns_names:  # TODO
+            #     if column in self.name and column not in attrs:
+            #         attrs.append(column)
 
             if child_type == "FilterCondition" or child_type == "CrossJoinCondition":
-                self.productions = redundant_boolean_conditions(self.child)
+                self.productions = redundant_boolean_conditions(self.name)
 
             else:
                 if child_type == "Cols" or child_type == "JoinCondition":
-                    if self.child != '':
-                        self.child = add_quotes(self.child)
-                self.productions = redundant_conditions(self.child)
+                    if self.name != '':
+                        self.name = add_quotes(self.name)
+                self.productions = redundant_conditions(self.name)
+
+        else:
+            comparators = ["==", "!=", "<=", ">=", "<", ">"]
+            self.productions = []
+            for comparator in comparators:
+                if comparator in self.name:
+                    self.productions = redundant_boolean_conditions(self.name)
+                    break
+            if not self.productions:
+                self.productions = redundant_conditions(self.name)
 
     def __repr__(self) -> str:
-        return f'Child({self.child}, type={self.type}, var={self.var})'
+        return f'Child({self.name}, type={self.type}, var={self.var})'
 
 
 class Line:
@@ -191,8 +203,9 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
         production_part = []
         condition = condition.strip()
         for comparator in comparators:
-            parts = condition.split(comparator)
             if comparator in condition:
+
+                parts = condition.split(comparator)
                 production_part.append(str(parts[0].strip()) + " " + str(comparator) + " " + str(parts[1].strip()))
                 if comparator == ">":
                     comparator = "<="
@@ -248,13 +261,10 @@ class Sketch:
             if sketch_line.startswith("out"):
                 pass # TODO parse Select
 
-            elif sketch_line.startswith("child"):
-                pass # TODO implement child we don't know the place
-
             elif sketch_line.startswith("??"):
                 # TODO implement in bitenum
                 line = sketch_line.strip()
-                if line == "??+":
+                if line == "??+":   # TODO Add unknown child here
                     self.max_loc = float('inf')
                     self.min_loc += 1
 
@@ -265,6 +275,7 @@ class Sketch:
                     logger.error('Sketch line "%s" could not be parsed', sketch_line)
                     parsed = False
                     break
+
             else:
                 self.min_loc += 1
                 self.max_loc += 1
@@ -280,22 +291,16 @@ class Sketch:
                     break
 
                 children = []
-                n_children = 0
 
-                # TODO SELECT statement
                 try:
                     if "??" == function:
                         # A line with no function. Can have children or not
-                        if self.max_loc != float('inf'):
-                            lines_names[self.max_loc] = name
-
+                        n_children = len(args)  # TODO check this
+                        # TODO is gonna throw error in case of no args
                         if args[0]:
-                            self.min_loc -= 1
-                            self.max_loc -= 1
-                            args = args_in_brackets(sketch_line)
+                            # Create children with only name and no type or check if it's column(s) / table
                             for arg in args:
-                                self.free_children.append(Child(arg))  # TODO parse do arg para ter aspas e todas as redundancias
-
+                                children.append(Child(arg.replace("'",""), "Unknown"))     # TODO parse do arg para ter aspas e todas as redundancias
                             # TODO parse free children and children that we know were they are. we can also roughly know the place in cases of ??*+
 
                     elif "natural_join" == function:
@@ -312,7 +317,7 @@ class Sketch:
                                 n_children = len(children)
                                 function += str(len(children))
 
-                    elif "inner_join" == function:  # Build error function if args != from the right #
+                    elif "inner_join" == function:
                         n_children = 3
                         children.append(Child(args[0], "Table"))
                         children.append(Child(args[1], "Table"))
@@ -384,7 +389,7 @@ class Sketch:
                             if aggr in arg:
                                 self.aggrs.append(aggr)
 
-                    else:   # TODO something similar for children
+                    else:
                         logger.error('Sketch line "%s" could not be parsed', sketch_line)
                         parsed = False
                         break
@@ -400,10 +405,11 @@ class Sketch:
                     break
 
                 line = Line(self.max_loc, name, function, children, n_children)
-                if self.max_loc != float('inf'):
-                    self.lines_encoding[self.max_loc] = line
-                else:
-                    self.free_lines.append(line)
+                if children:
+                    if self.max_loc != float('inf'):
+                        self.lines_encoding[self.max_loc] = line
+                    else:
+                        self.free_lines.append(line)
 
                 logger.debug("Sketch creation: " + str(line))
 
@@ -419,14 +425,15 @@ class Sketch:
     def fill_vars(self, spec, line_productions) -> None:
         # TODO have to check if there's root and children
         for line in self.lines_encoding.values():
-            prod_name = line.get_root()
-            prod = spec.get_function_production(prod_name)
+            root_name = line.get_root()
+            if root_name != "??":
+                prod = spec.get_function_production(root_name)
 
-            if prod:
-                line.var = prod.id
-            else:
-                logger.error('Unknown function production "%s"', prod_name)
-                raise RuntimeError("Could not process sketch function")
+                if prod:
+                    line.var = prod.id
+                else:
+                    logger.error('Unknown function production "%s"', root_name)
+                    raise RuntimeError("Could not process sketch function")
 
             n_children = line.get_n_children()
 
@@ -452,19 +459,33 @@ class Sketch:
                             else:
                                 logger.warning('Unknown Line production "%s"', prod_name)
                         else:
-                            prod_type = spec.get_type(prod_type)
-                            for name in child.productions:
-                                prod = spec.get_enum_production(prod_type, name)
-                                if prod:
-                                    child.var = prod.id
-                                    break
+                            prod = None
+                            if prod_type != "Unknown":
+                                prod_type = spec.get_type(prod_type)
+                                for name in child.productions:
+                                    prod = spec.get_enum_production(prod_type, name)
+                                    if prod:
+                                        child.var = prod.id
+                                        break
+                            else:
+                                for name in child.productions:
+                                    prod = spec.get_enum_production_with_rhs(name)
+                                    if prod:
+                                        if len(prod) == 1:
+                                            child.var = prod[0].id
+                                        else:
+                                            child.var = []
+                                            for p in prod:
+                                                child.var.append(p.id)
+                                        break
 
                             if not prod:
                                 logger.warning('Unknown %s production "%s"', prod_type, prod_name)
 
                 else:
                     child = Child()
-                    child.var = 0
+                    if root_name != "??":
+                        child.var = 0
                     line.add_child(child)
 
         logger.debug(self.lines_encoding)

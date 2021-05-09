@@ -86,4 +86,4 @@ def main(args, specification, id: int, conf: Config, queue: Queue):
             loc = loc + 1
 
     results.exceeded_max_loc = True
-    logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, util.get_config().maximum_loc)
+    logger.error('Process %d reached the maximum number of lines (%d). Giving up...', id, specification.max_loc)

@@ -67,6 +67,7 @@ class ProductionSpec:
         self._param_map = dict()
         self._func_map = dict()
         self._enum_map = dict()
+        self._rhs_enum_map = dict()
 
     def get_production(self, id: int) -> Optional[Production]:
         '''
@@ -142,6 +143,14 @@ class ProductionSpec:
         '''
         return self._param_map[index]
 
+    def get_enum_production_with_rhs(self, rhs: str) -> Optional[Production]:
+        '''
+        Return the enum production(s) whose rhs is `rhs`.
+        If no production is found, return `None`
+        '''
+        return self._rhs_enum_map[rhs]
+        # return self._rhs_enum_map.get(rhs)
+
     def get_enum_production(self, ty: EnumType, value: str) -> Optional[Production]:
         '''
         Return the enum production whose type is `type` and value is `value`.
@@ -178,6 +187,10 @@ class ProductionSpec:
         prod = EnumProduction(self._get_next_id(), lhs, choice)
         self._add_production(prod)
         self._enum_map[(lhs, prod.rhs)] = prod
+        rhs = prod.rhs.replace("'", "")
+        if rhs not in self._rhs_enum_map:
+            self._rhs_enum_map[rhs] = list()
+        self._rhs_enum_map[rhs].append(prod)
         return prod
 
     def add_param_production(self, lhs: ValueType, index: int, value: Any = None) -> ParamProduction:
@@ -369,6 +382,9 @@ class TyrellSpec:
 
     def get_param_productions(self) -> List[Production]:
         return self._prod_spec.get_param_productions()
+
+    def get_enum_production_with_rhs(self, rhs: str) -> Optional[Production]:
+        return self._prod_spec.get_enum_production_with_rhs(rhs)
 
     def get_enum_production(self, ty: EnumType, value: str) -> Optional[Production]:
         return self._prod_spec.get_enum_production(ty, value)
