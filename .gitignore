@@ -5,7 +5,6 @@ dump.dsl
 comments.yaml
 test_dirs.txt
 all_dirs.txt
-tests-examples/demo/test.yaml
 .RDataFiles/
 .idea/
 profiles/
@@ -93,3 +92,4 @@ _build/
 .Rproj.user
 
 tests/
+tests-examples/demo/test.yaml
