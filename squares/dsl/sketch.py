@@ -5,6 +5,9 @@ from itertools import product
 
 logger = getLogger('squares')
 
+######## FLAGS ########
+flag_types = True
+
 tables_names = []
 lines_names = {}
 aggregate_functions = ['max', 'min', 'sum', 'count', 'avg']
@@ -49,7 +52,7 @@ class Child:
                 self.type = "Line"
                 return
 
-        elif child_type != "Unknown":
+        elif child_type != "Unknown" and self.name != '??':
             # for column in columns_names:  # TODO
             #     if column in self.name and column not in attrs:
             #         attrs.append(column)
@@ -63,7 +66,7 @@ class Child:
                         self.name = add_quotes(self.name)
                 self.productions = redundant_conditions(self.name)
 
-        else:
+        elif self.name != '??':
             comparators = ["==", "!=", "<=", ">=", "<", ">"]
             self.productions = []
             for comparator in comparators:
@@ -78,11 +81,12 @@ class Child:
 
 
 class Line:
-    def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None) -> None:
+    def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None) -> None:
         self.name = name
         self.root = root
         self.children = children
         self.n_children = n_children
+        self.line_type = line_type
         self.var = None
         if name and line_id != float('inf'):
             lines_names[line_id] = name
@@ -244,8 +248,6 @@ class Sketch:
         self.aggrs = []
 
     def sketch_parser(self, tables: List[str], columns: List[str]) -> None:
-        # TODO verificar os types
-        # TODO if none function - ??
         logger.info("Parsing sketch...")
 
         for table in tables:
@@ -277,6 +279,7 @@ class Sketch:
                     break
 
             else:
+                line_type = None
                 self.min_loc += 1
                 self.max_loc += 1
                 line = sketch_line.partition("=")
@@ -295,13 +298,19 @@ class Sketch:
                 try:
                     if "??" == function:
                         # A line with no function. Can have children or not
-                        n_children = len(args)  # TODO check this
-                        # TODO is gonna throw error in case of no args
+                        n_children = len(args)
+
                         if args[0]:
+                            line_type = "Free"
                             # Create children with only name and no type or check if it's column(s) / table
                             for arg in args:
-                                children.append(Child(arg.replace("'",""), "Unknown"))     # TODO parse do arg para ter aspas e todas as redundancias
+                                if "??*" in arg:
+                                    line_type = "Incomplete"
+                                    arg = "??"
+                                children.append(Child(arg.replace("'",""), "Unknown"))
                             # TODO parse free children and children that we know were they are. we can also roughly know the place in cases of ??*+
+                        else:
+                            n_children = 0
 
                     elif "natural_join" == function:
                         n_children = 2
@@ -399,17 +408,17 @@ class Sketch:
                     parsed = False
                     break
 
-                if n_children < len(args) and parsed:
+                if n_children < len(args) and n_children != 0 and parsed:
                     logger.error('Sketch line "%s" has too many arguments', sketch_line)
                     parsed = False
                     break
 
-                line = Line(self.max_loc, name, function, children, n_children)
-                if children:
-                    if self.max_loc != float('inf'):
-                        self.lines_encoding[self.max_loc] = line
-                    else:
-                        self.free_lines.append(line)
+                line = Line(self.max_loc, name, function, children, n_children, line_type)
+                # if children:
+                if self.max_loc != float('inf'):
+                    self.lines_encoding[self.max_loc] = line
+                else:
+                    self.free_lines.append(line)
 
                 logger.debug("Sketch creation: " + str(line))
 
@@ -436,8 +445,9 @@ class Sketch:
                     raise RuntimeError("Could not process sketch function")
 
             n_children = line.get_n_children()
+            children = []
 
-            for c in range(spec.max_rhs):  # TODO check when we don't know which function
+            for c in range(spec.max_rhs):
 
                 if c < n_children:
 
@@ -449,13 +459,13 @@ class Sketch:
                         if prod_type == "Table":
                             prod = spec.get_param_production(prod_name)
                             if prod:
-                                child.var = prod.id
+                                child.var = [prod.id]
                             else:
                                 logger.warning('Unknown Table production "%s"', prod_name)
                         elif prod_type == "Line":
                             prod = line_productions[prod_name][0]       # check type if not more line prods
                             if prod:
-                                child.var = prod.id
+                                child.var = [prod.id]
                             else:
                                 logger.warning('Unknown Line production "%s"', prod_name)
                         else:
@@ -465,27 +475,56 @@ class Sketch:
                                 for name in child.productions:
                                     prod = spec.get_enum_production(prod_type, name)
                                     if prod:
-                                        child.var = prod.id
+                                        child.var = [prod.id]
                                         break
                             else:
                                 for name in child.productions:
                                     prod = spec.get_enum_production_with_rhs(name)
                                     if prod:
                                         if len(prod) == 1:
-                                            child.var = prod[0].id
+                                            child.var = [prod[0].id]
                                         else:
                                             child.var = []
                                             for p in prod:
-                                                child.var.append(p.id)
+                                                child.var.append(p.id)  # Not very efficient
                                         break
 
                             if not prod:
                                 logger.warning('Unknown %s production "%s"', prod_type, prod_name)
 
+                    elif flag_types and prod_type != "Unknown":       # Hole with known type
+                        child.var = []
+
+                        if prod_type == "Line":
+                            prod = line_productions
+                            for p in prod:
+                                child.var.append(p[0].id)
+
+                        elif prod_type == "Table":
+                            prod = spec.get_param_productions()
+                            for p in prod:
+                                child.var.append(p.id)   # Not very efficient
+
+                        else:
+                            prod = spec.get_productions_with_lhs(prod_type)
+                            for p in prod:
+                                child.var.append(p.id)   # Not very efficient
+
+                    if line.line_type is not None and child.var is not None:
+                        children.append(child.var)       # TODO add children constrain de que se uma child for um prod implica que as outras nao sejam essa prod
+
                 else:
                     child = Child()
-                    if root_name != "??":
-                        child.var = 0
+                    if root_name != "??" or line.line_type == "Free":
+                        child.var = [0]
                     line.add_child(child)
+
+            if line.line_type is not None:
+                for c in range(spec.max_rhs):
+                    child = line.get_child(c)
+                    if c >= n_children and line.line_type == "Free":
+                        break
+                    else:
+                        child.var = children
 
         logger.debug(self.lines_encoding)

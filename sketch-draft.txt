@@ -1,7 +1,7 @@
 Sketch format:
-    Table_Name_1 = Function_1(Child_1,...,Child_n)
+    Table_Name_1 = Function_1
     ...
-    Table_Name_N = Function_N(Child_1,...,Child_n)
+    Table_Name_N = Function_N
     out = TODO
 
         Functions:  natural_join(Table, Table, [Table], [Table])
@@ -16,7 +16,8 @@ Sketch format:
                     filter(Table, Condition(s))
                     summarise(Table, Condition(s), [Column(s)])
                     mutate(Table, Condition(s))
-                    ??()
+
+                    ??([Child], [Child], [Child], [Child]) -> In this case the children are always considered to be out of order
                 Note: Arguments in [] are optional
 
         Child:      an input table name
@@ -24,7 +25,9 @@ Sketch format:
                     column(s) name(s)
                     condition(s)
                     T?? -> used to reference a table generated in previous lines
-                    ??
+                    ??  -> hole
+                    ??+ -> 1 or more holes
+                    ??* -> 0 or more holes
                 Note: Multiple columns or conditions must be separated by "," and inside parenthesis
 
 Special cases:

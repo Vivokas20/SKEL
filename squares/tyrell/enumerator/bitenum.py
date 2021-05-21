@@ -31,12 +31,12 @@ class Node:
 
 
 class Root(Node):
-    def __init__(self, enumerator: 'BitEnumerator', id: int, sketch_var: int = None) -> None:
+    def __init__(self, enumerator: 'BitEnumerator', id: int, sketch_var: int = None, line_type: str = None) -> None:
         super().__init__()
         self.id = id
         self.children = []
         self.empty_children = []
-        self.free_children = False
+        self.line_type = line_type
         self.sketch_var = sketch_var
         self.type = self._create_type_variable(enumerator)
         self.var = self._create_root_variable(enumerator)
@@ -66,11 +66,11 @@ class Root(Node):
 
 
 class Leaf(Node):
-    def __init__(self, enumerator: 'BitEnumerator', parent: Root, child_id: int, sketch_child = None):
+    def __init__(self, enumerator: 'BitEnumerator', parent: Root, child_id: int, sketch_var = None):
         super().__init__()
         self.parent = parent
         self.child_id = child_id
-        self.sketch_child = sketch_child
+        self.sketch_var = sketch_var
         self.var = self._create_leaf_variable(enumerator)
         # don't need to create this vars if there is solution in sketch already?
         self.lines = self._create_lines_variables(enumerator)
@@ -83,17 +83,15 @@ class Leaf(Node):
 
         ctr = []
 
-        if self.sketch_child:
-            for child in self.sketch_child:
-                if child.var or child.var == 0:       # can be removed?
-                    if isinstance(child.var, list):
-                        for v in child.var:
-                            ctr.append(var == v) # TODO improve to not repeat vars between children
-                    else:
-                        ctr.append(var == child.var)
-            # if self.parent.free_children and len(ctr) < enumerator.max_children:
-            #     ctr.append(var == 0)      # Why doesn't this work?
-        else:
+        if self.sketch_var: # maybe can be removed?
+            for variable in self.sketch_var:
+                if isinstance(variable, list):
+                    for v in variable:
+                        ctr.append(var == v)
+                else:
+                    ctr.append(var == variable) # TODO improve to not repeat vars between children
+
+        if self.sketch_var is None or self.parent.line_type is not None and self.sketch_var[0]:
             for p in enumerator.spec.productions():
                 if not p.is_function() or p.lhs.name == 'Empty':  # FIXME: improve empty integration
                     ctr.append(var == p.id)
@@ -116,7 +114,7 @@ class Leaf(Node):
         return lines
 
     def __repr__(self) -> str:
-        return f'Leaf(parent={self.parent}, child_id={self.child_id}, var={self.var}, sketch={self.sketch_child})'
+        return f'Leaf(parent={self.parent}, child_id={self.child_id}, var={self.var}, sketch={self.sketch_var})'
 
 
 class BitEnumerator(Enumerator):
@@ -270,33 +268,18 @@ class BitEnumerator(Enumerator):
             else:
                 line = Line()
 
-            n = Root(self, i, line.var)
+            n = Root(self, i, line.var, line.line_type)
 
-            if line.root and line.root != "??":
+            if line.root:
                 for x in range(self.max_children):
-                    if line.children[x] and line.children[x].var is not None:
-                        var = [line.children[x]]
+                    if line.children[x].var:
+                        var = line.children[x].var
                     else:
                         var = None
 
                     child = Leaf(self, n, x, var)
 
-                    if var is None:
-                        n.empty_children.append(len(n.children))
-
-                    n.children.append(child)
-                    leaves.append(child)
-            else:
-                if line.children:
-                    n.free_children = True
-                    var = line.children
-                else:
-                    var = None
-
-                for x in range(self.max_children):
-                    child = Leaf(self, n, x, var)
-
-                    if var is None:
+                    if var is None or line.line_type is not None:
                         n.empty_children.append(len(n.children))
 
                     n.children.append(child)
@@ -307,6 +290,7 @@ class BitEnumerator(Enumerator):
         print("Nodes and Leaves")
         print(nodes)
         print(leaves)
+        print(self.z3_solver)
         return nodes, leaves
 
     def create_output_constraints(self) -> None:
@@ -352,7 +336,7 @@ class BitEnumerator(Enumerator):
                         continue
                     aux = r.var == p.id
 
-                    for c in r.empty_children:
+                    for c in r.empty_children:  # TODO Flag in each child with partially empty?
                         ctr = []
                         # If production has less arguments than the tree has children than all other children are 0
                         if c >= len(p.rhs):
