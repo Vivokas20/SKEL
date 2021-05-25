@@ -14,70 +14,77 @@ aggregate_functions = ['max', 'min', 'sum', 'count', 'avg']
 attrs = []
 
 class Child:
-    def __init__(self, child: str = None, child_type: str = None) -> None:
-        self.name = child
+    def __init__(self, child = None, child_type: str = None) -> None:
+        if isinstance(child, list):
+            self.names = child
+        else:
+            self.names = [child]
         self.productions = []
         self.type = None
-        self.var = None
+        self.var = []
         if child_type:
-            self.check_type(child_type)
+            self.check_type(child_type) # Ver se len > 1?
 
-    def get_name(self) -> str:
-        return self.name
+    def get_name(self) -> list:
+        return self.names
+
+    def get_productions(self) -> list:
+        return self.productions
 
     def get_type(self) -> str:
         return self.type
 
     def check_type(self, child_type) -> None:
-        if child_type == "Unknown":
-            if self.name in tables_names or self.name in lines_names.values():
-                child_type = "Table"
+        for n in range(len(self.names)):
+            name = self.names[n]
 
-        self.type = child_type
+            if child_type == "Unknown": # TODO Change
+                if name in tables_names or name in lines_names.values():
+                    child_type = "Table"
 
-        if child_type == "Table":
-            for i in range(len(tables_names)):
-                if tables_names[i] == self.name:
-                    self.name = i
-                    return
+            self.type = child_type      # change
 
-            for i in lines_names:
-                if lines_names[i] == self.name:
-                    self.name = i - 1
+            if child_type == "Table":
+                for i in range(len(tables_names)):
+                    if tables_names[i] == name:
+                        self.names[n] = i
+                        break
+
+                for i in lines_names:
+                    if lines_names[i] == name:
+                        self.names[n] = i - 1
+                        self.type = "Line"
+                        break
+
+                if name == "T??":     # TODO implement and test
+                    self.names[n] = "??"
                     self.type = "Line"
-                    return
 
-            if self.name == "T??":     # TODO implement and test
-                self.name = "??"
-                self.type = "Line"
-                return
+            elif child_type != "Unknown" and name != '??':
+                # for column in columns_names:  # TODO
+                #     if column in self.name and column not in attrs:
+                #         attrs.append(column)
 
-        elif child_type != "Unknown" and self.name != '??':
-            # for column in columns_names:  # TODO
-            #     if column in self.name and column not in attrs:
-            #         attrs.append(column)
+                if child_type == "FilterCondition" or child_type == "CrossJoinCondition":
+                    self.productions.append(redundant_boolean_conditions(name))
 
-            if child_type == "FilterCondition" or child_type == "CrossJoinCondition":
-                self.productions = redundant_boolean_conditions(self.name)
+                else:
+                    if child_type == "Cols" or child_type == "JoinCondition":
+                        if name != '':
+                            self.names[n] = add_quotes(name)
+                    self.productions.append(redundant_conditions(self.names[n]))
 
-            else:
-                if child_type == "Cols" or child_type == "JoinCondition":
-                    if self.name != '':
-                        self.name = add_quotes(self.name)
-                self.productions = redundant_conditions(self.name)
-
-        elif self.name != '??':
-            comparators = ["==", "!=", "<=", ">=", "<", ">"]
-            self.productions = []
-            for comparator in comparators:
-                if comparator in self.name:
-                    self.productions = redundant_boolean_conditions(self.name)
-                    break
-            if not self.productions:
-                self.productions = redundant_conditions(self.name)
+            elif name != '??':
+                comparators = ["==", "!=", "<=", ">=", "<", ">"]
+                for comparator in comparators:
+                    if comparator in name:
+                        self.productions.append(redundant_boolean_conditions(name))
+                        break
+                if not self.productions:
+                    self.productions.append(redundant_conditions(name))
 
     def __repr__(self) -> str:
-        return f'Child({self.name}, type={self.type}, var={self.var})'
+        return f'Child({self.names}, type={self.type}, var={self.var})'
 
 
 class Line:
@@ -115,7 +122,9 @@ class Line:
 
 def args_in_brackets(string: str):
     brackets = 0
+    rect = 0
     start = 0
+    last = False
     matches = []
     string = string.partition("(")[2]
     string = string.rpartition(")")[0]
@@ -126,20 +135,40 @@ def args_in_brackets(string: str):
             brackets += 1
         elif string[i] == ')':
             brackets -= 1
-        elif string[i] == "," and not brackets:
+        elif string[i] == '[':
+            rect += 1
+            possibilities = []
+            start = i + 1
+        elif string[i] == ']':
+            rect -= 1
             match = string[start:i].strip()
-            if match[0] == "(" and match[-1] == ")":
-                match = match[1:-1].strip()
-            matches.append(match)
+            if match and match[0] == "(" and match[-1] == ")":
+                match = match[1:-1].strip().replace("'","")
+            possibilities.append(match)
+            matches.append(possibilities)
+            start = i + 1
+            last = True
+        elif string[i] == "," and not brackets:
+            if not last:
+                match = string[start:i].strip()
+                if match[0] == "(" and match[-1] == ")":
+                    match = match[1:-1].strip().replace("'","")
+                if rect:
+                    possibilities.append(match)
+                else:
+                    matches.append(match)
+            else:
+                last = False
             start = i + 1
 
     if brackets != 0:
         return None
 
-    match = string[start:len(string)].strip()
-    if match and match[0] == "(" and match[-1] == ")":
-        match = match[1:-1].strip()
-    matches.append(match)
+    if start < len(string):
+        match = string[start:len(string)].strip()
+        if match and match[0] == "(" and match[-1] == ")":
+            match = match[1:-1].strip().replace("'","")
+        matches.append(match)
 
     return matches
 
@@ -296,7 +325,7 @@ class Sketch:
                 children = []
 
                 try:
-                    if "??" == function:
+                    if "??" == function or "[" in function:
                         # A line with no function. Can have children or not
                         n_children = len(args)
 
@@ -307,7 +336,7 @@ class Sketch:
                                 if "??*" in arg:
                                     line_type = "Incomplete"
                                     arg = "??"
-                                children.append(Child(arg.replace("'",""), "Unknown"))
+                                children.append(Child(arg, "Unknown"))
                             # TODO parse free children and children that we know were they are. we can also roughly know the place in cases of ??*+
                         else:
                             n_children = 0
@@ -452,71 +481,73 @@ class Sketch:
                 if c < n_children:
 
                     child = line.get_child(c)
-                    prod_type = child.get_type()
-                    prod_name = child.get_name()
 
-                    if prod_name != "??":
-                        if prod_type == "Table":
-                            prod = spec.get_param_production(prod_name)
-                            if prod:
-                                child.var = [prod.id]
+                    for n in range(len(child.names)):
+                        prod_name = child.names[n]
+                        prod_type = child.get_type()
+                        # prod_name = child.get_name()
+                        # productions = child.productions[n]
+
+                        if prod_name != "??":
+                            if prod_type == "Table":
+                                prod = spec.get_param_production(prod_name)
+                                if prod:
+                                    child.var.append(prod.id)
+                                else:
+                                    logger.warning('Unknown Table production "%s"', prod_name)
+                            elif prod_type == "Line":
+                                prod = line_productions[prod_name][0]       # check type if not more line prods
+                                if prod:
+                                    child.var.append(prod.id)
+                                else:
+                                    logger.warning('Unknown Line production "%s"', prod_name)
                             else:
-                                logger.warning('Unknown Table production "%s"', prod_name)
-                        elif prod_type == "Line":
-                            prod = line_productions[prod_name][0]       # check type if not more line prods
-                            if prod:
-                                child.var = [prod.id]
+                                prod = None
+                                if prod_type != "Unknown":
+                                    prod_type = spec.get_type(prod_type)
+                                    for name in child.productions[n]:
+                                        prod = spec.get_enum_production(prod_type, name)
+                                        if prod:
+                                            child.var.append(prod.id)
+                                            break
+                                else:
+                                    for name in child.productions[n]:
+                                        prod = spec.get_enum_production_with_rhs(name)
+                                        if prod:
+                                            if len(prod) == 1:
+                                                child.var.append(prod[0].id)
+                                            else:
+                                                for p in prod:
+                                                    child.var.append(p.id)  # Not very efficient
+                                            break
+
+                                if not prod:
+                                    logger.warning('Unknown %s production "%s"', prod_type, prod_name)
+
+                        elif flag_types and prod_type != "Unknown":       # Hole with known type
+
+                            if prod_type == "Line":
+                                prod = line_productions
+                                for p in prod:
+                                    child.var.append(p[0].id)
+
+                            elif prod_type == "Table":
+                                prod = spec.get_param_productions()
+                                for p in prod:
+                                    child.var.append(p.id)   # Not very efficient
+
                             else:
-                                logger.warning('Unknown Line production "%s"', prod_name)
-                        else:
-                            prod = None
-                            if prod_type != "Unknown":
-                                prod_type = spec.get_type(prod_type)
-                                for name in child.productions:
-                                    prod = spec.get_enum_production(prod_type, name)
-                                    if prod:
-                                        child.var = [prod.id]
-                                        break
-                            else:
-                                for name in child.productions:
-                                    prod = spec.get_enum_production_with_rhs(name)
-                                    if prod:
-                                        if len(prod) == 1:
-                                            child.var = [prod[0].id]
-                                        else:
-                                            child.var = []
-                                            for p in prod:
-                                                child.var.append(p.id)  # Not very efficient
-                                        break
+                                prod = spec.get_productions_with_lhs(prod_type)
+                                for p in prod:
+                                    child.var.append(p.id)   # Not very efficient
 
-                            if not prod:
-                                logger.warning('Unknown %s production "%s"', prod_type, prod_name)
-
-                    elif flag_types and prod_type != "Unknown":       # Hole with known type
-                        child.var = []
-
-                        if prod_type == "Line":
-                            prod = line_productions
-                            for p in prod:
-                                child.var.append(p[0].id)
-
-                        elif prod_type == "Table":
-                            prod = spec.get_param_productions()
-                            for p in prod:
-                                child.var.append(p.id)   # Not very efficient
-
-                        else:
-                            prod = spec.get_productions_with_lhs(prod_type)
-                            for p in prod:
-                                child.var.append(p.id)   # Not very efficient
-
-                    if line.line_type is not None and child.var is not None:
-                        children.append(child.var)       # TODO add children constrain de que se uma child for um prod implica que as outras nao sejam essa prod
+                        if line.line_type is not None and child.var and n < 1:
+                            children.append(child.var)       # TODO add children constrain de que se uma child for um prod implica que as outras nao sejam essa prod
 
                 else:
                     child = Child()
                     if root_name != "??" or line.line_type == "Free":
-                        child.var = [0]
+                        child.var.append(0)
                     line.add_child(child)
 
             if line.line_type is not None:

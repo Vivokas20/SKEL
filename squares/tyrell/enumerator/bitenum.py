@@ -87,11 +87,13 @@ class Leaf(Node):
             for variable in self.sketch_var:
                 if isinstance(variable, list):
                     for v in variable:
-                        ctr.append(var == v)
+                        if (var == v) not in ctr:
+                            ctr.append(var == v)
                 else:
-                    ctr.append(var == variable) # TODO improve to not repeat vars between children
+                    if (var == variable) not in ctr:
+                        ctr.append(var == variable)
 
-        if self.sketch_var is None or self.parent.line_type is not None and self.sketch_var[0]:
+        if self.sketch_var is None or self.parent.line_type == "Incomplete" and self.sketch_var[0]:
             for p in enumerator.spec.productions():
                 if not p.is_function() or p.lhs.name == 'Empty':  # FIXME: improve empty integration
                     ctr.append(var == p.id)
@@ -290,7 +292,7 @@ class BitEnumerator(Enumerator):
         print("Nodes and Leaves")
         print(nodes)
         print(leaves)
-        print(self.z3_solver)
+        print(self.z3_solver.sexpr())
         return nodes, leaves
 
     def create_output_constraints(self) -> None:
