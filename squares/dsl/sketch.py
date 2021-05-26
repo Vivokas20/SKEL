@@ -90,16 +90,19 @@ class Child:
 class Line:
     def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None) -> None:
         self.name = name
-        self.root = root
+        if isinstance(root, list):
+            self.root = root
+        else:
+            self.root = [root]
         self.children = children
         self.n_children = n_children
         self.line_type = line_type
-        self.var = None
+        self.var = []
         if name and line_id != float('inf'):
-            lines_names[line_id] = name
+            lines_names[line_id] = name     # TODO add name even if we don't know position
 
     def get_root(self) -> str:
-        return self.root
+        return self.root[0]
 
     def get_n_children(self) -> int:
         return self.n_children
@@ -126,8 +129,6 @@ def args_in_brackets(string: str):
     start = 0
     last = False
     matches = []
-    string = string.partition("(")[2]
-    string = string.rpartition(")")[0]
     string = string.strip()
 
     for i in range(len(string)):
@@ -313,7 +314,8 @@ class Sketch:
                 self.max_loc += 1
                 line = sketch_line.partition("=")
                 name = line[0].replace(" ", "")
-                args = args_in_brackets(line[2].strip())
+                string = line[2].strip().partition("(")[2].rpartition(")")[0]
+                args = args_in_brackets(string)
                 line = line[2].partition("(")
                 function = line[0].replace(" ", "")
 
@@ -325,7 +327,12 @@ class Sketch:
                 children = []
 
                 try:
-                    if "??" == function or "[" in function:
+                    if "[" in function:
+                        line_type = "Options"
+                        functions = args_in_brackets(function)
+                        function = functions[0]
+
+                    if "??" == function or isinstance(function, list):
                         # A line with no function. Can have children or not
                         n_children = len(args)
 
@@ -463,15 +470,15 @@ class Sketch:
     def fill_vars(self, spec, line_productions) -> None:
         # TODO have to check if there's root and children
         for line in self.lines_encoding.values():
-            root_name = line.get_root()
-            if root_name != "??":
-                prod = spec.get_function_production(root_name)
+            for root_name in line.root:
+                if root_name != "??":
+                    prod = spec.get_function_production(root_name)
 
-                if prod:
-                    line.var = prod.id
-                else:
-                    logger.error('Unknown function production "%s"', root_name)
-                    raise RuntimeError("Could not process sketch function")
+                    if prod:
+                        line.var.append(prod.id)
+                    else:
+                        logger.error('Unknown function production "%s"', root_name)
+                        raise RuntimeError("Could not process sketch function")
 
             n_children = line.get_n_children()
             children = []

@@ -31,7 +31,7 @@ class Node:
 
 
 class Root(Node):
-    def __init__(self, enumerator: 'BitEnumerator', id: int, sketch_var: int = None, line_type: str = None) -> None:
+    def __init__(self, enumerator: 'BitEnumerator', id: int, sketch_var = None, line_type: str = None) -> None:
         super().__init__()
         self.id = id
         self.children = []
@@ -47,12 +47,14 @@ class Root(Node):
         enumerator.variables.append(var)
         ctr = []
         if self.sketch_var:
-            enumerator.assert_expr(var == self.sketch_var)
+            for variable in self.sketch_var:
+                ctr.append(var == variable)
         else:
             for p in enumerator.spec.productions():
                 if p.is_function() and p.lhs.name != 'Empty':
                     ctr.append(var == p.id)
-            enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
+
+        enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
         return var
 
     def _create_type_variable(self, enumerator: 'BitEnumerator') -> z3.ExprRef:
