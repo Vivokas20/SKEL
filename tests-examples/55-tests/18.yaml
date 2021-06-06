@@ -34,3 +34,7 @@ comment: |
   df3 <- input1 %>% group_by(P_id) %>% summarise(cost = max(cost)) %>% ungroup()
   df4 <- inner_join(input2, input1) %>% inner_join(df3)
   out <- df4 %>% select(P_id, S_name) %>% arrange(P_id)
+full_sketch: |
+  T1 = summarise(18-1, cost = max(cost), P_id)
+  T2 = natural_join(18-1, 18-3, T1)
+  out = select(T3, (P_id, S_name), P_id)

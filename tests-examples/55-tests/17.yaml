@@ -41,5 +41,8 @@ comment: |
   summarise(input0, 'meancost = mean(cost)', 'P_id'), natural_join3(input0, input1, line0), filter(line1, 'meancost < cost')
   summarise(input0, 'meancost = mean(cost)', 'P_id'), natural_join3(input0, line0, input1), filter(line1, 'meancost < cost')
 
-
-
+full_sketch: |
+  T1 = summarise(17-1, meancost = mean(cost), P_id)
+  T2 = natural_join(17-1, 17-3, T1)
+  T3 = filter(T2, meancost < cost)
+  out = select(T3, (P_id, S_name), P_id)

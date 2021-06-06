@@ -144,7 +144,7 @@ def args_in_brackets(string: str):
             rect -= 1
             match = string[start:i].strip()
             if match and match[0] == "(" and match[-1] == ")":
-                match = match[1:-1].strip().replace("'","")
+                match = match[1:-1].strip().replace("'","").replace("\"","")
             possibilities.append(match)
             matches.append(possibilities)
             start = i + 1
@@ -153,7 +153,7 @@ def args_in_brackets(string: str):
             if not last:
                 match = string[start:i].strip()
                 if match[0] == "(" and match[-1] == ")":
-                    match = match[1:-1].strip().replace("'","")
+                    match = match[1:-1].strip().replace("\"","").replace("'","")
                 if rect:
                     possibilities.append(match)
                 else:
@@ -168,7 +168,7 @@ def args_in_brackets(string: str):
     if start < len(string):
         match = string[start:len(string)].strip()
         if match and match[0] == "(" and match[-1] == ")":
-            match = match[1:-1].strip().replace("'","")
+            match = match[1:-1].strip().replace("\"","").replace("'","")
         matches.append(match)
 
     return matches
@@ -185,7 +185,7 @@ def check_underscore_args(function: str, arg: str) -> str:
 def add_quotes(string: str) -> str:
     new_string = ""
 
-    string = string.replace(" ", "").replace("'", "").split(",")
+    string = string.replace(" ", "").replace("\"", "").replace("'","").split(",")
     for s in string:
         if "=" in s:
             new = s.split("=")
@@ -294,9 +294,8 @@ class Sketch:
                 pass # TODO parse Select
 
             elif sketch_line.startswith("??"):
-                # TODO implement in bitenum
                 line = sketch_line.strip()
-                if line == "??+":   # TODO Add unknown child here
+                if line == "??+":
                     self.max_loc = float('inf')
                     self.min_loc += 1
 

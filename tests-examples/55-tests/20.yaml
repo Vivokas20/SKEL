@@ -20,3 +20,7 @@ comment: |
   df1 <- input2 %>% filter(color == 'red')
   df2 <- inner_join(inner_join(inner_join(input1, df1), input2), input3)
   out <- df2 %>% select(S_key, P_id, S_name, color) %>% distinct()
+full_sketch: |
+  T1 = natural_join(19-1, 19-2, 19-3)
+  T2 = filter(T1, color == 'red')
+  out = select(T2, (S_key, P_id, S_name, color), S_key)

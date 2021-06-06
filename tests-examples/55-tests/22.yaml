@@ -25,5 +25,10 @@ comment: |
   df5 <- inner_join(df3, df4, by=c('P_id' = 'P_id','S_name' = 'P_id'), suffix = c('', '.other'))
   df6 <- df5 %>% filter(S_name != 'SN1' & meancost > cost)
   out <- df6 %>% select(P_id, S_name = S_name.other) %>% distinct() %>% arrange(P_id)
-
+full_sketch: |
+  T1 = natural_join(17-1, 17-3)
+  T2 = summarise(T1, meancost = mean(cost), (P_id, S_name))
+  T3 = inner_join(T1, T2, ('P_id' = 'P_id','S_name' = 'P_id'))
+  T4 = filter(T3, S_name != 'SN1' & meancost > cost)
+  out = select(T4, (P_id, S_name = S_name.other), P_id)
 

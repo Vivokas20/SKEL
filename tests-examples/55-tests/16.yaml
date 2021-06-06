@@ -71,3 +71,9 @@ comment: |
   df6 <- df5 %>% filter(S_name != 'AWS')
   df7 <- anti_join(input2, df6, by=c('P_id'))
   out <- df7 %>% select(P_name) %>% arrange(P_name)
+full_sketch: |
+  T1 = natural_join(16-1, 16-3)
+  T2 = summarise(T1, n = n(), (P_id, S_name))
+  T3 = filter(T2, S_name != "AWS")
+  T4 = anti_join(16-2, T3, P_id)
+  out = select(T4, P_name)
