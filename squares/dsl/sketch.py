@@ -10,8 +10,11 @@ flag_types = True
 
 tables_names = []
 lines_names = {}
+columns_names = []
 aggregate_functions = ['max', 'min', 'sum', 'count', 'avg']
 attrs = []
+
+######## AUXILIARY SKETCH CLASSES ########
 
 class Child:
     def __init__(self, child = None, child_type: str = None) -> None:
@@ -25,24 +28,27 @@ class Child:
         if child_type:
             self.check_type(child_type) # Ver se len > 1?
 
-    def get_name(self) -> list:
-        return self.names
-
-    def get_productions(self) -> list:
-        return self.productions
-
-    def get_type(self) -> str:
-        return self.type
-
     def check_type(self, child_type) -> None:
         for n in range(len(self.names)):
             name = self.names[n]
 
-            if child_type == "Unknown": # TODO Change
-                if name in tables_names or name in lines_names.values():
+            if child_type == "Unknown" and name != "??": # TODO Change
+                if name in tables_names or name in lines_names.values() or "T??" in name:
                     child_type = "Table"
 
-            self.type = child_type      # change
+                # elif name in columns_names:
+                #     child_type = "Col"
+
+                else:
+                    comparators = ["==", "!=", "<=", ">=", "<", ">"]
+                    for comparator in comparators:
+                        if comparator in name:  # CrossJoin or Filter
+                            self.productions.append(redundant_boolean_conditions(name))
+                            break
+                    if not self.productions:
+                        self.productions.append(redundant_conditions(name))
+
+            self.type = child_type
 
             if child_type == "Table":
                 for i in range(len(tables_names)):
@@ -61,9 +67,6 @@ class Child:
                     self.type = "Line"
 
             elif child_type != "Unknown" and name != '??':
-                # for column in columns_names:  # TODO
-                #     if column in self.name and column not in attrs:
-                #         attrs.append(column)
 
                 if child_type == "FilterCondition" or child_type == "CrossJoinCondition":
                     self.productions.append(redundant_boolean_conditions(name))
@@ -73,15 +76,6 @@ class Child:
                         if name != '':
                             self.names[n] = add_quotes(name)
                     self.productions.append(redundant_conditions(self.names[n]))
-
-            elif name != '??':
-                comparators = ["==", "!=", "<=", ">=", "<", ">"]
-                for comparator in comparators:
-                    if comparator in name:
-                        self.productions.append(redundant_boolean_conditions(name))
-                        break
-                if not self.productions:
-                    self.productions.append(redundant_conditions(name))
 
     def __repr__(self) -> str:
         return f'Child({self.names}, type={self.type}, var={self.var})'
@@ -96,16 +90,14 @@ class Line:
             self.root = [root]
         self.children = children
         self.n_children = n_children
+        self.children_types = []
+        for c in children:
+            if c.type and c.type != "Unknown":
+                self.children_types.append(c.type)
         self.line_type = line_type
         self.var = []
         if name and line_id != float('inf'):
             lines_names[line_id] = name     # TODO add name even if we don't know position
-
-    def get_root(self) -> str:
-        return self.root[0]
-
-    def get_n_children(self) -> int:
-        return self.n_children
 
     def get_child(self, n) -> Child:
         return self.children[n]
@@ -264,12 +256,14 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
     return final
 
 
+######## SKETCH CLASS ########
+
+
 class Sketch:
 
     def __init__(self, sketch) -> None:
         self.sketch = sketch
         self.lines = sketch.splitlines()
-        self.loc = len(self.lines) - 1
         self.min_loc = 0
         self.max_loc = 0
         self.lines_encoding = {}
@@ -326,7 +320,7 @@ class Sketch:
                 children = []
 
                 try:
-                    if "[" in function:
+                    if "[" in function: # TODO create more than 1 line and add both to synthesizer
                         line_type = "Options"
                         functions = args_in_brackets(function)
                         function = functions[0]
@@ -412,10 +406,6 @@ class Sketch:
                         children.append(Child(args[0], "Table"))
                         children.append(Child(arg, "SummariseCondition"))
 
-                        for aggr in aggregate_functions:        #TODO check if table is called max/min something
-                            if aggr in arg:
-                                self.aggrs.append(aggr)
-
                         if len(args) > 2:
                             children.append(Child(args[2], "Cols"))
                         else:
@@ -428,10 +418,6 @@ class Sketch:
 
                         children.append(Child(args[0], "Table"))
                         children.append(Child(arg, "SummariseCondition"))
-
-                        for aggr in aggregate_functions:        #TODO check if table is called max/min something
-                            if aggr in arg:
-                                self.aggrs.append(aggr)
 
                     else:
                         logger.error('Sketch line "%s" could not be parsed', sketch_line)
@@ -449,7 +435,7 @@ class Sketch:
                     break
 
                 line = Line(self.max_loc, name, function, children, n_children, line_type)
-                # if children:
+
                 if self.max_loc != float('inf'):
                     self.lines_encoding[self.max_loc] = line
                 else:
@@ -460,26 +446,25 @@ class Sketch:
         if not parsed:
             raise RuntimeError("Could not parse sketch")
 
-    def get_aggrs(self) -> List[str]:
-        return self.aggrs
-
-    def get_attrs(self) -> List[str]:
-        return attrs
-
     def fill_vars(self, spec, line_productions) -> None:
-        # TODO have to check if there's root and children
         for line in self.lines_encoding.values():
             for root_name in line.root:
                 if root_name != "??":
                     prod = spec.get_function_production(root_name)
 
                     if prod:
-                        line.var.append(prod.id)
+                        line.var.append(prod.id)        # Reduce children seeing func
                     else:
                         logger.error('Unknown function production "%s"', root_name)
                         raise RuntimeError("Could not process sketch function")
 
-            n_children = line.get_n_children()
+                elif flag_types and line.line_type is not None:    # Free or Incomplete
+                    productions = spec.get_function_productions()
+                    for production in productions:
+                        if production.has_in_rhs(line.children_types):
+                            line.var.append(production.id)
+
+            n_children = line.n_children
             children = []
 
             for c in range(spec.max_rhs):
@@ -490,9 +475,7 @@ class Sketch:
 
                     for n in range(len(child.names)):
                         prod_name = child.names[n]
-                        prod_type = child.get_type()
-                        # prod_name = child.get_name()
-                        # productions = child.productions[n]
+                        prod_type = child.type
 
                         if prod_name != "??":
                             if prod_type == "Table":

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Any, cast
+from collections import Counter
 
 from .expr import Expr, ExprType
 from .type import Type, EnumType, ValueType
@@ -143,6 +144,13 @@ class FunctionProduction(Production):
     @property
     def rhs(self) -> List[Type]:
         return self._rhs
+
+    def has_in_rhs(self, rhs) -> bool:
+        c1, c2 = Counter(rhs), Counter(e.name for e in self._rhs)
+        for k, n in c1.items():
+            if n > c2[k]:
+                return False
+        return True
 
     @property
     def name(self) -> str:
