@@ -5,6 +5,7 @@ dump.dsl
 comments.yaml
 test_dirs.txt
 all_dirs.txt
+tests-examples/demo/
 .RDataFiles/
 .idea/
 profiles/
@@ -90,8 +91,3 @@ _build/
 # Miscellaneous
 .DS_Store
 .Rproj.user
-
-tests/
-tests-examples/demo/test.yaml
-tests-examples/demo/test.yaml
-tests-examples/demo/demo.yaml
