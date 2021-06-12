@@ -315,7 +315,7 @@ class ConditionGenerator:
         for on_condition in on_conditions:
             if util.has_duplicates(map(lambda x: x[0], on_condition)) or util.has_duplicates(map(lambda x: x[1], on_condition)):
                 continue
-            self.inner_join_conditions.append((','.join(map(lambda x: f"'{x[0]}' = '{x[1]}'", on_condition)), (
+            self.inner_join_conditions.append((','.join(map(lambda x: f"{x[0]} = {x[1]}", on_condition)), (
                 self.specification.get_bitvecnum([pair[0] for pair in on_condition]),
                 self.specification.get_bitvecnum([pair[1] for pair in on_condition])
                 )))

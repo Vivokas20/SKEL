@@ -245,7 +245,7 @@ def write_specification(spec, file):
 
 
 def single_quote_str(string: str) -> str:
-    return f"'{string}'"
+    return f"{string}"
 
 
 def count(iter: Iterable) -> int:

@@ -370,16 +370,4 @@ class Specification:
     def __str__(self) -> str:
         buffer = io.StringIO()
         buffer.write(repr(self.generate_dsl()))
-        # buffer.write('\nMore restrictive:\n')
-        # for type in self.condition_generator.more_restrictive.graphs.keys():
-        #     max_length = max(map(len, self.condition_generator.more_restrictive.graphs[type])) + 1
-        #     buffer.write(f'\t{type}:\n')
-        #     for key in list(self.condition_generator.more_restrictive.graphs[type]):
-        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.more_restrictive.dfs(type, key).items}\n')
-        # buffer.write('Less restrictive:\n')
-        # for type in self.condition_generator.less_restrictive.graphs.keys():
-        #     max_length = max(map(len, self.condition_generator.less_restrictive.graphs[type])) + 1
-        #     buffer.write(f'\t{type}:\n')
-        #     for key in list(self.condition_generator.less_restrictive.graphs[type]):
-        #         buffer.write(f'\t\t{key.ljust(max_length)}: {self.condition_generator.less_restrictive.dfs(type, key).items}\n')
         return buffer.getvalue()

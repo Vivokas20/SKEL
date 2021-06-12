@@ -174,20 +174,6 @@ def check_underscore_args(function: str, arg: str) -> str:
 
     return arg
 
-def add_quotes(string: str) -> str:
-    new_string = ""
-
-    string = string.replace(" ", "").replace("\"", "").replace("'","").split(",")
-    for s in string:
-        if "=" in s:
-            new = s.split("=")
-            new_string += "'" + new[0] + "'" + " = " + "'" + new[1] + "'" + ","
-        else:
-            new_string += "'" + s + "'" + ","
-    new_string = new_string[:-1]
-
-    return new_string
-
 def redundant_conditions(condition: str) -> List[str]:
     conditions = []
     final = []

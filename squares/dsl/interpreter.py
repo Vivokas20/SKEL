@@ -28,6 +28,21 @@ class RedudantError(InterpreterError):
         pass
 
 
+def add_quotes(string: str) -> str:
+    new_string = ""
+    if string != '':
+        string = string.replace(" ", "").replace("\"", "").replace("'","").split(",")
+        for s in string:
+            if "=" in s:
+                new = s.split("=")
+                new_string += "'" + new[0] + "'" + " = " + "'" + new[1] + "'" + ","
+            else:
+                new_string += "'" + s + "'" + ","
+        new_string = new_string[:-1]
+
+    return new_string
+
+
 def eval_decorator(func):
     def wrapper(self, args, key):
         if key and not self.final_interpretation and util.get_config().cache_ops:
@@ -93,8 +108,10 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_inner_join(self, name, args):
-        _script = f"{name} <- inner_join({args[0]}, {args[1]}, by=c({args[2]}), suffix = c('', '.other'), na_matches='{util.get_config().na_matches}')"
-        for pair in args[2].split(','):
+        if "'" not in args[2]:
+            args2 = add_quotes(args[2])
+        _script = f"{name} <- inner_join({args[0]}, {args[1]}, by=c({args2}), suffix = c('', '.other'), na_matches='{util.get_config().na_matches}')"
+        for pair in args2.split(','):
             if '=' in pair:
                 A, B = pair.split('=')
                 A = A.strip()[1:-1]
@@ -142,7 +159,9 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_anti_join(self, name, args):
-        return f'{name} <- anti_join({args[0]}, {args[1]}, by=c({args[2]}), na_matches="{util.get_config().na_matches}")\n'
+        if "'" not in args[2]:
+            args2 = add_quotes(args[2])
+        return f'{name} <- anti_join({args[0]}, {args[1]}, by=c({args2}), na_matches="{util.get_config().na_matches}")\n'
 
     @eval_decorator
     def eval_left_join(self, name, args):
