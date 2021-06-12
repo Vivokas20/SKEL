@@ -93,3 +93,5 @@ _build/
 
 tests/
 tests-examples/demo/test.yaml
+tests-examples/demo/test.yaml
+tests-examples/demo/demo.yaml
