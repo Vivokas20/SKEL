@@ -32,12 +32,9 @@ class Child:
         for n in range(len(self.names)):
             name = self.names[n]
 
-            if child_type == "Unknown" and name != "??": # TODO Change
+            if child_type == "Unknown" and name != "??":    # Table
                 if name in tables_names or name in lines_names.values() or "T??" in name:
                     child_type = "Table"
-
-                # elif name in columns_names:
-                #     child_type = "Col"
 
                 else:
                     comparators = ["==", "!=", "<=", ">=", "<", ">"]
@@ -45,7 +42,7 @@ class Child:
                         if comparator in name:  # CrossJoin or Filter
                             self.productions.append(redundant_boolean_conditions(name))
                             break
-                    if not self.productions:
+                    if not self.productions:    # Col, Cols, JoinCond, SummariseCond
                         self.productions.append(redundant_conditions(name))
 
             self.type = child_type
@@ -72,9 +69,6 @@ class Child:
                     self.productions.append(redundant_boolean_conditions(name))
 
                 else:
-                    if child_type == "Cols" or child_type == "JoinCondition":
-                        if name != '':
-                            self.names[n] = add_quotes(name)
                     self.productions.append(redundant_conditions(self.names[n]))
 
     def __repr__(self) -> str:
