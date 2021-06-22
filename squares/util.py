@@ -186,6 +186,7 @@ def parse_specification(filename):
     f = open(filename)
 
     spec = yaml.safe_load(f)
+    logger.info("File read")
 
     if 'inputs' not in spec:
         logger.error('Field "inputs" is required in spec')

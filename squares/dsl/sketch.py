@@ -24,6 +24,7 @@ class Child:
             self.names = [child]
         self.productions = []
         self.type = None
+        self.list_vars = []
         self.var = []
         if child_type:
             self.check_type(child_type) # Ver se len > 1?
@@ -48,20 +49,21 @@ class Child:
             self.type = child_type
 
             if child_type == "Table":
+                if name == "T??":     # TODO implement and test
+                    self.names[n] = "??"
+                    self.type = "Line"
+                    return
+
                 for i in range(len(tables_names)):
                     if tables_names[i] == name:
                         self.names[n] = i
-                        break
+                        return
 
                 for i in lines_names:
                     if lines_names[i] == name:
                         self.names[n] = i - 1
                         self.type = "Line"
-                        break
-
-                if name == "T??":     # TODO implement and test
-                    self.names[n] = "??"
-                    self.type = "Line"
+                        return
 
             elif child_type != "Unknown" and name != '??':
 
@@ -98,6 +100,12 @@ class Line:
 
     def add_child(self, child) -> None:
         self.children.append(child)
+
+    def has_options(self) -> bool:
+        if len(self.root) > 1:
+            return True
+        else:
+            return False
 
     def __repr__(self) -> str:
         string = f'Line({self.name}, root={self.root}, var={self.var}, children=['
@@ -250,6 +258,7 @@ class Sketch:
         self.free_children = []
         self.free_lines = []
         self.aggrs = []
+        self.flag_types = flag_types
 
     def sketch_parser(self, tables: List[str], columns: List[str]) -> None:
         logger.info("Parsing sketch...")
@@ -301,7 +310,7 @@ class Sketch:
 
                 try:
                     if "[" in function: # TODO create more than 1 line and add both to synthesizer
-                        line_type = "Options"
+                        # Maybe restrict children vars in creation of leaf since children constraints already does some restrictions
                         functions = args_in_brackets(function)
                         function = functions[0]
 
@@ -315,8 +324,9 @@ class Sketch:
                             for arg in args:
                                 if "??*" in arg:
                                     line_type = "Incomplete"
-                                    arg = "??"
-                                children.append(Child(arg, "Unknown"))
+                                    n_children -= 1
+                                else:
+                                    children.append(Child(arg, "Unknown"))
                             # TODO parse free children and children that we know were they are. we can also roughly know the place in cases of ??*+
                         else:
                             n_children = 0
@@ -409,7 +419,7 @@ class Sketch:
                     parsed = False
                     break
 
-                if n_children < len(args) and n_children != 0 and parsed:
+                if n_children < len(args) and line_type != "Incomplete" and n_children != 0 and parsed:
                     logger.error('Sketch line "%s" has too many arguments', sketch_line)
                     parsed = False
                     break
@@ -438,11 +448,21 @@ class Sketch:
                         logger.error('Unknown function production "%s"', root_name)
                         raise RuntimeError("Could not process sketch function")
 
-                elif flag_types and line.line_type is not None:    # Free or Incomplete
+                # reduce number of possible functions in root
+                elif line.line_type:    # Free or Incomplete and has children
                     productions = spec.get_function_productions()
                     for production in productions:
-                        if production.has_in_rhs(line.children_types):
+                        if line.line_type == "Free" and len(
+                                production.rhs) == line.n_children or line.line_type == "Incomplete" and len(
+                                production.rhs) >= line.n_children:
                             line.var.append(production.id)
+                        else:
+                            continue
+
+                        if flag_types:
+                            if line.children_types and not production.has_in_rhs(line.children_types):
+                                line.var = line.var[:-1]
+
 
             n_children = line.n_children
             children = []
@@ -483,11 +503,8 @@ class Sketch:
                                     for name in child.productions[n]:
                                         prod = spec.get_enum_production_with_rhs(name)
                                         if prod:
-                                            if len(prod) == 1:
-                                                child.var.append(prod[0].id)
-                                            else:
-                                                for p in prod:
-                                                    child.var.append(p.id)  # Not very efficient
+                                            for p in prod:
+                                                child.var.append(p.id)  # Not very efficient
                                             break
 
                                 if not prod:
@@ -510,7 +527,7 @@ class Sketch:
                                 for p in prod:
                                     child.var.append(p.id)   # Not very efficient
 
-                        if line.line_type is not None and child.var and n < 1:
+                        if line.line_type and child.var and n < 1:      # So that all productions when unordered can be in each hole
                             children.append(child.var)       # TODO add children constrain de que se uma child for um prod implica que as outras nao sejam essa prod
 
                 else:
@@ -519,12 +536,14 @@ class Sketch:
                         child.var.append(0)
                     line.add_child(child)
 
+            # In case unordered add all children to the same child
             if line.line_type is not None:
                 for c in range(spec.max_rhs):
                     child = line.get_child(c)
                     if c >= n_children and line.line_type == "Free":
                         break
-                    else:
-                        child.var = children
+                    elif "??" not in child.names:
+                        child.var = children            # this makes var like [[],[]]
+                    child.list_vars = child.var
 
         logger.debug(self.lines_encoding)
