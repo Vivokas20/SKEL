@@ -16,3 +16,7 @@ sql: |-
   EXCEPT
   SELECT StuID
   FROM Has_allergy
+
+full_sketch: |
+  T1 = anti_join(student, has_allergy)
+  out = select(T1, stuid, stuid)

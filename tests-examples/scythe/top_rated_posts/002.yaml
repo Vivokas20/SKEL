@@ -21,3 +21,8 @@ comment: |
   df1 <- input1 %>% group_by(NAME, EMAIL) %>% summarise(n = n()) %>% ungroup()
   df2 <- df1 %>% filter(n > 1)
   out <- df2 %>% select(NAME) %>% distinct()
+
+sketch: |
+  T1 = summarise(i002, n=n(), (NAME, EMAIL))
+  T2 = filter(T1, n > 1)
+  out = select(T2, NAME)

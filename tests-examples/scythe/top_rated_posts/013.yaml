@@ -25,3 +25,9 @@ comment: |
   df2 <- inner_join(df1, df_i013, by=c('orgName'), suffix = c('', '.other'))
   df3 <- df2 %>% filter(n > 1)
   out <- df3 %>% select(orgName, n, id) %>% arrange(orgName)
+
+full_sketch: | # Not working
+  T1 = summarise(i013, n=n(), orgName)
+  T2 = inner_join(T1, i013, orgName)
+  T3 = filter(T2, n > 1)
+  out = select(T3, (orgName, n, id), orgName)

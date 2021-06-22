@@ -15,7 +15,31 @@ sql: |
 #  df2 <- df1 %>% group_by() %>% summarise(grade = min(grade)) %>% ungroup()
 #  out <- df2 %>% select(mingrade = grade) %>% arrange(mingrade)
 #  T1 = ?? courseId == 11
-sketch: |
+
+#sketch: |
+#  T1 = ??(??, courseId == 11)
+#  T2 = summarise(T1, grade = min(grade))
+#  out = select(T2, mingrade = grade, mingrade)
+#sketch: |
+#  T1 = [filter,anti_join](grades, ??)
+#  T2 = summarise(T1, grade = min(grade))
+#  out = select(T2, mingrade = grade, mingrade)
+
+#sketch: |
+#  T1 = filter(grades, [courseId == 11, courseId >= 11])
+#  T2 = summarise(T1, grade = min(grade))
+#  out = select(T2, mingrade = grade, mingrade)
+
+#sketch: |
+#  T1 = [filter,anti_join](grades, courseId == 11)
+#  T2 = summarise(T1, grade = min(grade))
+#  out = select(T2, mingrade = grade, mingrade)
+#sketch: |
+#  T1 = ??(grades, [courseId == 11, courseId >= 11], ??*)
+#  T2 = summarise(T1, grade = min(grade))
+#  out = select(T2, mingrade = grade, mingrade)
+
+full_sketch: |
   T1 = filter(grades, courseId == 11)
   T2 = summarise(T1, grade = min(grade))
   out = select(T2, mingrade = grade, mingrade)

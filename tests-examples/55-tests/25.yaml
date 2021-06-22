@@ -48,3 +48,9 @@ comment: |
   df3 <- df2 %>% filter(n > 3 | crusingrange <= 3)
   df4 <- df3 %>% group_by(crusingrange, eid) %>% summarise(maxcrusingrange = max(crusingrange)) %>% ungroup()
   out <- df4 %>% select(eid) %>% distinct()
+#full_sketch: |
+#  T1 = natural_join(certified, aircraft)
+#  T2 = summarise(T1, meancost = mean(cost), (P_id, S_name))
+#  T3 = inner_join(T1, T2, ('P_id' = 'P_id','S_name' = 'P_id'))
+#  T4 = filter(T3, S_name != 'SN1' & meancost > cost)
+#  out = select(T4, (P_id, S_name = S_name.other), P_id)
