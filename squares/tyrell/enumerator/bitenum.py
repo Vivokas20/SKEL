@@ -283,24 +283,29 @@ class BitEnumerator(Enumerator):
             if i in self.sketch.lines_encoding:
                 line = self.sketch.lines_encoding[i]
             else:
-                line = Line()
+                line = Line(line_type = "Empty")
 
             n = Root(self, i, line.var, line.line_type, line.n_children)
 
-            if line.root:
-                for x in range(self.max_children):
+            # if line.root:
+            for x in range(self.max_children):
+                if line.line_type != "Empty":
+                    list_vars = line.children[x].list_vars
                     if line.children[x].var:
                         var = line.children[x].var
                     else:
                         var = None
+                else:
+                    var = None
+                    list_vars = None
 
-                    child = Leaf(self, n, x, var, line.children[x].list_vars)
+                child = Leaf(self, n, x, var, list_vars)
 
-                    if var is None or line.line_type:
-                        n.empty_children.append(x)
+                if var is None or line.line_type:
+                    n.empty_children.append(x)
 
-                    n.children.append(child)
-                    leaves.append(child)
+                n.children.append(child)
+                leaves.append(child)
 
             nodes.append(n)
         # TODO check bitvectors of assigned vars
@@ -488,7 +493,7 @@ class BitEnumerator(Enumerator):
                             self.empty_children_constraints(r, p, c, aux, True)
 
             else:   #no root or defined root
-                # Since this has to include types there is no problem in mismatching the types if we know the root because the children will only have the correct types in the vars
+                # Since the defined root case has to include types there is no problem in mismatching the types if we know the root because the children will only have the correct types in the vars
                 if r.line_type == "Free":
                     for p in self.spec.get_function_productions():
                         if p.lhs.name == 'Empty':
@@ -497,7 +502,7 @@ class BitEnumerator(Enumerator):
 
                         self.free_children_constrains(r, p ,aux)
 
-                elif r.line_type == "Incomplete":  # line type == Incomplete
+                elif r.line_type == "Incomplete" or r.line_type == "Empty":
                     for p in self.spec.get_function_productions():
                         if p.lhs.name == 'Empty':
                             continue

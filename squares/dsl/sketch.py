@@ -87,9 +87,10 @@ class Line:
         self.children = children
         self.n_children = n_children
         self.children_types = []
-        for c in children:
-            if c.type and c.type != "Unknown":
-                self.children_types.append(c.type)
+        if children:
+            for c in children:
+                if c.type and c.type != "Unknown":
+                    self.children_types.append(c.type)
         self.line_type = line_type
         self.var = []
         if name and line_id != float('inf'):
@@ -278,7 +279,12 @@ class Sketch:
 
             elif sketch_line.startswith("??"):
                 line = sketch_line.strip()
-                if line == "??+":
+
+                if line == "??":
+                    self.max_loc += 1
+                    self.min_loc += 1
+
+                elif line == "??+":
                     self.max_loc = float('inf')
                     self.min_loc += 1
 
@@ -446,7 +452,7 @@ class Sketch:
                         line.var.append(prod.id)        # Reduce children seeing func
                     else:
                         logger.error('Unknown function production "%s"', root_name)
-                        raise RuntimeError("Could not process sketch function")
+                        raise RuntimeError("Could not process sketch production")
 
                 # reduce number of possible functions in root
                 elif line.line_type:    # Free or Incomplete and has children
@@ -483,13 +489,15 @@ class Sketch:
                                 if prod:
                                     child.var.append(prod.id)
                                 else:
-                                    logger.warning('Unknown Table production "%s"', prod_name)
+                                    logger.error('Unknown Table production "%s"', prod_name)
+                                    raise RuntimeError("Could not process sketch production")
                             elif prod_type == "Line":
                                 prod = line_productions[prod_name][0]       # check type if not more line prods
                                 if prod:
                                     child.var.append(prod.id)
                                 else:
-                                    logger.warning('Unknown Line production "%s"', prod_name)
+                                    logger.error('Unknown Line production "%s"', prod_name)
+                                    raise RuntimeError("Could not process sketch production")
                             else:
                                 prod = None
                                 if prod_type != "Unknown":
@@ -508,7 +516,8 @@ class Sketch:
                                             break
 
                                 if not prod:
-                                    logger.warning('Unknown %s production "%s"', prod_type, prod_name)
+                                    logger.error('Unknown %s production "%s"', prod_type, prod_name)
+                                    raise RuntimeError("Could not process sketch production")
 
                         elif flag_types and prod_type != "Unknown":       # Hole with known type
 

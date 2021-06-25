@@ -42,7 +42,7 @@ def test_file(filename: str, run: str = ''):
     elif args.sequential2:
         command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, './sequential2.py', '-vv', filename]
     else:       # This one!
-        command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, './sequential.py', '-vv', filename]
+        command = ['helper-scripts/runsolver', '-W', str(args.t), '--rss-swap-limit', str(args.m), '-d', '5', '-o', out_file, 'python3', 'sequential.py', '-vv', filename]
 
     command += other_args
 
@@ -87,8 +87,8 @@ if __name__ == '__main__':
 
     if not args.instances:
         # instances = glob.glob('tests-examples/**/**/*.yaml', recursive=True)
-        # instances = glob.glob('tests-examples/scythe/recent_posts/*.yaml', recursive=True)
-        instances = ['tests-examples/demo/demo.yaml']
+        instances = glob.glob('tests-examples/textbook/*.yaml', recursive=True)
+        # instances = ['tests-examples/textbook/1.yaml']
     else:
         instances = []
         with open(args.instances) as inst_list:
