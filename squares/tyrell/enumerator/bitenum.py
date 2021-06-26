@@ -290,9 +290,15 @@ class BitEnumerator(Enumerator):
             # if line.root:
             for x in range(self.max_children):
                 if line.line_type != "Empty":
-                    list_vars = line.children[x].list_vars
-                    if line.children[x].var:
-                        var = line.children[x].var
+                    child = line.children[x]
+                    list_vars = child.list_vars
+                    if child.var:
+                        if child.line:
+                            for l in range(0, i - 1):
+                                line_productions = self.line_productions[l]
+                                for line_production in line_productions:
+                                    child.var.append(line_production.id)
+                        var = child.var
                     else:
                         var = None
                 else:
@@ -309,9 +315,9 @@ class BitEnumerator(Enumerator):
 
             nodes.append(n)
         # TODO check bitvectors of assigned vars
-        print("Nodes and Leaves")
-        print(nodes)
-        print(leaves)
+        # print("Nodes and Leaves")
+        # print(nodes)
+        # print(leaves)
         print(self.z3_solver.sexpr())
         return nodes, leaves
 

@@ -27,6 +27,7 @@ class Child:
         self.type = None
         self.list_vars = []
         self.var = []
+        self.line = False
         if child_type:
             self.check_type(child_type) # Ver se len > 1?
 
@@ -566,13 +567,10 @@ class Sketch:
                                     raise RuntimeError("Could not process sketch production")
 
                         elif flag_types and prod_type != "Unknown":       # Hole with known type
+                            if prod_type == "Table":
+                                # TODO only insert lines that were created before current root
+                                child.line = True
 
-                            if prod_type == "Line":
-                                prod = line_productions
-                                for p in prod:
-                                    child.var.append(p[0].id)
-
-                            elif prod_type == "Table":
                                 prod = spec.get_param_productions()
                                 for p in prod:
                                     child.var.append(p.id)   # Not very efficient
