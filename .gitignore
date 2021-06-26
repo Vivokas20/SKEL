@@ -93,3 +93,4 @@ _build/
 .Rproj.user
 /sketch_check.py
 /tb_comments.yaml
+/tb_sql.yaml

@@ -201,6 +201,8 @@ def redundant_conditions(condition: str) -> List[str]:
     return final
 
 def redundant_boolean_conditions(condition: str) -> List[str]:
+    if "str_detect" in condition:
+        return [condition]
     separators = ["|", "&"]
     comparators = ["==", "!=", "<=", ">=", "<", ">"]
     final = []
