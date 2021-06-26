@@ -28,3 +28,10 @@ comment: |
   df7 <- df4 %>% filter(color != 'green')
   df8 <- anti_join(df6, df7, by=c('S_key'))
   out <- df8 %>% select(S_name, n) %>% arrange(S_name)
+full_sketch: |
+  T1 = natural_join(22-1, 22-2)
+  T2 = summarise(T1, n = n(), S_key)
+  T3 = natural_join(22-1, 22-3, T2)
+  T4 = filter(T1, color != 'green')
+  T5 = anti_join(T3, T4, S_key)
+  out = select (S_name, n) order by(S_name)

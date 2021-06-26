@@ -22,3 +22,8 @@ comment: |
   df2 <- df1 %>% group_by(S_key, S_name) %>% summarise(n = n()) %>% ungroup()
   df3 <- df2 %>% filter(n == max(n))
   out <- df3 %>% select(S_name) %>% distinct()
+full_sketch: |
+  T1 = natural_join(14-1, 14-2, 14-3)
+  T2 = summarise(T1, n = n(), (S_key, S_name))
+  T3 = filter(T2, n == max(n))
+  out = select distinct(S_name)

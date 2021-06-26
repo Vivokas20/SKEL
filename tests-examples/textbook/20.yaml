@@ -25,3 +25,9 @@ comment: |
   df6 <- df4 %>% filter(color == 'green')
   df7 <- inner_join(df5, df6, by=c('S_key','S_name'), suffix = c('', '.other'))
   out <- df7 %>% select(S_name) %>% distinct() %>% arrange(S_name)
+full_sketch: |
+  T1 = natural_join(20-1, 20-2, 20-3)
+  T2 = filter(T1, color == 'red')
+  T3 = filter(T1, color == 'green')
+  T4 = inner_join(T2, T3, (S_key, S_name))
+  out = select distinct(S_name) order by(S_name)

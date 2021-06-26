@@ -30,3 +30,8 @@ comment: |
   out <- df3 %>% select(P_id, S_name) %>% distinct()
 
   # not used tests-examples/textbook/tables/17-2.txt
+full_sketch: |
+  T1 = summarise(17-1, meancost = mean(cost), P_id)
+  T2 = natural_join(17-1, 17-3, T1)
+  T3 = filter(T2, meancost < cost)
+  out = select distinct(P_id, S_name)

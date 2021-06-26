@@ -30,3 +30,8 @@ comment: |
   df5 <- df4 %>% filter(crusingrange < 1000)
   df6 <- anti_join(df4, df5, by=c('eid', 'ename'))
   out <- df6 %>% select(ename) %>% distinct() %>% arrange(ename)
+full_sketch: |
+  T1 = natural_join(aircraft, certified, employees)
+  T2 = filter(T1, crusingrange < 1000)
+  T3 = anti_join(T1, T2, ('eid', 'ename'))
+  out = select distinct(ename) order by(ename)

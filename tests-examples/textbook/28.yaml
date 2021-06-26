@@ -23,3 +23,7 @@ comment: |
   df1 <- inner_join(inner_join(input1, input3), input2)
   df2 <- df1 %>% filter(str_detect(aname, 'Boeing'))
   out <- df2 %>% select(ename) %>% distinct()
+full_sketch: |
+  T1 = natural_join(employees, aircraft, certified)
+  T2 = filter(T1, str_detect(aname, 'Boeing'))
+  out = select distinct(ename)

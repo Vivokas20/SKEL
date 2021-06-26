@@ -33,4 +33,9 @@ comment: |
   out <- df4 %>% select(F_name, n)
 
   summarise(input0, 'n = n()', 'ID_key,Room'), filter(line0, "Room == 'R128'"), summarise(input0, 'n = n()', 'ID_key'), natural_join3(line2, input1, line1)
-
+full_sketch: |
+  T1 = summarise(9-1, n = n(), ID_key)
+  T2 = natural_join(9-2, T1)
+  T3 = filter(9-1, Room != 'R128')
+  T4 = anti_join(T2, T3)
+  out = select(F_name, n)

@@ -26,3 +26,7 @@ comment: |
   df1 <- input1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
   df2 <- df1 %>% filter(level != 'JR')
   out <- df2 %>% select(level, meanage)
+full_sketch: |
+  T1 = summarise(8-1, meanage = mean(age), level)
+  T2 = filter(T1, level != 'JR')
+  out = select(level, meanage)

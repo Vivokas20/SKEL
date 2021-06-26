@@ -38,3 +38,8 @@ comment: |
   df5 <- df4 %>% filter(str_detect(aname, 'Boeing') | crusingrange <= 3000)
   df6 <- anti_join(df4, df5, by=c('crusingrange', 'salary'))
   out <- df6 %>% select(ename) %>% distinct() %>% arrange(ename)
+full_sketch: |
+  T1 = natural_join(aircraft, certified, employees)
+  T2 = filter(T1, str_detect(aname, 'Boeing') | crusingrange <= 3000)
+  T3 = anti_join(T1, T2, (crusingrange, salary))
+  out = select distinct(ename) order by(ename)

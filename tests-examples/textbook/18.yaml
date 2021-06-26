@@ -25,3 +25,7 @@ comment: |
   summarise(input0, 'cost = max(cost)', 'P_id'), natural_join3(input0, line0, input1)
   summarise(input0, 'cost = max(cost)', 'P_id'), natural_join3(input0, input1, line0)
 
+full_sketch: |
+  T1 = summarise(18-1, cost = max(cost), P_id)
+  T2 = natural_join(18-1, 18-3, T1)
+  out = select(P_id, S_name) order by(P_id)

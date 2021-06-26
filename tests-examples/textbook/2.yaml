@@ -42,3 +42,9 @@ comment: |
   df2 <- df1 %>% filter(major != 'History' & F_name == 'faculty1')
   df3 <- df2 %>% group_by(F_name) %>% summarise(maxage = max(age)) %>% ungroup()
   out <- df3 %>% select(maxage) %>% distinct()
+
+full_sketch: |
+  T1 = natural_join(2-1, 2-2, 2-3, 2-4)
+  T2 = filter(T1, F_name == 'faculty1' | major == 'History')
+  T3 = summarise(T2, maxage = max(age))
+  out = select distinct(maxage)

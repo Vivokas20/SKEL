@@ -37,4 +37,9 @@ comment: |
   summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) & n == max(n)'), anti_join(input0, line1, "'age'"), union(line1, line2)
 
   summarise(input0, 'n = n()', 'age,level'), filter(line0, 'age != max(n) | n != max(n)'), summarise(line1, 'n = n()', 'age'), natural_join(line0, line2)
+#full_sketch: |
+#  T1 = summarise(12-1, n = n(), (age, level))
+#  T2 = filter(T1, n == max(n))
+#  ??
+##  out = select(age, level)
 

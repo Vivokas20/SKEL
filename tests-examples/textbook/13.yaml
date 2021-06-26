@@ -11,3 +11,6 @@ comment: |
 
   df1 <- inner_join(input1, input2)
   out <- df1 %>% select(P_name) %>% distinct()
+full_sketch: |
+  T1 = natural_join(13-1, 13-2)
+  out = select distinct(P_name)

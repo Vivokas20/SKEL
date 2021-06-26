@@ -21,3 +21,7 @@ comment: |
   df1 <- inner_join(df_21_1, df_21_3) %>% inner_join(df_21_2)
   df2 <- df1 %>% filter(color == 'red' | color == 'green')
   out <- df2 %>% select(S_name) %>% distinct() %>% arrange(S_name)
+full_sketch: |
+  T1 = natural_join(21-1, 21-2, 21-3)
+  T2 = filter(T1, color == 'red' | color == 'green')
+  out = select distinct(S_name) order by(S_name)

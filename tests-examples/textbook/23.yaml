@@ -28,3 +28,13 @@ comment: |
   filter(n == max(n)) %>%
   # merge the solution from 5.2.8 with 5.2.11
   inner_join(df3)"
+#sketch: |
+#  T1 = natural_join(23-1, 23-2, 23-3)
+#  T2 = filter(T1, color == 'green')
+#  T3 = filter(T1, color == 'red')
+#  T4 = intersect(T2, T3, S_name)
+#  T5 = summarise(T1, cost = max(cost), (S_name, P_name))
+#  ??+
+##  T4 = natural_join(22-1, 22-3, T2)
+##  T5 = anti_join(T3, T4, S_key)
+##  out = select (S_name, n) order by(S_name)

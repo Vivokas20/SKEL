@@ -31,3 +31,9 @@ comment: |
   df4 <- anti_join(input2, input1, by=c())
   df5 <- full_join(df3 %>% mutate(tmp.col=1), df4 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(salary >= salary.other & meansalary <= salary.other)
   out <- df5 %>% select(ename = ename.other, salary = salary.other) %>% distinct() %>% arrange(ename)
+
+full_sketch: |
+  T1 = mutate(employees, meansalary = mean(salary))
+  T2 = anti_join(employees, certified)
+  T3 = cross_join(T1, T2, salary <= salary.other & meansalary <= salary.other)
+  out = select distinct(ename, salary) order by(ename)

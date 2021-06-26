@@ -42,3 +42,18 @@ comment: |
   filter(input2, "S_name != 'AWS'"), natural_join4(input0, input1, line0, input2), summarise(line1, 'n = n()', 'P_id,S_name'), anti_join(input1, line2, '')
 
   filter(input2, "S_name != 'AWS'"), natural_join4(input1, input0, line0, input2), summarise(line1, 'n = n()', 'P_id,P_name'), anti_join(input1, line2, "'P_name'")
+
+  T1 = natural_join(16-1, 16-2, 16-3)
+  T2 = summarise(T1, n = n(), (P_name,S_name))
+  T3 = filter(T2, S_name == 'AWS')
+  T4 = natural_join(16-1, 16-2, 16-3)
+  T5 = summarise(T4, n=n(), P_name)
+  T6 = natural_join(T3,T5)
+  out = select distinct(P_name)
+
+full_sketch: |
+  T1 = natural_join(16-1, 16-3)
+  T2 = filter(T1, S_name != 'AWS')
+  T3 = anti_join(16-2, T2)
+  T4 = summarise(T3, n = n(), P_name)
+  out = select distinct(P_name)

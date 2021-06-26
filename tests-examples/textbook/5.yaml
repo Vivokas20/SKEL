@@ -30,3 +30,8 @@ comment: |
   df2 <- inner_join(inner_join(df1, input2), input1)
   df3 <- df2 %>% filter(n == max(n))
   out <- df3 %>% select(F_name) %>% distinct()
+full_sketch: |
+  T1 = summarise(5-1, n=n(), F_key)
+  T2 = inner_join(5-2, T1, F_key)
+  T3 = filter(T2, n==max(n))
+  out = select distinct(F_name)

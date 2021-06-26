@@ -34,5 +34,10 @@ comment: |
   df3 <- anti_join(input3, df2)
   df4 <- left_join(df3, input1)
   out <- df4 %>% select(S_name)
-
+full_sketch: |
+  T1 = natural_join(19-1, 19-2)
+  T2 = filter(T1, color != 'red')
+  T3 = anti_join(19-3, T2)
+  T4 = left_join(T3, 19-1)
+  out = select (S_name)
 
