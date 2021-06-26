@@ -2,7 +2,7 @@ Sketch format:
     Table_Name_1 = Function_1
     ...
     Table_Name_N = Function_N
-    out = TODO
+    out = select(col+) [distinct/??] [group by(col/??+)]
 
         Functions:  natural_join(Table, Table, [Table], [Table])
                     inner_join(Table, Table, Condition(s))

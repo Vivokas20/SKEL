@@ -1,5 +1,6 @@
 from logging import getLogger
 import re
+from squares import util
 from typing import List
 from itertools import product
 
@@ -256,6 +257,7 @@ class Sketch:
         self.min_loc = 0
         self.max_loc = 0
         self.lines_encoding = {}
+        self.select = {}
         self.free_children = []
         self.free_lines = []
         self.aggrs = []
@@ -275,7 +277,51 @@ class Sketch:
         for sketch_line in self.lines:
 
             if sketch_line.startswith("out"):
-                pass # TODO parse Select
+                line = sketch_line.partition("=")[2]
+
+                if "order by" in line:
+                    try:
+                        hole = False
+                        new_args = []
+                        line = line.partition("order by")
+                        args = args_in_brackets(line[2].split('(')[1].split(')')[0])
+                        if not args:
+                            logger.error('Order by cannot be empty')
+                            raise RuntimeError()
+                        for arg in args:
+                            if arg == "??":
+                                hole = True
+                            else:
+                                new_args.append(arg)
+
+                        if new_args and not hole:
+                        # if new_args:        # TODO take order into account
+                            # if hole and len(columns_names) != len(new_args):
+                            #     e_cols = [x for x in columns_names if x not in new_args]
+                            #     perms = util.get_permutations(e_cols, len(columns_names)-len(new_args))
+                            #     new_args = []
+                            #     for perm in perms:
+                            #         new_args.append(perm)
+                            self.select["arrange"] = new_args
+                        line = line[0]
+                    except:
+                        logger.error('Could not parse select line', sketch_line)
+                        parsed = False
+                else:
+                    self.select["arrange"] = []
+
+                try:
+                    args = args_in_brackets(line.split('(')[1].split(')')[0])
+                    if args:
+                        self.select["cols"] = args
+                except:
+                    logger.error('Could not parse select line', sketch_line)
+                    parsed = False
+
+                if "select distinct" in line:
+                    self.select["distinct"] = [' %>% distinct()']
+                elif "select ??" not in line:
+                    self.select["distinct"] = ['']
 
             elif sketch_line.startswith("??"):
                 line = sketch_line.strip()

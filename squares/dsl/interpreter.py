@@ -218,24 +218,41 @@ class SquaresInterpreter(LineInterpreter):
         if not util.get_config().subsume_conditions and score < 1:
             return False, score, None
 
+        sketch_cols = None
+        sketch_distinct = None
+        sketch_order = None
+        if self.problem.sketch and self.problem.sketch.select:
+            if "cols" in self.problem.sketch.select:
+                sketch_cols = self.problem.sketch.select["cols"]
+            if "distinct" in self.problem.sketch.select:
+                sketch_distinct = self.problem.sketch.select["distinct"]
+            if "arrange" in self.problem.sketch.select:
+                sketch_order = self.problem.sketch.select["arrange"]
+
+        # The columns are already described in the output so we don't need to use them
         a_cols = list(robjects.r(f'colnames({actual})'))
         e_cols = list(robjects.r(f'colnames({expect})'))
         expected_n = int(robjects.r(f'nrow({expect})')[0])
         result = None
         for combination in permutations(a_cols, len(e_cols)):
-            for d in ['', ' %>% distinct()']:
+            for d in sketch_distinct if sketch_distinct is not None else ['', ' %>% distinct()']:
                 _script = f'out <- {actual} %>% select({", ".join(map(lambda pair: f"{pair[0]} = {pair[1]}" if pair[0] != pair[1] else pair[0], zip(e_cols, combination)))}){d}'
                 try:
                     robjects.r(_script)
                     if self.test_equality('out', expect, False):
                         if self.final_interpretation:
-                            for perm in util.get_permutations(e_cols, len(e_cols)):
-                                name = util.get_fresh_name()
-                                new_script = f'{name} <- out %>% arrange({perm})'
-                                robjects.r(new_script)
-                                if self.test_equality(name, expect, True):
-                                    _script += f' %>% arrange({perm})'
-                                    break
+                            if sketch_order != []:      # None implies that there is no sketch so it must be [] to ensure there is no order by
+                                if sketch_order:
+                                    perms = sketch_order
+                                else:
+                                    perms = util.get_permutations(e_cols, len(e_cols))
+                                for perm in perms:
+                                    name = util.get_fresh_name()
+                                    new_script = f'{name} <- out %>% arrange({perm})'
+                                    robjects.r(new_script)
+                                    if self.test_equality(name, expect, True):
+                                        _script += f' %>% arrange({perm})'
+                                        break
 
                             self.program += _script + '\n'
                         return True, score, None
