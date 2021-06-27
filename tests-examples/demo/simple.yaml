@@ -1,5 +1,5 @@
 inputs:
   - tests-examples/demo/tables/courses.csv
-output: tests-examples/demo/tables/test_simple.out
+output: tests-examples/demo/tables/simple.out
 sql: |
   SELECT courseName FROM grades

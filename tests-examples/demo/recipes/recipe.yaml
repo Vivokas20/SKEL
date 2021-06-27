@@ -1,0 +1,10 @@
+inputs:
+- tests-examples/demo/recipes/tables/recipe.csv
+- tests-examples/demo/recipes/tables/cookbook.csv
+output: tests-examples/demo/recipes/tables/recipe.out
+loc: 1
+sql: |
+  SELECT name FROM cookbook NATURAL JOIN recipe
+sketch: |
+  T1 = natural_join(recipe, cookbook)
+  out = select(name)
