@@ -287,7 +287,6 @@ class BitEnumerator(Enumerator):
 
             n = Root(self, i, line.var, line.line_type, line.n_children)
 
-            # if line.root:
             for x in range(self.max_children):
                 if line.line_type != "Empty":
                     child = line.children[x]

@@ -112,9 +112,12 @@ class Line:
 
     def __repr__(self) -> str:
         string = f'Line({self.name}, root={self.root}, var={self.var}, children=['
-        for c in self.children:
-            string += str(c) + ","
-        string += "])"
+        if self.children:
+            for c in self.children:
+                string += str(c) + ","
+            string += "])"
+        else:
+            string += "])"
         return string
 
 
@@ -349,12 +352,16 @@ class Sketch:
                 self.max_loc += 1
                 line = sketch_line.partition("=")
                 name = line[0].replace(" ", "")
-                string = line[2].strip().partition("(")[2].rpartition(")")[0]
-                args = args_in_brackets(string)
-                line = line[2].partition("(")
-                function = line[0].replace(" ", "")
+                if "(" not in line and ")" not in line and "??" in line:
+                    args = []
+                    function = "??"
+                else:
+                    string = line[2].strip().partition("(")[2].rpartition(")")[0]
+                    args = args_in_brackets(string)
+                    line = line[2].partition("(")
+                    function = line[0].replace(" ", "")
 
-                if not args:
+                if not args and function != "??":
                     logger.error('Sketch line "%s" has missing brackets', sketch_line)
                     parsed = False
                     break
@@ -371,18 +378,23 @@ class Sketch:
                         # A line with no function. Can have children or not
                         n_children = len(args)
 
-                        if args[0]:
+                        if args:
                             line_type = "Free"
                             # Create children with only name and no type or check if it's column(s) / table
                             for arg in args:
                                 if "??*" in arg:
                                     line_type = "Incomplete"
                                     n_children -= 1
+                                elif "??+" in arg:
+                                    line_type = "Incomplete"
                                 else:
                                     children.append(Child(arg, "Unknown"))
                             # TODO parse free children and children that we know were they are. we can also roughly know the place in cases of ??*+
                         else:
-                            n_children = 0
+                            children = None
+                            function = None
+                            n_children = None
+                            line_type = "Empty"
 
                     elif "natural_join" == function:
                         n_children = 2
@@ -472,7 +484,7 @@ class Sketch:
                     parsed = False
                     break
 
-                if n_children < len(args) and line_type != "Incomplete" and n_children != 0 and parsed:
+                if n_children and n_children < len(args) and line_type != "Incomplete" and parsed:
                     logger.error('Sketch line "%s" has too many arguments', sketch_line)
                     parsed = False
                     break
@@ -491,112 +503,113 @@ class Sketch:
 
     def fill_vars(self, spec, line_productions) -> None:
         for line in self.lines_encoding.values():
-            for root_name in line.root:
-                if root_name != "??":
-                    prod = spec.get_function_production(root_name)
+            if line.line_type != "Empty":
+                for root_name in line.root:
+                    if root_name != "??":
+                        prod = spec.get_function_production(root_name)
 
-                    if prod:
-                        line.var.append(prod.id)        # Reduce children seeing func
-                    else:
-                        logger.error('Unknown function production "%s"', root_name)
-                        raise RuntimeError("Could not process sketch production")
-
-                # reduce number of possible functions in root
-                elif line.line_type:    # Free or Incomplete and has children
-                    productions = spec.get_function_productions()
-                    for production in productions:
-                        if line.line_type == "Free" and len(
-                                production.rhs) == line.n_children or line.line_type == "Incomplete" and len(
-                                production.rhs) >= line.n_children:
-                            line.var.append(production.id)
+                        if prod:
+                            line.var.append(prod.id)        # Reduce children seeing func
                         else:
-                            continue
+                            logger.error('Unknown function production "%s"', root_name)
+                            raise RuntimeError("Could not process sketch production")
 
-                        if flag_types:
-                            if line.children_types and not production.has_in_rhs(line.children_types):
-                                line.var = line.var[:-1]
-
-
-            n_children = line.n_children
-            children = []
-
-            for c in range(spec.max_rhs):
-
-                if c < n_children:
-
-                    child = line.get_child(c)
-
-                    for n in range(len(child.names)):
-                        prod_name = child.names[n]
-                        prod_type = child.type
-
-                        if prod_name != "??":
-                            if prod_type == "Table":
-                                prod = spec.get_param_production(prod_name)
-                                if prod:
-                                    child.var.append(prod.id)
-                                else:
-                                    logger.error('Unknown Table production "%s"', prod_name)
-                                    raise RuntimeError("Could not process sketch production")
-                            elif prod_type == "Line":
-                                prod = line_productions[prod_name][0]       # check type if not more line prods
-                                if prod:
-                                    child.var.append(prod.id)
-                                else:
-                                    logger.error('Unknown Line production "%s"', prod_name)
-                                    raise RuntimeError("Could not process sketch production")
+                    # reduce number of possible functions in root
+                    elif line.line_type:    # Free or Incomplete and has children
+                        productions = spec.get_function_productions()
+                        for production in productions:
+                            if line.line_type == "Free" and len(
+                                    production.rhs) == line.n_children or line.line_type == "Incomplete" and len(
+                                    production.rhs) >= line.n_children:
+                                line.var.append(production.id)
                             else:
-                                prod = None
-                                if prod_type != "Unknown":
-                                    prod_type = spec.get_type(prod_type)
-                                    for name in child.productions[n]:
-                                        prod = spec.get_enum_production(prod_type, name)
-                                        if prod:
-                                            child.var.append(prod.id)
-                                            break
-                                else:
-                                    for name in child.productions[n]:
-                                        prod = spec.get_enum_production_with_rhs(name)
-                                        if prod:
-                                            for p in prod:
-                                                child.var.append(p.id)  # Not very efficient
-                                            break
+                                continue
 
-                                if not prod:
-                                    logger.error('Unknown %s production "%s"', prod_type, prod_name)
-                                    raise RuntimeError("Could not process sketch production")
+                            if flag_types:
+                                if line.children_types and not production.has_in_rhs(line.children_types):
+                                    line.var = line.var[:-1]
 
-                        elif flag_types and prod_type != "Unknown":       # Hole with known type
-                            if prod_type == "Line":
-                                child.line = True
 
-                            elif prod_type == "Table":
-                                prod = spec.get_param_productions()
-                                for p in prod:
-                                    child.var.append(p.id)
+                n_children = line.n_children
+                children = []
 
-                            else:
-                                prod = spec.get_productions_with_lhs(prod_type)
-                                for p in prod:
-                                    child.var.append(p.id)   # Not very efficient?
-
-                        if line.line_type and child.var and n < 1:      # So that all productions when unordered can be in each hole
-                            children.append(child.var)
-
-                else:
-                    child = Child()
-                    if root_name != "??" or line.line_type == "Free":
-                        child.var.append(0)
-                    line.add_child(child)
-
-            # In case unordered add all children to the same child
-            if line.line_type is not None:
                 for c in range(spec.max_rhs):
-                    child = line.get_child(c)
-                    if c >= n_children and line.line_type == "Free":
-                        break
-                    elif "??" not in child.names:
-                        child.var = children            # this makes var like [[],[]]
-                    child.list_vars = child.var
+
+                    if c < n_children:
+
+                        child = line.get_child(c)
+
+                        for n in range(len(child.names)):
+                            prod_name = child.names[n]
+                            prod_type = child.type
+
+                            if prod_name != "??":
+                                if prod_type == "Table":
+                                    prod = spec.get_param_production(prod_name)
+                                    if prod:
+                                        child.var.append(prod.id)
+                                    else:
+                                        logger.error('Unknown Table production "%s"', prod_name)
+                                        raise RuntimeError("Could not process sketch production")
+                                elif prod_type == "Line":
+                                    prod = line_productions[prod_name][0]       # check type if not more line prods
+                                    if prod:
+                                        child.var.append(prod.id)
+                                    else:
+                                        logger.error('Unknown Line production "%s"', prod_name)
+                                        raise RuntimeError("Could not process sketch production")
+                                else:
+                                    prod = None
+                                    if prod_type != "Unknown":
+                                        prod_type = spec.get_type(prod_type)
+                                        for name in child.productions[n]:
+                                            prod = spec.get_enum_production(prod_type, name)
+                                            if prod:
+                                                child.var.append(prod.id)
+                                                break
+                                    else:
+                                        for name in child.productions[n]:
+                                            prod = spec.get_enum_production_with_rhs(name)
+                                            if prod:
+                                                for p in prod:
+                                                    child.var.append(p.id)  # Not very efficient
+                                                break
+
+                                    if not prod:
+                                        logger.error('Unknown %s production "%s"', prod_type, prod_name)
+                                        raise RuntimeError("Could not process sketch production")
+
+                            elif flag_types and prod_type != "Unknown":       # Hole with known type
+                                if prod_type == "Line":
+                                    child.line = True
+
+                                elif prod_type == "Table":
+                                    prod = spec.get_param_productions()
+                                    for p in prod:
+                                        child.var.append(p.id)
+
+                                else:
+                                    prod = spec.get_productions_with_lhs(prod_type)
+                                    for p in prod:
+                                        child.var.append(p.id)   # Not very efficient?
+
+                            if line.line_type and child.var and n < 1:      # So that all productions when unordered can be in each hole
+                                children.append(child.var)
+
+                    else:
+                        child = Child()
+                        if root_name != "??" or line.line_type == "Free":
+                            child.var.append(0)
+                        line.add_child(child)
+
+                # In case unordered add all children to the same child
+                if line.line_type is not None:
+                    for c in range(spec.max_rhs):
+                        child = line.get_child(c)
+                        if c >= n_children and line.line_type == "Free":
+                            break
+                        elif "??" not in child.names:
+                            child.var = children            # this makes var like [[],[]]
+                        child.list_vars = child.var
 
         logger.debug(self.lines_encoding)
