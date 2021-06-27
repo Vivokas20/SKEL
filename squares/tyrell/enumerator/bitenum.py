@@ -292,12 +292,12 @@ class BitEnumerator(Enumerator):
                 if line.line_type != "Empty":
                     child = line.children[x]
                     list_vars = child.list_vars
+                    if child.line:
+                        for l in range(0, i - 1):
+                            line_productions = self.line_productions[l]
+                            for line_production in line_productions:
+                                child.var.append(line_production.id)
                     if child.var:
-                        if child.line:
-                            for l in range(0, i - 1):
-                                line_productions = self.line_productions[l]
-                                for line_production in line_productions:
-                                    child.var.append(line_production.id)
                         var = child.var
                     else:
                         var = None

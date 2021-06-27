@@ -251,7 +251,6 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
 
 ######## SKETCH CLASS ########
 
-
 class Sketch:
 
     def __init__(self, sketch) -> None:
@@ -278,6 +277,7 @@ class Sketch:
         parsed = True
 
         for sketch_line in self.lines:
+            sketch_line = sketch_line.strip()
 
             if sketch_line.startswith("out"):
                 line = sketch_line.partition("=")[2]
@@ -327,17 +327,15 @@ class Sketch:
                     self.select["distinct"] = ['']
 
             elif sketch_line.startswith("??"):
-                line = sketch_line.strip()
-
-                if line == "??":
+                if sketch_line == "??":
                     self.max_loc += 1
                     self.min_loc += 1
 
-                elif line == "??+":
+                elif sketch_line == "??+":
                     self.max_loc = float('inf')
                     self.min_loc += 1
 
-                elif line == "??*":
+                elif sketch_line == "??*":
                     self.max_loc = float('inf')
 
                 else:
@@ -569,21 +567,21 @@ class Sketch:
                                     raise RuntimeError("Could not process sketch production")
 
                         elif flag_types and prod_type != "Unknown":       # Hole with known type
-                            if prod_type == "Table":
-                                # TODO only insert lines that were created before current root
+                            if prod_type == "Line":
                                 child.line = True
 
+                            elif prod_type == "Table":
                                 prod = spec.get_param_productions()
                                 for p in prod:
-                                    child.var.append(p.id)   # Not very efficient
+                                    child.var.append(p.id)
 
                             else:
                                 prod = spec.get_productions_with_lhs(prod_type)
                                 for p in prod:
-                                    child.var.append(p.id)   # Not very efficient
+                                    child.var.append(p.id)   # Not very efficient?
 
                         if line.line_type and child.var and n < 1:      # So that all productions when unordered can be in each hole
-                            children.append(child.var)       # TODO add children constrain de que se uma child for um prod implica que as outras nao sejam essa prod
+                            children.append(child.var)
 
                 else:
                     child = Child()
