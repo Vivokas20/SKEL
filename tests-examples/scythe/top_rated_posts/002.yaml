@@ -22,7 +22,7 @@ comment: |
   df2 <- df1 %>% filter(n > 1)
   out <- df2 %>% select(NAME) %>% distinct()
 
-sketch: |
+full_sketch: |
   T1 = summarise(i002, n=n(), (NAME, EMAIL))
   T2 = filter(T1, n > 1)
-  out = select(T2, NAME)
+  out = select (NAME)

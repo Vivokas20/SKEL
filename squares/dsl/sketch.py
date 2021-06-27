@@ -518,6 +518,9 @@ class Sketch:
                     elif line.line_type:    # Free or Incomplete and has children
                         productions = spec.get_function_productions()
                         for production in productions:
+                            if production.lhs.name == 'Empty':
+                                continue
+
                             if line.line_type == "Free" and len(
                                     production.rhs) == line.n_children or line.line_type == "Incomplete" and len(
                                     production.rhs) >= line.n_children:

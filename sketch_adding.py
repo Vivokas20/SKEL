@@ -3,6 +3,7 @@ import sys
 import time
 import yaml
 import random
+import glob
 import subprocess
 
 last = ""
@@ -66,43 +67,6 @@ def args_in_brackets(string: str):
 
     return matches
 
-
-# def signal_handler(sig, frame):
-#     print('Current File: ' + last)
-#     sys.exit(0)
-#
-# signal.signal(signal.SIGINT, signal_handler)
-# signal.signal(signal.SIGTERM, signal_handler)
-#
-# if __name__ == '__main__':
-#     # for file in glob.glob('tests-examples/**/**/*.yaml', recursive=True):
-#     with open("test_dirs.txt") as dirs:
-#         for file in dirs:
-#             file = file[:-1]
-#             last = file
-#             if 'schema.yaml' in file:
-#                 continue
-#
-#             with open(file, "r+") as f:
-#                 spec = yaml.safe_load(f)
-#
-#                 if 'sketch' not in spec:
-#                     instance = {}
-#
-#                     try:
-#                         # cubes and test_examples in same directory
-#                         process = subprocess.run(["python3", "cubes/sequential.py", file], timeout=600, stderr=subprocess.DEVNULL, check=True, stdout=subprocess.PIPE, universal_newlines=True)
-#                     except subprocess.TimeoutExpired:
-#                         print(file)
-#                         continue
-#
-#                     output = process.stdout
-#                     output = output.split("\n\n")[2]
-#
-#                     instance['sketch'] = literal(output)    # prints with - because it's list
-#                     output = yaml.dump(instance, default_flow_style=False, sort_keys=False)
-#                     f.write("\n" + output)
-
 class Line:
     def __init__(self, name: str, function: str, children: str) -> None:
         self.name = name
@@ -121,8 +85,7 @@ class Line:
         string += ")"
         return string
 
-
-if __name__ == '__main__':
+def make_sketch():
     # with open("all_dirs.txt") as dirs:
     #     for file in dirs:
     #         file = file[:-1]
@@ -148,8 +111,6 @@ if __name__ == '__main__':
                 lines[func] = args
                 functions.append(func)
                 n_children += len(args)
-
-
 
             if not 'sketch_easy' in spec:
                 '''
@@ -197,6 +158,61 @@ if __name__ == '__main__':
                 sketch = ""
                 instances['sketch_hard'] = literal(sketch)
 
-
             # output = yaml.dump(instances, default_flow_style=False, sort_keys=False)
             # f.write("\n" + output)
+
+# def signal_handler(sig, frame):
+#     print('Current File: ' + last)
+#     sys.exit(0)
+#
+# signal.signal(signal.SIGINT, signal_handler)
+# signal.signal(signal.SIGTERM, signal_handler)
+#
+def run_get_result():
+    # for file in glob.glob('tests-examples/**/**/*.yaml', recursive=True):
+    with open("test_dirs.txt") as dirs:
+        for file in dirs:
+            file = file[:-1]
+            last = file
+            if 'schema.yaml' in file:
+                continue
+
+            with open(file, "r+") as f:
+                spec = yaml.safe_load(f)
+
+                if 'sketch' not in spec:
+                    instance = {}
+
+                    try:
+                        # cubes and test_examples in same directory
+                        process = subprocess.run(["python3", "cubes/sequential.py", file], timeout=600, stderr=subprocess.DEVNULL, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+                    except subprocess.TimeoutExpired:
+                        print(file)
+                        continue
+
+                    output = process.stdout
+                    output = output.split("\n\n")[2]
+
+                    instance['sketch'] = literal(output)    # prints with - because it's list
+                    output = yaml.dump(instance, default_flow_style=False, sort_keys=False)
+                    f.write("\n" + output)
+
+def get_comments():
+    instances = glob.glob('tests-examples/textbook/*.yaml')
+    for file in instances:
+        with open(file, "r") as f:
+            spec = yaml.safe_load(f)
+
+            if 'sql' in spec:
+                out = {}
+
+                comment = spec['sql']
+
+                out[file] = literal(comment)
+
+                output = yaml.dump(out, default_flow_style=False, sort_keys=False)
+                with open("evaluation/file_extractions/tb_sql.yaml", "a") as tb:
+                    tb.write(output + "\n")
+
+if __name__ == '__main__':
+    get_comments()

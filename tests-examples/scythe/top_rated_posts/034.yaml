@@ -24,7 +24,7 @@ comment: |
   df3 <- inner_join(df2, input1, by=c('maxTime' = 'Time'), suffix = c('', '.other')) %>% mutate(Time = maxTime)
   out <- df3 %>% select(Train, Dest, Time = maxTime) %>% arrange(Train)
 
-sketch: |
+full_sketch: |
   T1 = summarise(i034, maxTime = max(Time), Train)
   T2 = inner_join(i034, T1, Time = maxTime)
-  out = select(T2, (Train, Dest, Time = maxTime), Train)
+  out = select(Train, Dest, Time = maxTime) order by(Train)

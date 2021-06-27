@@ -2,10 +2,8 @@ output.err
 users/*
 .cenv
 dump.dsl
-comments.yaml
 test_dirs.txt
 all_dirs.txt
-tests-examples/demo/
 .RDataFiles/
 .idea/
 profiles/
@@ -92,5 +90,5 @@ _build/
 .DS_Store
 .Rproj.user
 /sketch_check.py
-/tb_comments.yaml
-/tb_sql.yaml
+/evaluation/file_extractions/
+/evaluation/data/
