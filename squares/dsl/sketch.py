@@ -19,6 +19,7 @@ attrs = []
 
 class Child:
     def __init__(self, child = None, child_type: str = None) -> None:
+        self.real_name = child
         if isinstance(child, list):
             self.names = child
         else:
@@ -78,10 +79,14 @@ class Child:
     def __repr__(self) -> str:
         return f'Child({self.names}, type={self.type}, var={self.var})'
 
+    # def __repr__(self) -> str:
+    #     return f'Child({self.real_name}, {self.type})'
+
 
 class Line:
     def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None) -> None:
         self.name = name
+        self.real_root = root
         if isinstance(root, list):
             self.root = root
         else:
@@ -115,10 +120,18 @@ class Line:
         if self.children:
             for c in self.children:
                 string += str(c) + ","
+            string = string[:-1]
             string += "])"
         else:
             string += "])"
         return string
+    # def __repr__(self) -> str:
+    #     string = f'Line {self.name}({self.real_root}):\n'
+    #     if self.children:
+    #         for c in self.children:
+    #             string += "\t-> " + str(c) + "\n"
+    #         string = string[:-1]
+    #     return string
 
 
 ######## AUXILIARY PARSE FUNCTIONS ########
@@ -268,7 +281,7 @@ class Sketch:
         self.aggrs = []
         self.flag_types = flag_types
 
-    def sketch_parser(self, tables: List[str], columns: List[str]) -> None:
+    def sketch_parser(self, tables: List[str], columns: List[str] = None) -> None:
         logger.info("Parsing sketch...")
 
         for table in tables:

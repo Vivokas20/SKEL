@@ -57,14 +57,20 @@ def test_file(filename: str, run: str = ''):
     except:
         status = None if timeout or memout else 0
 
-    process = None
-    if not timeout and not memout and not args.cubes:
+    programs = None
+    gt = None
+    if not timeout and not memout:
         with open(out_file) as f:
             log = f.read()
             try:
-                process = int(re.search('Solution found using process (.*)', log)[1])
+                programs = int(re.search('\tAttempted programs: (.*) \(approx\)', log)[1])
             except:
-                process = None
+                programs = None
+
+            # try:
+            #     gt = int(re.search('\tAttempted programs: (.*) \(approx\)', log)[1])
+            # except:
+            #     gt = None
 
     real = float(re.search('Real time \(s\): (.*)', p.stdout)[1])
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])
@@ -73,7 +79,7 @@ def test_file(filename: str, run: str = ''):
     with open('evaluation/data/' + args.name + '.csv',
               'a') as f:  # TODO use a queue so that only one process needs to have the file open
         writer = csv.writer(f)
-        writer.writerow((test_name, timeout, real, cpu, ram, process, status, memout))
+        writer.writerow((test_name, timeout, real, cpu, ram, programs, gt, status, memout))
         f.flush()
 
 
@@ -82,13 +88,13 @@ if __name__ == '__main__':
         os.mkdir(f'evaluation/data/{args.name}')
         with open('evaluation/data/' + args.name + '.csv', 'w') as f:
             writer = csv.writer(f)
-            writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'process', 'status', 'memout'))
+            writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'programs', 'gt', 'status', 'memout'))
             f.flush()
 
     if not args.instances:
         # instances = glob.glob('tests-examples/**/**/*.yaml', recursive=True)
-        instances = glob.glob('tests-examples/textbook/*.yaml')
-        # instances = ['tests-examples/textbook/1.yaml']
+        # instances = glob.glob('tests-examples/textbook/*.yaml')
+        instances = ['tests-examples/textbook/1.yaml', 'tests-examples/textbook/2.yaml']
     else:
         instances = []
         with open(args.instances) as inst_list:

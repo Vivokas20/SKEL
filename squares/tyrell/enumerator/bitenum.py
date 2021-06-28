@@ -317,7 +317,7 @@ class BitEnumerator(Enumerator):
         # print("Nodes and Leaves")
         # print(nodes)
         # print(leaves)
-        print(self.z3_solver.sexpr())
+        # print(self.z3_solver.sexpr())
         return nodes, leaves
 
     def create_output_constraints(self) -> None:
@@ -809,9 +809,6 @@ class BitEnumerator(Enumerator):
         return len(models) - 1
 
     def construct_program(self, model) -> Program:
-        # print(self.roots)
-        # print(self.leaves)
-        # print(model)
         prog = [program.Line(self.get_production(model[root.var].as_long()),
                              tuple(self.get_production(model[child.var].as_long()) for child in root.children)) for root in
                 self.roots]
