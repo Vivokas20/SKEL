@@ -68,6 +68,8 @@ def sketch_no_root(sketch, spec):
         for child in root.children:
             if child.real_name:
                 sketch_out += f'{child.real_name}, '
+            else:
+                sketch_out += f'\'\', '
         sketch_out = sketch_out[:-2] + ")\n"
 
     sketch_out += spec['full_sketch'].splitlines()[-1]
@@ -138,6 +140,7 @@ def parse_sketch(instances):
                 if not 'sketch_no_children' in spec:
                     out['sketch_no_children'] = literal(sketch_no_children(sketch, spec))
 
+                # Attention when anti_join or summarise since 2 or 3 args
                 if not 'sketch_no_root' in spec:
                     out['sketch_no_root'] = literal(sketch_no_root(sketch, spec))
 
@@ -150,6 +153,31 @@ def parse_sketch(instances):
                 if out != {}:
                     output = yaml.dump(out, default_flow_style=False, sort_keys=False)
                     f.write("\n" + output)
+
+
+# def remove_sketch(instances):
+#     global last
+#     for file in instances:
+#         last = file
+#         with open(file, "r") as f:
+#             spec = yaml.safe_load(f)
+#
+#         if 'sketch_no_children' in spec:
+#             del spec['sketch_no_children']
+#
+#         # Attention when anti_join or summarise since 2 or 3 args
+#         if 'sketch_no_root' in spec:
+#             del spec['sketch_no_root']
+#
+#         if 'sketch_no_filter' in spec:
+#             del spec['sketch_no_filter']
+#
+#         if 'sketch_no_summarise' in spec:
+#             del spec['sketch_no_summarise']
+#
+#         with open(file, "w") as f:
+#             output = yaml.dump(spec)
+#             f.write(output)
 
 def run_get_result():
     # for file in glob.glob('tests-examples/**/**/*.yaml', recursive=True):
@@ -201,5 +229,5 @@ def get_comments(instances):
 
 if __name__ == '__main__':
     # get_comments(glob.glob('tests-examples/textbook/*.yaml'))
-    # parse_sketch(['tests-examples/demo/test.yaml'])
+    # parse_sketch(['tests-examples/demo/demo.yaml'])
     parse_sketch(glob.glob('tests-examples/textbook/*.yaml'))

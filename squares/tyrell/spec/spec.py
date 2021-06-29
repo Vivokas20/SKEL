@@ -148,8 +148,8 @@ class ProductionSpec:
         Return the enum production(s) whose rhs is `rhs`.
         If no production is found, return `None`
         '''
-        return self._rhs_enum_map[rhs]
-        # return self._rhs_enum_map.get(rhs)
+        # return self._rhs_enum_map[rhs]
+        return self._rhs_enum_map.get(rhs)
 
     def get_enum_production(self, ty: EnumType, value: str) -> Optional[Production]:
         '''

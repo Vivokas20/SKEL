@@ -97,7 +97,11 @@ class Line:
         if children:
             for c in children:
                 if c.type and c.type != "Unknown":
-                    self.children_types.append(c.type)
+                    if c.type == "Line":
+                        t = "Table"
+                    else:
+                        t = c.type
+                    self.children_types.append(t)
         self.line_type = line_type
         self.var = []
         if name and line_id != float('inf'):
@@ -595,7 +599,7 @@ class Sketch:
                                                 break
                                     else:
                                         for name in child.productions[n]:
-                                            prod = spec.get_enum_production_with_rhs(name)
+                                            prod = spec.get_enum_production_with_rhs(name.replace("'", ""))
                                             if prod:
                                                 for p in prod:
                                                     child.var.append(p.id)  # Not very efficient
