@@ -87,8 +87,10 @@ class Line:
     def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None, real_function: str = None) -> None:
         self.name = name
         self.real_root = real_function
+        self.options = False
         if isinstance(root, list):
             self.root = root
+            self.options = True
         else:
             self.root = [root]
         self.children = children
@@ -112,12 +114,6 @@ class Line:
 
     def add_child(self, child) -> None:
         self.children.append(child)
-
-    def has_options(self) -> bool:
-        if len(self.root) > 1:
-            return True
-        else:
-            return False
 
     def __repr__(self) -> str:
         string = f'Line({self.name}, root={self.root}, var={self.var}, children=['
@@ -558,6 +554,9 @@ class Sketch:
                             if flag_types:
                                 if line.children_types and not production.has_in_rhs(line.children_types):
                                     line.var = line.var[:-1]
+
+                        if len(line.var) > 0:
+                            line.options = True
 
 
                 n_children = line.n_children

@@ -31,7 +31,7 @@ class Node:
 
 
 class Root(Node):
-    def __init__(self, enumerator: 'BitEnumerator', id: int, sketch_var = None, line_type: str = None, n_children = None) -> None:
+    def __init__(self, enumerator: 'BitEnumerator', id: int, sketch_var = None, line_type: str = None, n_children = None, options = None) -> None:
         super().__init__()
         self.id = id
         self.children = []
@@ -40,10 +40,7 @@ class Root(Node):
         self.sketch_var = sketch_var
         self.hole = False
         self.n_children = n_children
-        if self.sketch_var and len(self.sketch_var) > 1:
-            self.options = True
-        else:
-            self.options = False
+        self.options = options
         self.type = self._create_type_variable(enumerator)
         self.var = self._create_root_variable(enumerator)
         self.bitvec = enumerator.create_variable(f'bv_{id}', z3.BitVec, enumerator.specification.n_columns)
@@ -285,7 +282,7 @@ class BitEnumerator(Enumerator):
             else:
                 line = Line(line_type = "Empty")
 
-            n = Root(self, i, line.var, line.line_type, line.n_children)
+            n = Root(self, i, line.var, line.line_type, line.n_children, line.options)
 
             for x in range(self.max_children):
                 if line.line_type != "Empty":
