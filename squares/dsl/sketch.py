@@ -18,8 +18,8 @@ attrs = []
 ######## AUXILIARY SKETCH CLASSES ########
 
 class Child:
-    def __init__(self, child = None, child_type: str = None) -> None:
-        self.real_name = child
+    def __init__(self, child = None, child_type: str = None, real_name = None) -> None:
+        self.real_name = real_name
         if isinstance(child, list):
             self.names = child
         else:
@@ -51,7 +51,7 @@ class Child:
 
             self.type = child_type
 
-            if child_type == "Table":
+            if child_type == "Table" and name != "??":
                 if name == "T??":     # TODO implement and test
                     self.names[n] = "??"
                     self.type = "Line"
@@ -142,6 +142,7 @@ def args_in_brackets(string: str):
     start = 0
     last = False
     matches = []
+    real = []
     string = string.strip()
 
     for i in range(len(string)):
@@ -152,25 +153,31 @@ def args_in_brackets(string: str):
         elif string[i] == '[':
             rect += 1
             possibilities = []
+            real_possibilities = []
             start = i + 1
         elif string[i] == ']':
             rect -= 1
             match = string[start:i].strip()
+            real_possibilities.append(match)
             if match and match[0] == "(" and match[-1] == ")":
                 match = match[1:-1].strip().replace("'","").replace("\"","")
             possibilities.append(match)
             matches.append(possibilities)
+            real.append(real_possibilities)
             start = i + 1
             last = True
         elif string[i] == "," and not brackets:
             if not last:
                 match = string[start:i].strip()
+                real_match = match
                 if match[0] == "(" and match[-1] == ")":
                     match = match[1:-1].strip().replace("\"","").replace("'","")
                 if rect:
+                    real_possibilities.append(real_match)
                     possibilities.append(match)
                 else:
                     matches.append(match)
+                    real.append(real_match)
             else:
                 last = False
             start = i + 1
@@ -180,11 +187,12 @@ def args_in_brackets(string: str):
 
     if start < len(string):
         match = string[start:len(string)].strip()
+        real.append(match)
         if match and match[0] == "(" and match[-1] == ")":
             match = match[1:-1].strip().replace("\"","").replace("'","")
         matches.append(match)
 
-    return matches
+    return matches, real
 
 def check_underscore_args(function: str, arg: str) -> str:
     variations = ["all", "at", "if"]
@@ -303,7 +311,7 @@ class Sketch:
                         hole = False
                         new_args = []
                         line = line.partition("order by")
-                        args = args_in_brackets(line[2].split('(')[1].split(')')[0])
+                        args = args_in_brackets(line[2].split('(')[1].split(')')[0])[0]
                         if not args:
                             logger.error('Order by cannot be empty')
                             raise RuntimeError()
@@ -330,7 +338,7 @@ class Sketch:
                     self.select["arrange"] = []
 
                 try:
-                    args = args_in_brackets(line.split('(')[1].split(')')[0])
+                    args = args_in_brackets(line.split('(')[1].split(')')[0])[0]
                     if args:
                         self.select["cols"] = args
                 except:
@@ -367,10 +375,11 @@ class Sketch:
                 name = line[0].replace(" ", "")
                 if "(" not in line and ")" not in line and "??" in line:
                     args = []
+                    real = []
                     function = "??"
                 else:
                     string = line[2].strip().partition("(")[2].rpartition(")")[0]
-                    args = args_in_brackets(string)
+                    args, real = args_in_brackets(string)
                     line = line[2].partition("(")
                     function = line[0].replace(" ", "")
                 real_function = function
@@ -385,7 +394,7 @@ class Sketch:
                 try:
                     if "[" in function: # TODO create more than 1 line and add both to synthesizer
                         # Maybe restrict children vars in creation of leaf since children constraints already does some restrictions
-                        functions = args_in_brackets(function)
+                        functions = args_in_brackets(function)[0]
                         function = functions[0]
 
                     if "??" == function or isinstance(function, list):
@@ -417,8 +426,8 @@ class Sketch:
                             parsed = False
                             break
                         else:
-                            for arg in args:
-                                children.append(Child(arg, "Table"))
+                            for n in range(len(args)):
+                                children.append(Child(args[n], "Table", real[n]))
 
                             if len(children) > 2:
                                 n_children = len(children)
@@ -426,67 +435,67 @@ class Sketch:
 
                     elif "inner_join" == function:
                         n_children = 3
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(args[1], "Table"))
-                        children.append(Child(args[2], "JoinCondition"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(args[1], "Table", real[1]))
+                        children.append(Child(args[2], "JoinCondition", real[2]))
 
                     elif "anti_join" == function:
                         n_children = 3
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(args[1], "Table"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(args[1], "Table", real[1]))
                         if len(args) > 2:
-                            children.append(Child(args[2], "Cols"))
+                            children.append(Child(args[2], "Cols", real[2]))
                         else:
-                            children.append(Child('', "Cols"))
+                            children.append(Child('', "Cols", ''))
 
                     elif "left_join" == function or "union" == function or "semi_join" == function:
                         n_children = 2
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(args[1], "Table"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(args[1], "Table", real[1]))
 
                     elif "intersect" == function:   # TODO test
                         n_children = 3
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(args[1], "Table"))
-                        children.append(Child(args[2], "Col"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(args[1], "Table", real[1]))
+                        children.append(Child(args[2], "Col", real[2]))
 
                     elif "cross_join" == function:
                         n_children = 3
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(args[1], "Table"))
-                        children.append(Child(args[2], "CrossJoinCondition"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(args[1], "Table", real[1]))
+                        children.append(Child(args[2], "CrossJoinCondition", real[2]))
 
                     elif "unite" == function:
                         n_children = 3
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(args[1], "Col"))
-                        children.append(Child(args[2], "Col"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(args[1], "Col", real[1]))
+                        children.append(Child(args[2], "Col", real[2]))
 
                     elif "filter" == function:
                         n_children = 2
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(args[1], "FilterCondition"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(args[1], "FilterCondition", real[1]))
 
                     elif "summarise" in function:
                         n_children = 3
                         arg = check_underscore_args(function, args[1])
                         function = "summarise"
 
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(arg, "SummariseCondition"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(arg, "SummariseCondition", real[1]))
 
                         if len(args) > 2:
-                            children.append(Child(args[2], "Cols"))
+                            children.append(Child(args[2], "Cols", real[2]))
                         else:
-                            children.append(Child('', "Cols"))
+                            children.append(Child('', "Cols", ''))
 
                     elif "mutate" in function:
                         n_children = 2
                         arg = check_underscore_args(function, args[1])
                         function = "mutate"
 
-                        children.append(Child(args[0], "Table"))
-                        children.append(Child(arg, "SummariseCondition"))
+                        children.append(Child(args[0], "Table", real[0]))
+                        children.append(Child(arg, "SummariseCondition", real[1]))
 
                     else:
                         logger.error('Sketch line "%s" could not be parsed', sketch_line)
@@ -597,10 +606,8 @@ class Sketch:
                                         raise RuntimeError("Could not process sketch production")
 
                             elif flag_types and prod_type != "Unknown":       # Hole with known type
-                                if prod_type == "Line":
+                                if prod_type == "Table":
                                     child.line = True
-
-                                elif prod_type == "Table":
                                     prod = spec.get_param_productions()
                                     for p in prod:
                                         child.var.append(p.id)
