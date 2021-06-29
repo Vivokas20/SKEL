@@ -179,10 +179,12 @@ def create_argparser(all_inputs=False):
     g.add_argument('--use-solution-cube', dest='use_cube', action='store_true')
     g.add_argument('--use-solution-loc', dest='use_loc', action='store_true')
 
+    parser.add_argument('--sketch', nargs='?', const='sketch', type=str, help='name of the sketch in the specification file')
+
     return parser
 
 
-def parse_specification(filename):
+def parse_specification(filename, sketch):
     f = open(filename)
 
     spec = yaml.safe_load(f)
@@ -208,7 +210,13 @@ def parse_specification(filename):
         logger.warning('"const" field is deprecated. Please use "constants"')
         spec['constants'] = spec['const']
 
-    for field in ['sketch', 'constants', 'functions', 'columns', 'filters', 'dateorder']:
+    if not sketch:
+        spec[sketch] = None
+    elif sketch not in spec:
+        logger.warning(f'Specified sketch ({sketch}) not in specification file')
+        spec[sketch] = None
+
+    for field in ['constants', 'functions', 'columns', 'filters', 'dateorder']:
         if field not in spec:
             spec[field] = None
 

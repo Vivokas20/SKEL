@@ -102,8 +102,8 @@ class Specification:
                     self.types_by_const[const].append(type)
                     self.consts_by_type[type].append(const)
 
-        if spec['sketch']:
-            self.sketch = Sketch(spec['sketch'])
+        if spec[util.get_config().sketch]:
+            self.sketch = Sketch(spec[util.get_config().sketch])
             self.sketch.sketch_parser(self.inputs, self.all_columns)
             self.min_loc = self.sketch.min_loc
             if self.sketch.max_loc != float('inf'):

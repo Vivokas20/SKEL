@@ -13,6 +13,8 @@ class Config:
     minimum_loc: int
     maximum_loc: int
 
+    sketch: str
+
     subsume_conditions: bool
     transitive_blocking: bool
 
