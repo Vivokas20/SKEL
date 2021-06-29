@@ -147,8 +147,9 @@ def parse_sketch(instances):
                 if not 'sketch_no_summarise' in spec:
                     out['sketch_no_summarise'] = literal(sketch_no_summarise(sketch, spec))
 
-                output = yaml.dump(out, default_flow_style=False, sort_keys=False)
-                f.write("\n" + output)
+                if out != {}:
+                    output = yaml.dump(out, default_flow_style=False, sort_keys=False)
+                    f.write("\n" + output)
 
 def run_get_result():
     # for file in glob.glob('tests-examples/**/**/*.yaml', recursive=True):
@@ -200,4 +201,5 @@ def get_comments(instances):
 
 if __name__ == '__main__':
     # get_comments(glob.glob('tests-examples/textbook/*.yaml'))
-    parse_sketch(['tests-examples/demo/test.yaml'])
+    # parse_sketch(['tests-examples/demo/test.yaml'])
+    parse_sketch(glob.glob('tests-examples/textbook/*.yaml'))

@@ -31,8 +31,8 @@ sql: |
 comment: |
   5.3.3 optimal solution sql
 
-full_sketch: |
-  T1 = filter(flights, origin == 'Los Angeles' & destination == 'Honolulu')
-  T2 = summarise(T1, ??, ??)
-  ??
-#  out = select distinct(ename)
+#full_sketch: |
+#  T1 = filter(flights, origin == 'Los Angeles' & destination == 'Honolulu')
+#  T2 = summarise(T1, ??, ??)
+#  ??
+##  out = select distinct(ename)

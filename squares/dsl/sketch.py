@@ -84,9 +84,9 @@ class Child:
 
 
 class Line:
-    def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None) -> None:
+    def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None, real_function: str = None) -> None:
         self.name = name
-        self.real_root = root
+        self.real_root = real_function
         if isinstance(root, list):
             self.root = root
         else:
@@ -373,6 +373,7 @@ class Sketch:
                     args = args_in_brackets(string)
                     line = line[2].partition("(")
                     function = line[0].replace(" ", "")
+                real_function = function
 
                 if not args and function != "??":
                     logger.error('Sketch line "%s" has missing brackets', sketch_line)
@@ -502,7 +503,7 @@ class Sketch:
                     parsed = False
                     break
 
-                line = Line(self.max_loc, name, function, children, n_children, line_type)
+                line = Line(self.max_loc, name, function, children, n_children, line_type, real_function)
 
                 if self.max_loc != float('inf'):
                     self.lines_encoding[self.max_loc] = line
