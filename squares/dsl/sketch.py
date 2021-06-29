@@ -207,6 +207,9 @@ def redundant_conditions(condition: str) -> List[str]:
     conditions = []
     final = []
 
+    if "str_detect"in condition:    # TODO integrate this
+        return [condition]
+
     if "," in condition:
         conditions = condition.split(",")
 
@@ -225,8 +228,9 @@ def redundant_conditions(condition: str) -> List[str]:
     return final
 
 def redundant_boolean_conditions(condition: str) -> List[str]:
-    if "str_detect" in condition:
+    if "str_detect" in condition:       # TODO integrate this
         return [condition]
+
     separators = ["|", "&"]
     comparators = ["==", "!=", "<=", ">=", "<", ">"]
     final = []
