@@ -17,3 +17,7 @@ comment:
   df1 <- df_comments %>% group_by(dead,parent) %>% summarise(n = n()) %>% ungroup()
   df2 <- df1 %>% filter(n > 10)
   out <- df2 %>% select(parent, count = n) %>% arrange(parent)
+full_sketch: |
+  T1 = summarise(comments, n = n(), (dead, parent))
+  T2 = filter(T1, n > 10)
+  out = select(parent, count = n)

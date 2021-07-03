@@ -1,3 +1,4 @@
+db: tests-examples/kaggle/tables/1_6_X_2.sqlite
 inputs:
   - tests-examples/kaggle/tables/posts_questions.csv
   - tests-examples/kaggle/tables/posts_answers.csv
@@ -8,6 +9,8 @@ constants:
   - bigquery
 columns:
   - tags
+  - id
+  - parent_id
 loc: 1
 sql:
   SELECT a.id, a.body, a.owner_user_id
@@ -19,3 +22,7 @@ comment:
   df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery', negate=TRUE))
   df2 <- anti_join(df_posts_answers, df1, by=c('body','comment_count'), na_matches="never")
   out <- df2 %>% select(id, body, owner_user_id) %>% arrange(id)
+full_sketch: |
+  T1 = cross_join(posts_questions, posts_answers, id == parent_id.other)
+  T2 = filter(T1, str_detect(tags, 'bigquery'))
+  out = select(id.other, body.other, owner_user_id.other)

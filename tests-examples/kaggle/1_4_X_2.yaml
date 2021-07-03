@@ -10,13 +10,17 @@ columns:
   - year
 loc: 2
 sql:
-  SELECT indicator_code, indicator_name, COUNT(1) AS num_rows
+  SELECT indicator_code, COUNT(1) AS num_rows
   FROM `bigquery-public-data.world_bank_intl_education.international_education`
   WHERE year = 2016
-  GROUP BY indicator_name, indicator_code
-  HAVING COUNT(1) >= 175
+  GROUP BY indicator_code
+  HAVING COUNT(1) >= 5
   ORDER BY COUNT(1) DESC
 comment:
   df1 <- df_international_education_2 %>% group_by(indicator_code,year) %>% summarise(n = n()) %>% ungroup()
   df2 <- df1 %>% filter(n >= 5 & n < 2016)
   out <- df2 %>% select(indicator_code, num_rows = n) %>% arrange(indicator_code)
+full_sketch: |
+  T1 = summarise(international_education_2, n = n(), (indicator_code,year))
+  T2 = filter(T1, n >= 5 & year == 2016)
+  out = select(indicator_code, num_rows = n) order by(num_rows)

@@ -18,3 +18,6 @@ sql:
 comment:
   df1 <- df_transactions %>% group_by(block_timestamp,size) %>% summarise(n = n()) %>% ungroup()
   out <- df1 %>% select(transactions = n, trans_date = block_timestamp) %>% arrange(transactions)
+full_sketch: |
+  T1 = summarise(transactions, n = n(), (block_timestamp,size))
+  out = select(transactions = n, trans_date = block_timestamp) order by(trans_date)

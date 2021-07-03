@@ -15,3 +15,6 @@ sql:
 comment:
   df1 <- df_hacker_news_full %>% filter(type == 'job')
   out <- df1 %>% select(score, title) %>% arrange(score)
+full_sketch: |
+  T1 = filter(hacker_news_full, type == 'job')
+  out = select(score, title) order by(score)

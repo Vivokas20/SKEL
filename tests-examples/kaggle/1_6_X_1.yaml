@@ -15,3 +15,6 @@ sql:
 comment:
   df1 <- df_posts_questions %>% filter(str_detect(tags, 'bigquery'))
   out <- df1 %>% select(id, title, owner_user_id) %>% arrange(id)
+full_sketch: |
+  T1 = filter(posts_questions, str_detect(tags, 'bigquery'))
+  out = select(id, title, owner_user_id)

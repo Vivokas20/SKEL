@@ -13,3 +13,6 @@ sql:
 comment:
   df1 <- df_global_air_quality %>% filter(country == 'US')
   out <- df1 %>% select(city) %>% arrange(city)
+full_sketch: |
+  T1 = filter(global_air_quality, country == 'US')
+  out = select(city)

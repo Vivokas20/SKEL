@@ -5,12 +5,19 @@ constants:
   - TRUE
 columns:
   - deleted
+functions:
+  - n
 loc: 2
 sql:
   SELECT COUNT(1) AS num_deleted_posts
   FROM `bigquery-public-data.hacker_news.comments`
   WHERE deleted = True
 comment:
+  DSL does not generate everything
   df1 <- df_comments %>% group_by(author) %>% summarise(n = n()) %>% ungroup()
   df2 <- df1 %>% filter(n > 10)
   out <- df2 %>% select(author, NumPosts = n) %>% arrange(parent)
+#full_sketch: |
+#  T1 = summarise(comments_2, n = n())
+#  T2 = filter(T1, deleted > 10)
+#  out = select(author, NumPosts = n)

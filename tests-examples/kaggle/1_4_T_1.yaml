@@ -13,3 +13,6 @@ sql:
 comment:
   df1 <- df_comments_4 %>% group_by(day_of_week,number_of_vehicle_forms_submitted_all) %>% summarise(n = n()) %>% ungroup()
   out <- df1 %>% select(num_accidents = n, day_of_week) %>% arrange(num_accidents)
+full_sketch: |
+  T1 = summarise(comments_4, n = n(), (day_of_week,number_of_vehicle_forms_submitted_all))
+  out = select(num_accidents = n, day_of_week) order by(num_accidents)

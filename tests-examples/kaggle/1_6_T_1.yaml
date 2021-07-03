@@ -16,3 +16,7 @@ comment:
   df1 <- inner_join(df_sample_files, df_licenses, na_matches="never")
   df2 <- df1 %>% group_by(id,license) %>% summarise(n = n()) %>% ungroup()
   out <- df2 %>% select(license, number_of_files = n) %>% arrange(license)
+full_sketch: |
+  T1 = natural_join(sample_files, licenses)
+  T2 = summarise(T1, n = n(), license)
+  out = select(license, number_of_files = n) order by(number_of_files)

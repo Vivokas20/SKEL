@@ -13,3 +13,6 @@ sql:
 comment:
   df1 <- df_global_air_quality_2 %>% filter(unit == 'ppm')
   out <- df1 %>% select(country) %>% arrange(country)
+full_sketch: |
+  T1 = filter(global_air_quality_2, unit == 'ppm')
+  out = select(country)
