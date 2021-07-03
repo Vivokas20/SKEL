@@ -1,8 +1,0 @@
-data/
-plots/
-tables/
-.RData
-.Rhistory
-.ipynb_checkpoints/
-metrics_cache*
-data.tar.xz
