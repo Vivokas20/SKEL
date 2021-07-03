@@ -41,3 +41,5 @@ sql: |
                          AND F2.arrives < '18:00'))
 comment: |
   5.3.9 optimal solution sql
+
+  EMPTY OUTPUT

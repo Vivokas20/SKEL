@@ -22,8 +22,9 @@ sql: |
 comment: |
   5.3.6 optimal solution sql
 
-#full_sketch: |
-#  T1 = filter(flights, origin == 'Los Angeles' & destination == 'Chicago')
-#  T2 = summarise(T1, ??, ??)
-#  ??
-##  out = select(aid)
+full_sketch: |
+  T1 = filter(flights, origin == 'Los Angeles' & destination == 'Chicago')
+  T2 = summarise(T1, distance = min(distance))
+  T3 = natural_join(aircraft, T2)
+  T4 = filter(T3, crusingrange > distance)
+  out = select(aid)

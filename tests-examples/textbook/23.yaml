@@ -12,6 +12,12 @@ functions:
 columns:
   - cost
   - color
+sql: |
+  SELECT S.sname, MAX(C.cost) as MaxCost
+  FROM Suppliers S, Parts P, Catalog C
+  WHERE P.pid = C.pid AND C.sid = S.sid
+  GROUP BY S.sname, S.sid
+  HAVING ANY (P.color=’green’) AND ANY (P.color = ’red’)
 comment: |
   5.2.11 optimal solution
 

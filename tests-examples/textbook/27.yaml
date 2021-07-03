@@ -1,13 +1,13 @@
 db: tests-examples/textbook/tables/27.sqlite
 inputs:
   - tests-examples/textbook/tables/employees.txt
-  - tests-examples/textbook/tables/aircraft.txt
   - tests-examples/textbook/tables/certified.txt
+  - tests-examples/textbook/tables/aircraft.txt
 output: tests-examples/textbook/tables/27.out
 constants:
   - 1000
 functions:
-  - mean
+  - avg
 columns:
   - salary
   - crusingrange
@@ -27,3 +27,10 @@ sql: |
     ) AS Temp
 comment: |
   5.3.4 optimal solution sql
+  all_equal -> False although equal tables
+
+# full_sketch: |
+#   T1 = natural_join(employees, certified, aircraft)
+#   T2 = filter(T1, crusingrange > 1000)
+#   T3 = summarise(T2, meansalary = mean(salary), (aid, aname))
+#   out = select(aname, meansalary)
