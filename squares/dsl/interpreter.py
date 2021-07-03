@@ -74,6 +74,8 @@ class SquaresInterpreter(LineInterpreter):
 
     def try_execute(self, script):
         try:
+            # print("SCRIPT_EXEC")
+            # print(script)
             # print(script, end='')
             robjects.r(script)
         except (Exception, RRuntimeError) as e:
@@ -223,7 +225,7 @@ class SquaresInterpreter(LineInterpreter):
         sketch_order = None
         if self.problem.sketch and self.problem.sketch.select:
             if "cols" in self.problem.sketch.select:
-                sketch_cols = self.problem.sketch.select["cols"]
+                sketch_cols = tuple(self.problem.sketch.select["cols"])
             if "distinct" in self.problem.sketch.select:
                 sketch_distinct = self.problem.sketch.select["distinct"]
             if "arrange" in self.problem.sketch.select:
@@ -234,7 +236,11 @@ class SquaresInterpreter(LineInterpreter):
         e_cols = list(robjects.r(f'colnames({expect})'))
         expected_n = int(robjects.r(f'nrow({expect})')[0])
         result = None
-        for combination in permutations(a_cols, len(e_cols)):
+        if sketch_cols:
+            selected_columns = [sketch_cols]
+        else:
+            selected_columns = permutations(a_cols, len(e_cols))
+        for combination in selected_columns:
             for d in sketch_distinct if sketch_distinct is not None else ['', ' %>% distinct()']:
                 _script = f'out <- {actual} %>% select({", ".join(map(lambda pair: f"{pair[0]} = {pair[1]}" if pair[0] != pair[1] else pair[0], zip(e_cols, combination)))}){d}'
                 try:

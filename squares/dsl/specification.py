@@ -321,9 +321,9 @@ class Specification:
         add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join')
         add_is_not_parent_if_enabled(pred_spec, 'natural_join3', 'natural_join4')
         add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'anti_join')
-        add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join')
-        add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join3')
-        add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join4')
+        # add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join')
+        # add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join3')
+        # add_is_not_parent_if_enabled(pred_spec, 'anti_join', 'natural_join4')
 
         for join in ['natural_join4', 'natural_join3', 'natural_join', 'anti_join', 'semi_join', 'left_join']:
             if join not in util.get_config().disabled:

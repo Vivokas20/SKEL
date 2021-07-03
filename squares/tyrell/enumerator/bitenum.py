@@ -209,6 +209,8 @@ class BitEnumerator(Enumerator):
 
         self.blocked_models = set()
 
+        # print(self.z3_solver.sexpr())
+
         logger.debug('Enumerator for loc %d constructed using %d variables and %d constraints', self.loc, self.num_variables,
                      self.num_constraints)
 
@@ -437,13 +439,14 @@ class BitEnumerator(Enumerator):
                             used.append(var)
 
                             if var in self.line_productions_by_id:  # Case production is line
-                                line = self.line_productions_by_id[var].line
-                                ctr.append(z3.And(r.children[c].var == var,
-                                                  r.children[c].bitvec == self.roots[line].bitvec,
-                                                  r.children[c].bitvec2 == self.mk_bitvec(0)))
-                                # if a previous line is used, then its flag must be true
-                                line_var = r.children[c].lines[line]
-                                self.assert_expr(line_var == (r.children[c].var == var))
+                                if p.rhs[c].name == "Table":
+                                    line = self.line_productions_by_id[var].line
+                                    ctr.append(z3.And(r.children[c].var == var,
+                                                      r.children[c].bitvec == self.roots[line].bitvec,
+                                                      r.children[c].bitvec2 == self.mk_bitvec(0)))
+                                    # if a previous line is used, then its flag must be true
+                                    line_var = r.children[c].lines[line]
+                                    self.assert_expr(line_var == (r.children[c].var == var))    # TODO maybe stop repeating this constraint for different roots
 
                             else:  # Case production is enum/param
                                 leaf_p = self.spec.get_production_or_raise(var)

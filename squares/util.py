@@ -184,7 +184,7 @@ def create_argparser(all_inputs=False):
     return parser
 
 
-def parse_specification(filename, sketch):
+def parse_specification(filename, sketch = None):
     f = open(filename)
 
     spec = yaml.safe_load(f)

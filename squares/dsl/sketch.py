@@ -286,6 +286,7 @@ class Sketch:
         self.lines = sketch.splitlines()
         self.min_loc = 0
         self.max_loc = 0
+        self.filled = False
         self.lines_encoding = {}
         self.select = {}
         self.free_children = []
@@ -529,6 +530,8 @@ class Sketch:
             raise RuntimeError("Could not parse sketch")
 
     def fill_vars(self, spec, line_productions) -> None:
+        if self.filled:
+            return
         for line in self.lines_encoding.values():
             if line.line_type != "Empty":
                 for root_name in line.root:
@@ -642,5 +645,5 @@ class Sketch:
                         elif "??" not in child.names:
                             child.var = children            # this makes var like [[],[]]
                         child.list_vars = child.var
-
+        self.filled = True
         logger.debug(self.lines_encoding)
