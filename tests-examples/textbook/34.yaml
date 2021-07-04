@@ -35,5 +35,5 @@ comment: |
 full_sketch: |
   T1 = mutate(employees, meansalary = mean(salary))
   T2 = anti_join(employees, certified)
-  T3 = cross_join(T1, T2, salary <= salary.other & meansalary <= salary.other)
-  out = select distinct(ename, salary) order by(ename)
+  T3 = cross_join(T1, T2, meansalary <= salary.other)
+  out = select distinct(ename.other, salary.other) order by(ename)

@@ -35,6 +35,6 @@ comment: |
 full_sketch: |
   T1 = summarise(certified, n=n(), eid)
   T2 = natural_join(aircraft, certified, T1)
-  T3 = filter(T2, crusingrange <= 3 | n > 3)
+  T3 = filter(T2, n > 3)
   T4 = summarise(T3, crusingrange = max(crusingrange), eid)
-  out = select(eid, maxcrusingrange = crusingrange) order by(eid)
+  out = select(eid, crusingrange)
