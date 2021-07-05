@@ -17,6 +17,14 @@ solution:
   - filter
   - filter
   - inner_join
+sql: |
+  SELECT DISTINCT C.sid
+  FROM Catalog C, Parts P
+  WHERE C.pid = P.pid AND P.color = ‘Red’
+  INTERSECT
+  SELECT DISTINCT C1.sid
+  FROM Catalog C1, Parts P1
+  WHERE C1.pid = P1.pid AND P1.color = ‘Green’
 comment: |
   # 5.2.8 optimal solution
 
@@ -29,5 +37,5 @@ full_sketch: |
   T1 = natural_join(20-1, 20-2, 20-3)
   T2 = filter(T1, color == 'red')
   T3 = filter(T1, color == 'green')
-  T4 = inner_join(T2, T3, (S_key, S_name))
-  out = select distinct(S_name) order by(S_name)
+  T4 = inner_join(T2, T3, S_name)
+  out = select distinct(S_name)

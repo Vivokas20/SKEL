@@ -75,7 +75,6 @@ class SquaresInterpreter(LineInterpreter):
     def try_execute(self, script):
         try:
             # print("SCRIPT_EXEC")
-            # print(script)
             # print(script, end='')
             robjects.r(script)
         except (Exception, RRuntimeError) as e:

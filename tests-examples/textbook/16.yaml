@@ -6,8 +6,6 @@ inputs:
 output: tests-examples/textbook/tables/16.out
 constants:
   - AWS
-functions:
-  - n
 columns:
   - S_name
 bools:
@@ -18,6 +16,15 @@ solution:
   - natural_join4
   - summarise
   - anti_join
+sql: |
+  SELECT P.pname
+  FROM Parts P, Catalog C, Suppliers S
+  WHERE P.pid = C.pid AND C.sid = S.sid
+  AND S.sname = ‘Acme Widget Suppliers’
+  AND NOT EXISTS ( SELECT *
+  FROM Catalog C1, Suppliers S1
+  WHERE P.pid = C1.pid AND C1.sid = S1.sid AND
+  S1.sname <> ‘Acme Widget Suppliers’ )
 comment: |
   5.2.4 optimal solution
 
@@ -52,8 +59,7 @@ comment: |
   out = select distinct(P_name)
 
 full_sketch: |
-  T1 = natural_join(16-1, 16-3)
+  T1 = natural_join(16-1, 16-2, 16-3)
   T2 = filter(T1, S_name != 'AWS')
-  T3 = anti_join(16-2, T2)
-  T4 = summarise(T3, n = n(), P_name)
-  out = select distinct(P_name)
+  T3 = anti_join(T1, T2, (P_id, P_name))
+  out = select distinct (P_name)
