@@ -31,16 +31,17 @@ class Node:
 
 
 class Root(Node):
-    def __init__(self, enumerator: 'BitEnumerator', id: int, sketch_var = None, line_type: str = None, n_children = None, options = None) -> None:
+    def __init__(self, enumerator: 'BitEnumerator', id: int, line = None) -> None:
         super().__init__()
+        # sketch_var = None, line_type: str = None, n_children = None, options = None
         self.id = id
         self.children = []
         self.empty_children = []
-        self.line_type = line_type
-        self.sketch_var = sketch_var
-        self.hole = False
-        self.n_children = n_children
-        self.options = options
+        self.line_type = line.line_type
+        self.sketch_var = line.var
+        self.hole = line.line_free_hole
+        self.n_children = line.n_children
+        self.options = line.options
         self.type = self._create_type_variable(enumerator)
         self.var = self._create_root_variable(enumerator)
         self.bitvec = enumerator.create_variable(f'bv_{id}', z3.BitVec, enumerator.specification.n_columns)
@@ -88,8 +89,7 @@ class Leaf(Node):
         enumerator.variables.append(var)
 
         ctr = []
-
-        if self.sketch_var and self.parent.line_type != "Incomplete":
+        if self.sketch_var and (self.parent.line_type is None or (self.parent.line_type == "Free" and not self.parent.hole) or (self.parent.line_type == "Free" and self.sketch_var[0] == 0)):
             for variable in self.sketch_var:
                 if isinstance(variable, list):
                     for v in variable:
@@ -99,8 +99,7 @@ class Leaf(Node):
                     if (var == variable) not in ctr:
                         ctr.append(var == variable)
 
-        if not self.sketch_var or self.parent.line_type == "Incomplete":# and self.sketch_var[0]:
-            self.parent.hole = True
+        else:
             for p in enumerator.spec.productions():
                 if not p.is_function() or p.lhs.name == 'Empty':  # FIXME: improve empty integration
                     ctr.append(var == p.id)
@@ -182,6 +181,8 @@ class BitEnumerator(Enumerator):
         if self.sketch:
             self.sketch.fill_vars(self.spec, self.line_productions)
             self.roots, self.leaves = self.build_trees_with_sketch()
+            self.create_incomplete_free_hole_children_constraints()
+            self.create_sketch_free_lines_constraints()
         else:
             self.roots, self.leaves = self.build_trees()
 
@@ -284,7 +285,7 @@ class BitEnumerator(Enumerator):
             else:
                 line = Line(line_type = "Empty")
 
-            n = Root(self, i, line.var, line.line_type, line.n_children, line.options)
+            n = Root(self, i, line)
 
             for x in range(self.max_children):
                 if line.line_type != "Empty":
@@ -312,7 +313,6 @@ class BitEnumerator(Enumerator):
                 leaves.append(child)
 
             nodes.append(n)
-        # TODO check bitvectors of assigned vars
         # print("Nodes and Leaves")
         # print(nodes)
         # print(leaves)
@@ -354,6 +354,67 @@ class BitEnumerator(Enumerator):
                     if p.is_function():
                         self.assert_expr(z3.Implies(r.var == p.id, r.type == t), f'type_constraint_{r.id}_{t}_{p.id}')
 
+    def create_sketch_free_lines_constraints(self) -> None:
+        """If there is one or more free lines those variables need to be used at least once"""
+        for i in range(len(self.sketch.free_lines)):
+            l = self.sketch.free_lines[i]
+            ctr = []
+            for r in self.roots:
+                first = True
+                if r.id not in self.sketch.lines_encoding:
+                    ctr_r = []
+                    ctr1 = []
+                    if l.var:
+                        for v in l.var:
+                            ctr1.append(r.var == v)
+                    ctr_r.append(z3.Or(ctr1))
+
+                    for x in range(self.max_children):
+                        ctr1 = []
+                        child_line = l.children[x]
+                        child = r.children[x]
+                        if child_line.line and first:
+                            first = False
+                            for line in range(0, r.id - 1):
+                                line_productions = self.line_productions[line]
+                                for line_production in line_productions:
+                                    child_line.var.append(line_production.id)
+                        if child_line.var:
+                            for variable in child_line.var:
+                                if isinstance(variable, list):
+                                    for v in variable:
+                                        if (child.var == v) not in ctr1:
+                                            ctr1.append(child.var == v)
+                                else:
+                                    if (child.var == variable) not in ctr1:
+                                        ctr1.append(child.var == variable)
+                        ctr_r.append(z3.Or(ctr1))
+
+                    ctr.append(z3.And(ctr_r))
+
+            self.assert_expr(z3.Or(ctr), f'sketch_free_line_{i}_is_used')
+            print(self.z3_solver.sexpr())
+
+    def create_incomplete_free_hole_children_constraints(self) -> None:
+        for r in self.roots:
+            if r.line_type == "Incomplete" or r.hole:
+                children = len(r.children)
+                if r.line_type == "Free":
+                    children = r.n_children
+
+                ctr = []
+                for v in r.children[0].sketch_list_vars:
+                    ctr1 = []
+                    for c in range(children):
+                        for var in v:
+                            ctr1.append(r.children[c].var == var)
+                    ctr.append(z3.Or(ctr1))
+                if ctr:
+                    if len(ctr) > 1:
+                        self.assert_expr(z3.And(ctr), f'children_options_{r.id}')
+                    else:
+                        self.assert_expr(ctr[0], f'children_options_{r.id}')
+
     def create_all_children_constraints(self) -> None:
         for r in self.roots:
             if len(r.empty_children) > 0:
@@ -362,7 +423,7 @@ class BitEnumerator(Enumerator):
                         continue
                     aux = r.var == p.id
 
-                    for c in r.empty_children:  # TODO Flag in each child with partially empty?
+                    for c in r.empty_children:
                         ctr = []
                         # If production has less arguments than the tree has children than all other children are 0
                         if c >= len(p.rhs):
@@ -446,7 +507,7 @@ class BitEnumerator(Enumerator):
                                                       r.children[c].bitvec2 == self.mk_bitvec(0)))
                                     # if a previous line is used, then its flag must be true
                                     line_var = r.children[c].lines[line]
-                                    self.assert_expr(line_var == (r.children[c].var == var))    # TODO maybe stop repeating this constraint for different roots
+                                    self.assert_expr(line_var == (r.children[c].var == var))
 
                             else:  # Case production is enum/param
                                 leaf_p = self.spec.get_production_or_raise(var)
@@ -464,24 +525,6 @@ class BitEnumerator(Enumerator):
 
     def create_children_constraints(self) -> None:
         for r in self.roots:
-            if r.line_type == "Incomplete" or r.line_type == "Free" and r.hole:
-                children = len(r.children)
-                if r.line_type == "Free":
-                    children = r.n_children
-
-                ctr = []
-                for v in r.children[0].sketch_list_vars:
-                    ctr1 = []
-                    for c in range(children):
-                        for var in v:
-                            ctr1.append(r.children[c].var == var)
-                    ctr.append(z3.Or(ctr1))
-                if ctr:
-                    if len(ctr) > 1:
-                        self.assert_expr(z3.And(ctr), f'children_options_{r.id}')
-                    else:
-                        self.assert_expr(ctr[0], f'children_options_{r.id}')
-
             if r.options:       # has more than one root
                 if r.line_type == "Free":
                     for v in r.sketch_var:

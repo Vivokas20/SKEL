@@ -19,27 +19,27 @@ sql: |
 #sketch: |
 #  T1 = ??(??, courseId == 11)
 #  T2 = summarise(T1, grade = min(grade))
-#  out = select(mingrade)
+#  out = select(grade)
 #sketch: |
 #  T1 = [filter,anti_join](grades, ??)
 #  T2 = summarise(T1, grade = min(grade))
-#  out = select(mingrade)
+#  out = select(grade)
 
 #sketch: |
 #  T1 = filter(grades, [courseId == 11, courseId >= 11])
 #  T2 = summarise(T1, grade = min(grade))
-#  out = select(mingrade)
+#  out = select(grade)
 
 #sketch: |
 #  T1 = [filter,anti_join](grades, courseId == 11)
 #  T2 = summarise(T??, grade = min(grade))
-#  out = select(mingrade)
+#  out = select(grade)
 #sketch: |
 #  T1 = ??(grades, [courseId == 11, courseId >= 11], ??*)
 #  T2 = summarise(T1, grade = min(grade))
-#  out = select(mingrade)
+#  out = select(grade)
 
-full_sketch: |
-  T1 = filter(grades, courseId == 11)
-  T2 = summarise(T1, grade = min(grade))
-  out = select(mingrade)
+#full_sketch: |
+#  T1 = filter(grades, courseId == 11)
+#  T2 = summarise(T1, grade = min(grade))
+#  out = select(grade)

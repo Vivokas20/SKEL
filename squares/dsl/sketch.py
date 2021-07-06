@@ -52,7 +52,7 @@ class Child:
             self.type = child_type
 
             if child_type == "Table" and name != "??":
-                if name == "T??":     # TODO implement and test
+                if name == "T??":
                     self.names[n] = "??"
                     self.type = "Line"
                     return
@@ -84,7 +84,8 @@ class Child:
 
 
 class Line:
-    def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None, real_function: str = None) -> None:
+    def __init__(self, line_id: float = None, name: str = None, root: str = None, children: List[Child] = None, n_children: int = None, line_type: str = None, real_function: str = None, line_free_hole: bool = False) -> None:
+        self.line_id = line_id
         self.name = name
         self.real_root = real_function
         self.options = False
@@ -105,6 +106,7 @@ class Line:
                         t = c.type
                     self.children_types.append(t)
         self.line_type = line_type
+        self.line_free_hole = line_free_hole
         self.var = []
         if name and line_id != float('inf'):
             lines_names[line_id] = name     # TODO add name even if we don't know position
@@ -291,6 +293,7 @@ class Sketch:
         self.select = {}
         self.free_children = []
         self.free_lines = []
+        self.all_lines = []
         self.aggrs = []
         self.flag_types = flag_types
 
@@ -327,13 +330,6 @@ class Sketch:
                                 new_args.append(arg)
 
                         if new_args and not hole:
-                        # if new_args:        # TODO take order into account
-                            # if hole and len(columns_names) != len(new_args):
-                            #     e_cols = [x for x in columns_names if x not in new_args]
-                            #     perms = util.get_permutations(e_cols, len(columns_names)-len(new_args))
-                            #     new_args = []
-                            #     for perm in perms:
-                            #         new_args.append(perm)
                             self.select["arrange"] = new_args
                         line = line[0]
                     except:
@@ -374,6 +370,7 @@ class Sketch:
 
             else:
                 line_type = None
+                line_free_hole = False
                 self.min_loc += 1
                 self.max_loc += 1
                 line = sketch_line.partition("=")
@@ -416,8 +413,9 @@ class Sketch:
                                 elif "??+" in arg:
                                     line_type = "Incomplete"
                                 else:
+                                    if "??" in arg and line_type == "Free":
+                                        line_free_hole = True
                                     children.append(Child(arg, "Unknown"))
-                            # TODO parse free children and children that we know were they are. we can also roughly know the place in cases of ??*+
                         else:
                             children = None
                             function = None
@@ -458,7 +456,7 @@ class Sketch:
                         children.append(Child(args[0], "Table", real[0]))
                         children.append(Child(args[1], "Table", real[1]))
 
-                    elif "intersect" == function:   # TODO test
+                    elif "intersect" == function:
                         n_children = 3
                         children.append(Child(args[0], "Table", real[0]))
                         children.append(Child(args[1], "Table", real[1]))
@@ -517,12 +515,14 @@ class Sketch:
                     parsed = False
                     break
 
-                line = Line(self.max_loc, name, function, children, n_children, line_type, real_function)
+                line = Line(self.max_loc, name, function, children, n_children, line_type, real_function, line_free_hole)
 
                 if self.max_loc != float('inf'):
                     self.lines_encoding[self.max_loc] = line
-                else:
+                elif line.line_type != "Empty":
                     self.free_lines.append(line)
+
+                self.all_lines.append(line)
 
                 logger.debug("Sketch creation: " + str(line))
 
@@ -532,7 +532,7 @@ class Sketch:
     def fill_vars(self, spec, line_productions) -> None:
         if self.filled:
             return
-        for line in self.lines_encoding.values():
+        for line in self.all_lines:
             if line.line_type != "Empty":
                 for root_name in line.root:
                     if root_name != "??":
@@ -618,9 +618,13 @@ class Sketch:
                             elif flag_types and prod_type != "Unknown":       # Hole with known type
                                 if prod_type == "Table":
                                     child.line = True
+
                                     prod = spec.get_param_productions()
                                     for p in prod:
                                         child.var.append(p.id)
+
+                                elif prod_type == "Line":
+                                    child.line = True
 
                                 else:
                                     prod = spec.get_productions_with_lhs(prod_type)
@@ -646,4 +650,4 @@ class Sketch:
                             child.var = children            # this makes var like [[],[]]
                         child.list_vars = child.var
         self.filled = True
-        logger.debug(self.lines_encoding)
+        logger.debug(self.all_lines)

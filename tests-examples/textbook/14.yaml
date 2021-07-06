@@ -15,6 +15,15 @@ solution:
   - natural_join3
   - summarise
   - filter
+sql: |
+  SELECT S.sname
+  FROM Suppliers S
+  WHERE NOT EXISTS (( SELECT P.pid
+  FROM Parts P )
+  EXCEPT
+  ( SELECT C.pid
+  FROM Catalog C
+  WHERE C.sid = S.sid ))
 comment: |
   5.2.2 optimal solution
 
