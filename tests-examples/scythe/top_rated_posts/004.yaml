@@ -22,3 +22,7 @@ comment: |
   df1 <- df_i004 %>% group_by(id) %>% summarise(rev = max(rev)) %>% ungroup()
   df2 <- inner_join(df_i004, df1)
   out <- df2 %>% select(id, rev, content) %>% arrange(id)
+full_sketch: |
+  T1 = summarise(i004, rev = max(rev), id)
+  T2 = natural_join(i004, T1)
+  out = select(id, rev, content)

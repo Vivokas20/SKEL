@@ -21,3 +21,8 @@ comment: |
   df2 <- inner_join(df_i032, df1, by=c('Section'), suffix = c('', '.other'))
   df3 <- df2 %>% filter(Status == 'Active' & Status != 'Inactive')
   out <- df3 %>% select(Section, Count, Count.other) %>% arrange(Section)
+full_sketch: |
+  T1 = filter(i032, Status == 'Active')
+  T2 = filter(i032, Status == 'Inactive')
+  T3 = inner_join(T1, T2, Section)
+  out = select(Section, Count, Count.other)

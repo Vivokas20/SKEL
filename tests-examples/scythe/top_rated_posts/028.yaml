@@ -1,7 +1,7 @@
 db: tests-examples/scythe/top_rated_posts/tables/028.sqlite
 inputs:
-  - tests-examples/scythe/top_rated_posts/tables/i028_1.csv
   - tests-examples/scythe/top_rated_posts/tables/i028_2.csv
+#  - tests-examples/scythe/top_rated_posts/tables/i028_1.csv
 output: tests-examples/scythe/top_rated_posts/tables/o028.csv
 functions:
   - concat
@@ -21,3 +21,6 @@ comment: |
   df1 <- inner_join(input2, input1)
   df2 <- df1 %>% group_by(PID) %>% summarise(concatDesc = string_agg(Desc, ' ')) %>% ungroup()
   out <- df2 %>% select(PID, concatDesc)
+full_sketch: |
+  T1 = summarise(i028_2, concatDesc = string_agg(Desc, ' '), PID)
+  out = select(PID, concatDesc) order by(PID)

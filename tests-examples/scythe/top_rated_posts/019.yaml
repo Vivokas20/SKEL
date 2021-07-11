@@ -18,3 +18,7 @@ comment: |
   df1 <- df_i019 %>% group_by(age) %>% summarise(n = n()) %>% ungroup()
   df2 <- inner_join(df_i019, df1)
   out <- df2 %>% select(id, age, n) %>% arrange(id)
+full_sketch: |
+  T1 = summarise(i019, n = n(), age)
+  T2 = inner_join(i019, T1, age)
+  out = select(id, age, n)

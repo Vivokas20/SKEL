@@ -26,3 +26,7 @@ comment: |
   df1 <- input1 %>% group_by(username) %>% summarise(maxtime_stamp = max(time_stamp))
   df2 <- inner_join(input1, df1, by=c('username' = 'username','time_stamp' = 'maxtime_stamp'))
   out <- df2 %>% ungroup() %>% select(username,ip,time_stamp) %>% distinct()
+full_sketch: |
+  T1 = summarise(i009, maxtime_stamp = max(time_stamp), username)
+  T2 = inner_join(i009, T1, (username = username,time_stamp = maxtime_stamp))
+  out = select(username, ip, time_stamp)

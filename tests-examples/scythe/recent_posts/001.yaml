@@ -32,5 +32,9 @@ comment: |
   df3 <- bind_rows(df2, input1)
   df4 <- df3 %>% filter(!is.na(partner_company))
   out <- df4 %>% select(Company = partner_company, id_demand) %>% distinct() %>% arrange(Company)
-
-
+full_sketch: |
+  ??*
+  T1 = filter(001, !is.na(partner_company))
+  T2 = filter(001, !is.na(concurrent_company))
+  ??*
+#  out = select(Company, id_demand) order by(Company)

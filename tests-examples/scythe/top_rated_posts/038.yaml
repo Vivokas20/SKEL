@@ -25,3 +25,8 @@ comment: |
   df2 <- inner_join(df_i038, df1)
   df3 <- df2 %>% filter(n > 1)
   out <- df3 %>% select(id, name, city) %>% arrange(id)
+full_sketch: |
+  T1 = summarise(i038, n = n(), (name, city))
+  T2 = filter(T1, n > 1)
+  T3 = natural_join(i038, T2)
+  out = select(id, name, city)

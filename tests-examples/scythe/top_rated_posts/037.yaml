@@ -21,3 +21,7 @@ comment: |
   df1 <- df_i037 %>% group_by(c2) %>% summarise(c1 = min(c1)) %>% ungroup()
   df2 <- inner_join(df_i037, df1)
   out <- df2 %>% select(c1, c2, c3) %>% arrange(c1)
+full_sketch: |
+  T1 = summarise(i037, c1 = min(c1), c2)
+  T2 = natural_join(i037, T1)
+  out = select(c1, c2, c3)

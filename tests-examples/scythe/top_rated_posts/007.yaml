@@ -24,3 +24,7 @@ comment: |
   df1 <- input1 %>% group_by(home, player) %>% summarise(maxdatetime = max(datetime))
   df2 <- inner_join(input1, df1, by=c('home' = 'home','datetime' = 'maxdatetime'), suffix = c("", ".other"))
   out <- df2 %>% ungroup() %>% select(id,home,datetime,player,resource) %>% distinct()
+full_sketch: |
+  T1 = summarise(i007, maxdatetime = max(datetime), home)
+  T2 = inner_join(i007, T1, (home = home,datetime = maxdatetime))
+  out = select(id, home, datetime, player, resource)

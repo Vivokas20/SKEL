@@ -50,3 +50,8 @@ comment: |
   df2 <- full_join(df1, df1, by=character(), suffix = c("", ".other")) %>% filter(n > n.other)
   df3 <- df2 %>% group_by(c) %>% summarise(n = n()) %>% ungroup()
   out <- df3 %>% select(c) %>% arrange(c)
+full_dsl_sketch: |
+  T1 = summarise(i039, n = n(), c)
+  T2 = summarise(T1, maxc = max(c))
+  T3 = inner_join(T1, T2, n = maxc)
+  out = select(c)

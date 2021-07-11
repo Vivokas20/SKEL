@@ -18,3 +18,6 @@ comment: |
 
   df34 <- input1 %>% group_by(UserId) %>% summarise(concatAlias = string_agg(Alias, ', ')) %>% ungroup()
   df35 <- df34 %>% select(UserId, concatAlias) %>% distinct()
+full_sketch: |
+  T1 = summarise(i049, concatAlias = string_agg(Alias, ', '), UserId)
+  out = select(UserId, concatAlias)

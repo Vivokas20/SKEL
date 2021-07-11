@@ -4,6 +4,8 @@ inputs:
 output: tests-examples/scythe/top_rated_posts/tables/o024.csv
 functions:
   - sum
+columns:
+  - Sales
 dateorder: dmy
 loc: 2
 sql: |
@@ -16,3 +18,7 @@ comment: |
   df1 <- input1 %>% mutate(year = year(date), month = month(date, label=T))
   df2 <- df1 %>% group_by(month, year) %>% summarise(Sales = sum(Sales)) %>% ungroup()
   out <- df2 %>% select(month, year, sales = Sales)
+full_dsl_sketch: |
+  T1 = mutate(i024, (year = year(date), month = month(date, label=T)))
+  T2 = summarise(T1, sumSales = sum(Sales), (month, year))
+  out = select(month, year, sales)

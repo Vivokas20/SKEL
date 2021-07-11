@@ -3,7 +3,7 @@ inputs:
   - tests-examples/scythe/top_rated_posts/tables/i031.csv
 output: tests-examples/scythe/top_rated_posts/tables/o031.csv
 functions:
-  - n
+  - row_number
 constants:
   - Beta
 columns:
@@ -25,3 +25,7 @@ comment: |
   df2 <- df1 %>% filter(name == 'Beta')
   df3 <- df2 %>% group_by(id,name) %>% summarise(n = n()) %>% ungroup()
   out <- df3 %>% select(id, n, name) %>% arrange(id)
+full_sketch: |
+  T1 = mutate(i031, row_number_ = row_number())
+  T2 = filter(T1, name == 'Beta')
+  out = select(id, row_number_, name)

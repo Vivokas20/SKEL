@@ -26,3 +26,7 @@ comment: |
   df1 <- df_i048 %>% group_by(CName) %>% summarise(AddressID = min(AddressID)) %>% ungroup()
   df2 <- inner_join(df_i048, df1)
   out <- df2 %>% select(CName, minAddressID = AddressID, AddressLine) %>% arrange(CName)
+full_sketch: |
+  T1 = summarise(i048, AddressID = min(AddressID), CName)
+  T2 = natural_join(i048, T1)
+  out = select(CName, AddressID, AddressLine)

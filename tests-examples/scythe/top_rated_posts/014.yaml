@@ -18,3 +18,6 @@ comment: |
 
   df1 <- input1 %>% group_by(id) %>% summarise(concatstring = string_agg(string, ', ')) %>% ungroup()
   out <- df1 %>% select(id, concatstring) %>% distinct()
+full_sketch: |
+  T1 = summarise(i014, concatstring = string_agg(string, ', '), id)
+  out = select(id, concatstring)

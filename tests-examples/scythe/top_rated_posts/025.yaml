@@ -24,3 +24,7 @@ comment: |
   df1 <- df_i025 %>% mutate(row_number_ = row_number())
   df2 <- df1 %>% filter(row_number_ >= 3 & row_number_ < 5)
   out <- df2 %>% select(Id, Value) %>% arrange(Id)
+full_sketch: |
+  T1 = mutate(i025, row_number_ = row_number())
+  T2 = filter(T1, row_number_ >= 3 & row_number_ < 5)
+  out = select(Id, Value) order by(Id)

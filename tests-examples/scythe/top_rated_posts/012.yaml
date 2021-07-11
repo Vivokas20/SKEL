@@ -29,3 +29,7 @@ comment: |
   df1 <- input1 %>% group_by(DocumentID) %>% summarise(maxDateCreated = max(DateCreated))
   df2 <- inner_join(input1, df1, by=c('DocumentID' = 'DocumentID','DateCreated' = 'maxDateCreated'), suffix = c("", ".other"))
   out <- df2 %>% ungroup() %>% select(DocumentID,Status,DateCreated)
+full_sketch: |
+  T1 = summarise(i012, maxDateCreated = max(DateCreated), DocumentID)
+  T2 = inner_join(i012, T1, (DocumentID = DocumentID,DateCreated = maxDateCreated))
+  out = select(DocumentID,Status,DateCreated)

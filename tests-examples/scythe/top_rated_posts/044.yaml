@@ -20,3 +20,6 @@ sql: |
 comment: |
   df2 <- input1 %>% mutate(cumsumcount = cumsum(count))
   out <- df2 %>% select(id, count, sumcount = cumsumcount) %>% arrange(id)
+full_sketch: |
+  T1 = mutate(i044, cumsumcount = cumsum(count))
+  out = select(id, count, cumsumcount) order by(id)

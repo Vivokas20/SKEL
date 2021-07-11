@@ -27,3 +27,8 @@ comment: |
   df3 <- input1 %>% group_by(total) %>% summarise(id = min(id)) %>% ungroup()
   df4 <- left_join(df2, df3)
   out <- df4 %>% select(minid = id, customer, maxtotal = total) %>% arrange(minid)
+full_sketch: |
+  T1 = summarise(i005, total = max(total), customer)
+  T2 = summarise(i005, id = min(id), (customer, total))
+  T3 = left_join(T1, T2)
+  out = select(id, customer, total)

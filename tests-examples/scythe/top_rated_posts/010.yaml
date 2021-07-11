@@ -22,3 +22,6 @@ comment: |
 
   df3 <- anti_join(input2, input1, by=c('phone_number'))
   out <- df3 %>% select(id, date, phone_number) %>% arrange(id)
+full_sketch: |
+  T1 = anti_join(i010_2, i010_1, phone_number)
+  out = select(id, date, phone_number)

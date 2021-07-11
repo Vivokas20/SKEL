@@ -26,3 +26,7 @@ comment: |
   df1 <- input1 %>% group_by(category) %>% summarise(maxdate = max(date)) %>% ungroup()
   df2 <- inner_join(input1, df1, by=c('category' = 'category','date' = 'maxdate'), suffix = c("", ".other"))
   out <- df2 %>% select(id, category, date) %>% distinct()
+full_sketch: |
+  T1 = summarise(i051, maxdate = max(date), category)
+  T2 =  inner_join(i051, T1, (category = category,date = maxdate))
+  out = select(id, category, date)

@@ -23,3 +23,7 @@ comment: |
   df1 <- df_i036 %>% group_by(username) %>% summarise(maxdate = max(date)) %>% ungroup()
   df2 <- inner_join(df_i036, df1, by=c('date' = 'maxdate'), suffix = c('', '.other')) %>% mutate(maxdate = date)
   out <- df2 %>% select(username, date, value) %>% arrange(username)
+full_sketch: |
+  T1 = summarise(i036, maxdate = max(date), username)
+  T2 = inner_join(i036, T1, (username = username, date = maxdate))
+  out = select(username, date, value)

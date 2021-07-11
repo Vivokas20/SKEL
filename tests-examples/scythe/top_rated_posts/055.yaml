@@ -18,3 +18,6 @@ comment: |
 
   df1 <- input1 %>% group_by(User, Activity) %>% summarise(concatPageURL = string_agg(PageURL, ' ')) %>% ungroup()
   out <- df1 %>% select(User, Activity, concatPageURL)
+full_sketch: |
+  T1 = summarise(i055, concatPageURL = string_agg(PageURL, ' '), (User, Activity))
+  out = select(User, Activity, concatPageURL)

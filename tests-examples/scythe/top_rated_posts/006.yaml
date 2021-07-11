@@ -19,7 +19,10 @@ sql: |
               GROUP BY name) AS b
   ON a.id = b.maxid
 comment: |
-
   df1 <- input1 %>% group_by(Name) %>% summarise(maxId = max(Id))
   df2 <- inner_join(input1, df1, by=c('Id' = 'maxId','Name' = 'Name'))
   out <- df2 %>% ungroup() %>% select(Id,Name,Other_Columns)
+full_sketch: |
+  T1 = summarise(i006, maxId = max(Id), Name)
+  T2 = inner_join(i006, T1, Id = maxId)
+  out = select(Id, Name, Other_Columns)

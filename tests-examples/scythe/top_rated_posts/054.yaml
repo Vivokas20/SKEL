@@ -6,6 +6,7 @@ functions:
   - cumsum
 columns:
   - count
+  - created_at
 dateorder: mdy
 loc: 1
 solution:
@@ -19,3 +20,6 @@ sql: |
 comment: |
   df2 <- input1 %>% mutate(cumsumcount = cumsum(count))
   out <- df2 %>% select(created_at, count = cumsumcount) %>% arrange(created_at)
+full_sketch: |
+  T1 = mutate(i054, cumsumcount = cumsum(count))
+  out = select(created_at, cumsumcount)

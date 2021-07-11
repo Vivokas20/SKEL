@@ -18,3 +18,6 @@ comment: |
 
   df1 <- input1 %>% group_by(SubjectID) %>% summarise(concatStudentName = string_agg(StudentName, ', ')) %>% ungroup()
   out <- df1 %>% select(SubjectID, concatStudentName) %>% distinct()
+full_sketch: |
+  T1 = summarise(i001, concatStudentName = string_agg(StudentName, ', '), SubjectID)
+  out = select(SubjectID, concatStudentName)

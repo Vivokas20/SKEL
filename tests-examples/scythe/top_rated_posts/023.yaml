@@ -15,3 +15,6 @@ sql: |
 comment: |
   df2 <- input1 %>% mutate(row_number = row_number())
   out <- df2 %>% select(rank = row_number, itemID, ordercount) %>% arrange(rank)
+full_sketch: |
+  T1 = mutate(i023, row_number_ = row_number())
+  out = select(row_number_, itemID, ordercount) order by(ordercount)

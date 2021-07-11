@@ -20,3 +20,6 @@ sql: |
 comment: |
   df1 <- input1 %>% group_by(CHARGETYPE, CHARGEID) %>% summarise(maxSERVICEMONTH = max(SERVICEMONTH))
   out <- df1 %>% ungroup() %>% select(CHARGEID,CHARGETYPE,maxSERVICEMONTH) %>% distinct()
+full_sketch: |
+  T1 = summarise(i021, maxSERVICEMONTH = max(SERVICEMONTH), (CHARGEID, CHARGETYPE))
+  out = select(CHARGEID,CHARGETYPE,maxSERVICEMONTH)

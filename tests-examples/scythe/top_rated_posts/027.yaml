@@ -21,3 +21,7 @@ comment: |
   df1 <- input1 %>% group_by(cname) %>% summarise(maxavg = max(avg))
   df2 <- inner_join(df1, input1, by=c('cname' = 'cname','maxavg' = 'avg'), suffix = c("", ".other"))
   out <- df2 %>% ungroup() %>% select(cname,wmname,maxavg)
+full_sketch: |
+  T1 = summarise(i027, maxavg = max(avg), cname)
+  T2 = inner_join(T1, i027, (cname = cname,maxavg = avg))
+  out = select(cnmae, wmname, maxavg)

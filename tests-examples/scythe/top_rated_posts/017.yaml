@@ -29,3 +29,8 @@ comment: |
   df2 <- full_join(df1, df_i017, by=character(), suffix = c("", ".other")) %>% filter(ID >= ID.other)
   df3 <- df2 %>% filter(str_detect(SKU, 'FOO-'))
   out <- df3 %>% select(ID = ID.other, SKU, PRODUCT = PRODUCT.other) %>% distinct() %>% arrange(ID)
+full_sketch: |
+  T1 = filter(i017, str_detect(SKU, 'FOO-'))
+  T2 = summarise(T1, minID = min(ID), PRODUCT)
+  T3 = inner_join(i017, T2, ID = minID)
+  out = select(ID, SKU, PRODUCT)

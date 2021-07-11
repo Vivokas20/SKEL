@@ -24,3 +24,12 @@ comment: |
   df1 <- left_join(input1, input2)
   df2 <- df1 %>% group_by(Name, VehicleID) %>% summarise(concatCity = string_agg(City, ', ')) %>% ungroup()
   out <- df2 %>% select(VehicleID, Name, concatCity) %>% distinct()
+
+  df4 <- df_i011_2 %>% group_by(VehicleID) %>% summarise(concatCity = string_agg(City, ', ')) %>% ungroup()
+  df5 <- left_join(df_i011_1, df4, na_matches="never")
+  out <- df5 %>% select(VehicleID, Name, concatCity) %>% arrange(VehicleID)
+
+full_sketch: |
+  T1 = summarise(i011_2, concatCity = string_agg(City, ', '), VehicleID)
+  T2 = natural_join(i011_1, T1)
+  out = select(VehicleID, Name, concatCity)

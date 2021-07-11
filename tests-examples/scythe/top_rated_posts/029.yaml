@@ -18,3 +18,6 @@ comment: |
 
   df1 <- input1 %>% group_by(TicketID) %>% summarise(concatPerson = string_agg(Person, ' ')) %>% ungroup()
   out <- df1 %>% select(TicketID, concatPerson)
+full_sketch: |
+  T1 = summarise(i029, concatPerson = string_agg(Person, ' '), TicketID)
+  out = select(TicketID, concatPerson)

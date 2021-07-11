@@ -20,3 +20,6 @@ comment: |
 
   df2 <- input1 %>% mutate(pminCol1Col2Col3 = pmin(Col1,Col2,Col3))
   out <- df2 %>% select(ID, Col1, Col2, Col3, TheMin = pminCol1Col2Col3) %>% arrange(ID)
+full_sketch: |
+  T1 = mutate(i050, pmin_ = pmin(Col1,Col2,Col3))
+  out = select(ID, Col1, Col2, Col3, pmin_)

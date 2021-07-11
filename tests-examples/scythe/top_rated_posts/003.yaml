@@ -15,3 +15,6 @@ sql: |
 comment: |
   df2 <- input1 %>% mutate(concatc = string_agg(c, ', '))
   out <- df2 %>% select(concatc) %>% distinct() %>% arrange(concatc)
+full_sketch: |
+  T1 = mutate(i003, concatc = string_agg(c, ', '))
+  out = select distinct(concatc)

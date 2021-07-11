@@ -18,3 +18,7 @@ comment: |
   df1 <- input1 %>% group_by(City) %>% summarise(minBirthyear = min(Birthyear)) %>% ungroup()
   df2 <- inner_join(df1, input1, by=c('minBirthyear' = 'Birthyear','City' = 'City'), suffix = c('', '.other'))
   out <- df2 %>% select(Name, City, minBirthyear)
+full_sketch: |
+  T1 = summarise(i057, minBirthyear = min(Birthyear), City)
+  T2 = inner_join(T1, i057, (minBirthyear = Birthyear, City = City))
+  out = select(Name, City, Birthyear)

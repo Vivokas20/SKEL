@@ -25,4 +25,4 @@ comment: |
 full_sketch: |
   T1 = summarise(i002, n=n(), (NAME, EMAIL))
   T2 = filter(T1, n > 1)
-  out = select (NAME)
+  out = select(NAME)

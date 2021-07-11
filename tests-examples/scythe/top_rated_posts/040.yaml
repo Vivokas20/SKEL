@@ -14,3 +14,6 @@ sql: |
 comment: |
   df1 <- df_i040 %>% group_by(group,subGroup) %>% summarise(n = n()) %>% ungroup()
   out <- df1 %>% select(group, subGroup, n) %>% arrange(group)
+full_join: |
+  T1 = summarise(i040, n = n(), (group, sunGroup))
+  out = select(group, subGroup, n)
