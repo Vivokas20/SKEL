@@ -92,7 +92,10 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_summarise(self, name, args):
-        args2 = args[2].replace("'", "")
+        if args[2]:
+            args2 = args[2].replace("'", "")
+        else:
+            args2 = args[2]
         re_object = re.fullmatch(r'([A-Za-z_]+)\$([A-Za-z_]+)', args[1])
         if re_object:
             return f'{name} <- {args[0]} %>% group_by({args2}) %>% summarise_{re_object.groups()[0]}({re_object.groups()[1]}) %>% ungroup()\n'
@@ -109,8 +112,10 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_inner_join(self, name, args):
-        if "'" not in args[2]:
+        if args[2] and "'" not in args[2]:
             args2 = add_quotes(args[2])
+        else:
+            args2 = args[2]
         _script = f"{name} <- inner_join({args[0]}, {args[1]}, by=c({args2}), suffix = c('', '.other'), na_matches='{util.get_config().na_matches}')"
         for pair in args2.split(','):
             if '=' in pair:
@@ -160,8 +165,10 @@ class SquaresInterpreter(LineInterpreter):
 
     @eval_decorator
     def eval_anti_join(self, name, args):
-        if "'" not in args[2]:
+        if args[2] and "'" not in args[2]:
             args2 = add_quotes(args[2])
+        else:
+            args2 = args[2]
         return f'{name} <- anti_join({args[0]}, {args[1]}, by=c({args2}), na_matches="{util.get_config().na_matches}")\n'
 
     @eval_decorator

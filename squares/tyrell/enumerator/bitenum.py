@@ -37,11 +37,18 @@ class Root(Node):
         self.id = id
         self.children = []
         self.empty_children = []
-        self.line_type = line.line_type
-        self.sketch_var = line.var
-        self.hole = line.line_free_hole
-        self.n_children = line.n_children
-        self.options = line.options
+        if line:
+            self.line_type = line.line_type
+            self.sketch_var = line.var
+            self.hole = line.line_free_hole
+            self.n_children = line.n_children
+            self.options = line.options
+        else:
+            self.line_type = None
+            self.sketch_var = None
+            self.hole = None
+            self.n_children = None
+            self.options = None
         self.type = self._create_type_variable(enumerator)
         self.var = self._create_root_variable(enumerator)
         self.bitvec = enumerator.create_variable(f'bv_{id}', z3.BitVec, enumerator.specification.n_columns)
@@ -393,7 +400,7 @@ class BitEnumerator(Enumerator):
                     ctr.append(z3.And(ctr_r))
 
             self.assert_expr(z3.Or(ctr), f'sketch_free_line_{i}_is_used')
-            print(self.z3_solver.sexpr())
+            # print(self.z3_solver.sexpr())
 
     def create_incomplete_free_hole_children_constraints(self) -> None:
         for r in self.roots:

@@ -209,13 +209,10 @@ def redundant_conditions(condition: str) -> List[str]:
     conditions = []
     final = []
 
-    if "str_detect"in condition:    # TODO integrate this
-        return [condition]
-
-    if "," in condition:
+    if "," in condition and "concat" not in condition and "str_count" not in condition and "row_number" not in condition and "pmin" not in condition and "pmax" not in condition:
         conditions = condition.split(",")
 
-    if len(conditions) > 1:
+    if conditions and len(conditions) > 1:
         final.append(str(conditions[0].strip() + "," + conditions[1].strip()))
         final.append(str(conditions[1].strip() + "," + conditions[0].strip()))
 
@@ -230,9 +227,6 @@ def redundant_conditions(condition: str) -> List[str]:
     return final
 
 def redundant_boolean_conditions(condition: str) -> List[str]:
-    if "str_detect" in condition:       # TODO integrate this
-        return [condition]
-
     separators = ["|", "&"]
     comparators = ["==", "!=", "<=", ">=", "<", ">"]
     final = []
@@ -268,13 +262,15 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
                 productions.append(production_part)
                 break
 
-    if len(productions) > 1:
+    if productions and len(productions) > 1:
         combinations = list(product(*productions))
         for combination in combinations:
             final.append(str(combination[0]) + " " + separator + " " + str(combination[1]))
             final.append(str(combination[1]) + " " + separator + " " + str(combination[0]))
-    else:
+    elif productions:
         final = productions[0]
+    else:
+        final = [condition]
 
     return final
 
