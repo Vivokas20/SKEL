@@ -23,5 +23,5 @@ comment: |
   out <- df2 %>% ungroup() %>% select(cname,wmname,maxavg)
 full_sketch: |
   T1 = summarise(i027, maxavg = max(avg), cname)
-  T2 = inner_join(T1, i027, (cname = cname,maxavg = avg))
-  out = select(cnmae, wmname, maxavg)
+  T2 = inner_join(T1, i027, (cname = cname, maxavg = avg))
+  out = select(cname, wmname, maxavg)
