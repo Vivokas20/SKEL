@@ -7,7 +7,7 @@ from itertools import product
 logger = getLogger('squares')
 
 ######## FLAGS ########
-flag_types = True
+flag_types = False
 
 tables_names = []
 lines_names = {}
@@ -209,7 +209,7 @@ def redundant_conditions(condition: str) -> List[str]:
     conditions = []
     final = []
 
-    if "," in condition and "concat" not in condition and "str_count" not in condition and "row_number" not in condition and "pmin" not in condition and "pmax" not in condition:
+    if "," in condition and "concat" not in condition and "str_detect" not in condition and "str_count" not in condition and "row_number" not in condition and "pmin" not in condition and "pmax" not in condition:
         conditions = condition.split(",")
 
     if conditions and len(conditions) > 1:
@@ -233,6 +233,9 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
     conditions = []
     productions = []
     condition = condition.replace("=>", ">=").replace("=<", "<=")
+
+    if 'str_detect' in condition:
+        return [condition]
 
     for separator in separators:
         if separator in condition:
@@ -479,9 +482,10 @@ class Sketch:
                         n_children = 3
                         arg = check_underscore_args(function, args[1])
                         function = "summarise"
+                        real_function = "summarise"
 
                         children.append(Child(args[0], "Table", real[0]))
-                        children.append(Child(arg, "SummariseCondition", real[1]))
+                        children.append(Child(arg, "SummariseCondition", arg))
 
                         if len(args) > 2:
                             children.append(Child(args[2], "Cols", real[2]))
@@ -492,9 +496,10 @@ class Sketch:
                         n_children = 2
                         arg = check_underscore_args(function, args[1])
                         function = "mutate"
+                        real_function = "mutate"
 
                         children.append(Child(args[0], "Table", real[0]))
-                        children.append(Child(arg, "SummariseCondition", real[1]))
+                        children.append(Child(arg, "SummariseCondition", arg))
 
                     else:
                         logger.error('Sketch line "%s" could not be parsed', sketch_line)

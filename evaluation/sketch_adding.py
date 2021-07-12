@@ -47,13 +47,17 @@ yaml.add_representer(literal, literal_presenter)
 # number = round(len(lines) * random.randint(0, 20) / 100) # 20%
 # k = random.choice(functions)
 # v = random.randint(0, len(lines[k]))
+# if random.choices([0, 1], [0.8, 0.2])[0]:
+#     sketch_out += f'{child.real_name}, '
+
+random.seed(20)
 
 def sketch_no_children(sketch, spec):
     sketch_out = ''
     for line in sketch.lines_encoding:
         root = sketch.lines_encoding[line]
         sketch_out += f'{root.name} = {root.real_root}('
-        sketch_out += "??, " * len(root.children)
+        sketch_out += f'??, ' * len(root.children)
         sketch_out = sketch_out[:-2] + ")\n"
 
     sketch_out += spec['full_sketch'].splitlines()[-1]
@@ -81,16 +85,13 @@ def sketch_no_filter(sketch, spec):
     for line in sketch.lines_encoding:
         root = sketch.lines_encoding[line]
         if root.real_root == "filter":
-            sketch_out += f'{root.name} = ??('
+            sketch_out += f'{root.name} = ??\n'
         else:
             sketch_out += f'{root.name} = {root.real_root}('
-        for child in root.children:
-            if child.real_name:
-                if child.type == "FilterCondition":
-                    sketch_out += f'??+, '
-                else:
+            for child in root.children:
+                if child.real_name:
                     sketch_out += f'{child.real_name}, '
-        sketch_out = sketch_out[:-2] + ")\n"
+            sketch_out = sketch_out[:-2] + ")\n"
 
     sketch_out += spec['full_sketch'].splitlines()[-1]
 
@@ -101,20 +102,13 @@ def sketch_no_summarise(sketch, spec):
     for line in sketch.lines_encoding:
         root = sketch.lines_encoding[line]
         if root.real_root == "summarise":
-            sketch_out += f'{root.name} = ??('
+            sketch_out += f'{root.name} = ??\n'
         else:
             sketch_out += f'{root.name} = {root.real_root}('
-        for child in root.children:
-            if child.real_name:
-                if child.type == "SummariseCondition":
-                    if root.real_root == "summarise":
-                        sketch_out += f'??+, '
-                    else:
-                        sketch_out += f'??+, '
-                    break
-                else:
+            for child in root.children:
+                if child.real_name:
                     sketch_out += f'{child.real_name}, '
-        sketch_out = sketch_out[:-2] + ")\n"
+            sketch_out = sketch_out[:-2] + ")\n"
 
     sketch_out += spec['full_sketch'].splitlines()[-1]
 
@@ -229,5 +223,6 @@ def get_comments(instances):
 
 if __name__ == '__main__':
     # get_comments(glob.glob('tests-examples/textbook/*.yaml'))
-    # parse_sketch(['tests-examples/demo/demo.yaml'])
-    parse_sketch(glob.glob('tests-examples/textbook/*.yaml'))
+    # parse_sketch(['tests-examples/textbook/31.yaml'])
+    parse_sketch(glob.glob('tests-examples/scythe/top_rated_posts/*.yaml'))
+    # parse_sketch(glob.glob('tests-examples/textbook/*.yaml'))

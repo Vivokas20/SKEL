@@ -58,7 +58,8 @@ def test_file(filename: str, run: str = ''):
         status = None if timeout or memout else 0
 
     programs = None
-    gt = None
+    gt = False
+    gt_status = 0
     if not timeout and not memout:
         with open(out_file) as f:
             log = f.read()
@@ -67,10 +68,40 @@ def test_file(filename: str, run: str = ''):
             except:
                 programs = None
 
-            # try:
-            #     gt = int(re.search('\tAttempted programs: (.*) \(approx\)', log)[1])
-            # except:
-            #     gt = None
+            try:
+                file_solution = re.search('Solution found: \[(.+)]', log)[0]
+                file_solution = file_solution.replace("Solution found: ", "")[1:-1]
+                file_select = re.search('out <- df[0-9]+ %>% select(.+)', log)[0]
+                file_select = file_select.split("%>% ", 1)[1]
+
+                if 'scythe' in filename:
+                    folder = 'scythe_full/'
+                elif 'textbook' in filename:
+                    folder = 'textbook_full/'
+                else:
+                    folder = 'placeholder_full'
+
+                l_name = "evaluation/data/" + folder + filename[:-5] + "_0.log"
+
+                with open(l_name) as l:
+                    log_solution = l.read()
+                gt_solution = re.search('Solution found: \[(.+)]', log_solution)[0]
+                gt_solution = gt_solution.replace("Solution found: ", "")[1:-1]
+                select = re.search('out <- df[0-9]+ %>% select(.+)', log_solution)[0]
+                select = select.split("%>% ", 1)[1]
+
+                if gt_solution == file_solution:
+                    gt = True
+                    if select == file_select:
+                        gt_status = 1
+                    else:
+                        gt_status = 2
+                else:
+                    gt = False
+                    gt_status = 0
+            except:
+                gt = False
+                gt_status = 0
 
     real = float(re.search('Real time \(s\): (.*)', p.stdout)[1])
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])
@@ -79,7 +110,7 @@ def test_file(filename: str, run: str = ''):
     with open('evaluation/data/' + args.name + '.csv',
               'a') as f:  # TODO use a queue so that only one process needs to have the file open
         writer = csv.writer(f)
-        writer.writerow((test_name, timeout, real, cpu, ram, programs, gt, status, memout))
+        writer.writerow((test_name, timeout, real, cpu, ram, programs, gt, gt_status, status, memout))
         f.flush()
 
 
@@ -88,13 +119,18 @@ if __name__ == '__main__':
         os.mkdir(f'evaluation/data/{args.name}')
         with open('evaluation/data/' + args.name + '.csv', 'w') as f:
             writer = csv.writer(f)
-            writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'programs', 'gt', 'status', 'memout'))
+            writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'programs', 'gt', 'gt_status', 'status', 'memout'))
             f.flush()
 
     if not args.instances:
         # instances = glob.glob('tests-examples/**/**/*.yaml', recursive=True)
         # instances = glob.glob('tests-examples/textbook/*.yaml')
-        instances = ['tests-examples/textbook/1.yaml', 'tests-examples/textbook/2.yaml']
+        # instances = ['tests-examples/scythe/top_rated_posts/027.yaml']
+        # instances = glob.glob('tests-examples/scythe/top_rated_posts/*.yaml')
+        scythe_top = ['tests-examples/scythe/top_rated_posts/001.yaml', 'tests-examples/scythe/top_rated_posts/002.yaml', 'tests-examples/scythe/top_rated_posts/003.yaml', 'tests-examples/scythe/top_rated_posts/004.yaml', 'tests-examples/scythe/top_rated_posts/005.yaml', 'tests-examples/scythe/top_rated_posts/006.yaml', 'tests-examples/scythe/top_rated_posts/007.yaml', 'tests-examples/scythe/top_rated_posts/008.yaml', 'tests-examples/scythe/top_rated_posts/009.yaml', 'tests-examples/scythe/top_rated_posts/010.yaml', 'tests-examples/scythe/top_rated_posts/011.yaml', 'tests-examples/scythe/top_rated_posts/012.yaml', 'tests-examples/scythe/top_rated_posts/013.yaml', 'tests-examples/scythe/top_rated_posts/014.yaml', 'tests-examples/scythe/top_rated_posts/016.yaml', 'tests-examples/scythe/top_rated_posts/017.yaml', 'tests-examples/scythe/top_rated_posts/019.yaml', 'tests-examples/scythe/top_rated_posts/021.yaml', 'tests-examples/scythe/top_rated_posts/023.yaml', 'tests-examples/scythe/top_rated_posts/025.yaml', 'tests-examples/scythe/top_rated_posts/027.yaml', 'tests-examples/scythe/top_rated_posts/028.yaml', 'tests-examples/scythe/top_rated_posts/029.yaml', 'tests-examples/scythe/top_rated_posts/031.yaml', 'tests-examples/scythe/top_rated_posts/032.yaml', 'tests-examples/scythe/top_rated_posts/034.yaml', 'tests-examples/scythe/top_rated_posts/036.yaml', 'tests-examples/scythe/top_rated_posts/037.yaml', 'tests-examples/scythe/top_rated_posts/038.yaml', 'tests-examples/scythe/top_rated_posts/043.yaml', 'tests-examples/scythe/top_rated_posts/044.yaml', 'tests-examples/scythe/top_rated_posts/047.yaml', 'tests-examples/scythe/top_rated_posts/048.yaml', 'tests-examples/scythe/top_rated_posts/049.yaml', 'tests-examples/scythe/top_rated_posts/050.yaml', 'tests-examples/scythe/top_rated_posts/051.yaml', 'tests-examples/scythe/top_rated_posts/054.yaml', 'tests-examples/scythe/top_rated_posts/055.yaml', 'tests-examples/scythe/top_rated_posts/057.yaml']
+        textbook = ['tests-examples/textbook/1.yaml', 'tests-examples/textbook/10.yaml', 'tests-examples/textbook/11.yaml', 'tests-examples/textbook/13.yaml', 'tests-examples/textbook/14.yaml', 'tests-examples/textbook/15.yaml', 'tests-examples/textbook/16.yaml', 'tests-examples/textbook/17.yaml', 'tests-examples/textbook/18.yaml', 'tests-examples/textbook/19.yaml', 'tests-examples/textbook/2.yaml', 'tests-examples/textbook/20.yaml', 'tests-examples/textbook/21.yaml', 'tests-examples/textbook/22.yaml', 'tests-examples/textbook/23.yaml', 'tests-examples/textbook/24.yaml', 'tests-examples/textbook/25.yaml', 'tests-examples/textbook/26.yaml', 'tests-examples/textbook/28.yaml', 'tests-examples/textbook/29.yaml', 'tests-examples/textbook/3.yaml', 'tests-examples/textbook/31.yaml', 'tests-examples/textbook/34.yaml', 'tests-examples/textbook/35.yaml', 'tests-examples/textbook/4.yaml', 'tests-examples/textbook/5.yaml', 'tests-examples/textbook/6.yaml', 'tests-examples/textbook/7.yaml', 'tests-examples/textbook/8.yaml', 'tests-examples/textbook/9.yaml']
+        instances = textbook + scythe_top
+
     else:
         instances = []
         with open(args.instances) as inst_list:
