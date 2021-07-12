@@ -14,6 +14,7 @@ class Config:
     maximum_loc: int
 
     sketch: str
+    flag_types: bool
 
     subsume_conditions: bool
     transitive_blocking: bool

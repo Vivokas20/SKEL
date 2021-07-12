@@ -199,7 +199,7 @@ class BitEnumerator(Enumerator):
         self.create_lines_constraints()
         self.create_type_constraints()
 
-        if self.sketch and self.sketch.flag_types:
+        if self.sketch and util.get_config().flag_types:
             self.create_children_constraints()
         else:
             self.create_all_children_constraints()

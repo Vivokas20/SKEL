@@ -3,11 +3,9 @@ import re
 from squares import util
 from typing import List
 from itertools import product
+from .. import util
 
 logger = getLogger('squares')
-
-######## FLAGS ########
-flag_types = False
 
 tables_names = []
 lines_names = {}
@@ -294,7 +292,6 @@ class Sketch:
         self.free_lines = []
         self.all_lines = []
         self.aggrs = []
-        self.flag_types = flag_types
 
     def sketch_parser(self, tables: List[str], columns: List[str] = None) -> None:
         logger.info("Parsing sketch...")
@@ -559,7 +556,7 @@ class Sketch:
                             else:
                                 continue
 
-                            if flag_types:
+                            if util.get_config().flag_types:
                                 if line.children_types and not production.has_in_rhs(line.children_types):
                                     line.var = line.var[:-1]
 
@@ -616,7 +613,7 @@ class Sketch:
                                         logger.error('Unknown %s production "%s"', prod_type, prod_name)
                                         raise RuntimeError("Could not process sketch production")
 
-                            elif flag_types and prod_type != "Unknown":       # Hole with known type
+                            elif util.get_config().flag_types and prod_type != "Unknown":       # Hole with known type
                                 if prod_type == "Table":
                                     child.line = True
 
