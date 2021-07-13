@@ -119,7 +119,7 @@ if __name__ == '__main__':
         os.mkdir(f'evaluation/data/{args.name}')
         with open('evaluation/data/' + args.name + '.csv', 'w') as f:
             writer = csv.writer(f)
-            writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'programs', 'gt', 'gt_status', 'status', 'memout'))
+            writer.writerow(('name', 'timeout', 'real', 'cpu', 'ram', 'programs', 'ground_truth', 'gt_status', 'status', 'memout'))
             f.flush()
 
     if not args.instances:

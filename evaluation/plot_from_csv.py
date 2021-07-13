@@ -62,7 +62,7 @@ def gt_plot(datas, names):
 
     for n in range(len(datas)):
         data = datas[n]
-        df = data[data.gt == True]
+        df = data[data.ground_truth == True]
         index.append(names[n])
         values.append(len(df.index))
 
@@ -75,7 +75,9 @@ def gt_plot(datas, names):
     return fig
 
 
-files = ["evaluation/data/textbook-no_sketch.csv", "evaluation/data/on/off_no_children.csv", "evaluation/data/on/on_no_children.csv", "evaluation/data/on/off_no_children_all_constraints.csv", "evaluation/data/on/off_no_children_constraints.csv"]
+# files = ["evaluation/data/textbook-no_sketch.csv", "evaluation/data/on/off_no_children.csv", "evaluation/data/on/on_no_children.csv", "evaluation/data/on/off_no_children_all_constraints.csv", "evaluation/data/on/off_no_children_constraints.csv"]
+dir = "evaluation/data/"
+files = [dir+"st-no_sketch.csv", dir+"st-no_children.csv", dir+"st-no_root.csv"]
 csv_list = []
 name_list = []
 
