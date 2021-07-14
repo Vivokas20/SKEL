@@ -49,6 +49,7 @@ class Root(Node):
             self.hole = None
             self.n_children = None
             self.options = None
+        self.all_vars = []
         self.type = self._create_type_variable(enumerator)
         self.var = self._create_root_variable(enumerator)
         self.bitvec = enumerator.create_variable(f'bv_{id}', z3.BitVec, enumerator.specification.n_columns)
@@ -60,10 +61,12 @@ class Root(Node):
         if self.sketch_var:
             for variable in self.sketch_var:
                 ctr.append(var == variable)
+                self.all_vars.append(variable)
         else:
             for p in enumerator.spec.get_function_productions():
                 if p.lhs.name != 'Empty':
                     ctr.append(var == p.id)
+                    self.all_vars.append(p.id)
 
         enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
         return var
@@ -85,6 +88,8 @@ class Leaf(Node):
         self.child_id = child_id
         self.sketch_var = sketch_var
         self.sketch_list_vars = sketch_list_vars
+        self.all_vars = []
+        self.all_vars_lhs = {}
         self.var = self._create_leaf_variable(enumerator)
         # don't need to create this vars if there is solution in sketch already?
         self.lines = self._create_lines_variables(enumerator)
@@ -96,25 +101,46 @@ class Leaf(Node):
         enumerator.variables.append(var)
 
         ctr = []
-        if self.sketch_var and (self.parent.line_type is None or (self.parent.line_type == "Free" and not self.parent.hole) or (self.parent.line_type == "Free" and self.sketch_var[0] == 0)):
+        if self.sketch_var and (
+                self.parent.line_type is None or (self.parent.line_type == "Free" and not self.parent.hole) or (
+                self.parent.line_type == "Free" and self.sketch_var[0] == 0)):
+
             for variable in self.sketch_var:
-                if isinstance(variable, list):
-                    for v in variable:
-                        if (var == v) not in ctr:
-                            ctr.append(var == v)
-                else:
-                    if (var == variable) not in ctr:
-                        ctr.append(var == variable)
+                if not isinstance(variable, list):
+                    variable = [variable]
+
+                for v in variable:
+                    if (var == v) not in ctr:
+                        ctr.append(var == v)
+                        self.all_vars.append(v)
+
+                        lhs = enumerator.get_production(v).lhs
+                        if lhs not in self.all_vars_lhs:
+                            self.all_vars_lhs[lhs] = [v]
+                        else:
+                            self.all_vars_lhs[lhs].append(v)
 
         else:
             for p in enumerator.spec.productions():
                 if not p.is_function() or p.lhs.name == 'Empty':  # FIXME: improve empty integration
                     ctr.append(var == p.id)
+                    self.all_vars.append(p.id)
+
+                    if p.lhs not in self.all_vars_lhs:
+                        self.all_vars_lhs[p.lhs] = [p.id]
+                    else:
+                        self.all_vars_lhs[p.lhs].append(p.id)
 
             for l in range(0, self.parent.id - 1):
                 line_productions = enumerator.line_productions[l]
                 for line_production in line_productions:
                     ctr.append(var == line_production.id)
+                    self.all_vars.append(line_production.id)
+
+                    if line_production.lhs not in self.all_vars_lhs:
+                        self.all_vars_lhs[line_production.lhs] = [line_production.id]
+                    else:
+                        self.all_vars_lhs[line_production.lhs].append(line_production.id)
 
         enumerator.assert_expr(z3.Or(ctr), f'leaf_{self.parent.id}_{self.child_id}_domain')
 
@@ -195,14 +221,14 @@ class BitEnumerator(Enumerator):
 
         if util.get_config().lines_force_all_inputs:
             self.create_input_constraints()
-        self.create_output_constraints()
+        # self.create_output_constraints()
         self.create_lines_constraints()
         self.create_type_constraints()
 
-        if self.sketch and util.get_config().flag_types:
-            self.create_children_constraints()
-        else:
-            self.create_all_children_constraints()
+        # if self.sketch and util.get_config().flag_types:
+        #     self.create_children_constraints()
+        # else:
+        self.create_all_children_constraints()
 
         self._production_id_cache = defaultdict(OrderedSet)
         for p in self.spec.productions():
@@ -217,7 +243,7 @@ class BitEnumerator(Enumerator):
 
         self.blocked_models = set()
 
-        # print(self.z3_solver.sexpr())
+        print(self.z3_solver.sexpr())
 
         logger.debug('Enumerator for loc %d constructed using %d variables and %d constraints', self.loc, self.num_variables,
                      self.num_constraints)
@@ -424,41 +450,39 @@ class BitEnumerator(Enumerator):
 
     def create_all_children_constraints(self) -> None:
         for r in self.roots:
-            if len(r.empty_children) > 0:
-                for p in self.spec.get_function_productions():
-                    if p.lhs.name == 'Empty':
+            for prod_id in r.all_vars:
+                p = self.get_production(prod_id)
+
+                aux = r.var == p.id
+
+                for c in range(len(r.children)):
+                    ctr = []
+                    # If production has less arguments than the tree has children than all other children are 0
+                    if c >= len(p.rhs):
+                        self.assert_expr(z3.Implies(aux, z3.And(r.children[c].var == 0,
+                                                                r.children[c].bitvec == self.mk_bitvec(0),
+                                                                r.children[c].bitvec2 == self.mk_bitvec(0))), f'empty_arg_{r.id}_{p.id}_{c}')
                         continue
-                    aux = r.var == p.id
 
-                    for c in r.empty_children:
-                        ctr = []
-                        # If production has less arguments than the tree has children than all other children are 0
-                        if c >= len(p.rhs):
-                            self.assert_expr(z3.Implies(aux, z3.And(r.children[c].var == 0,
-                                                                    r.children[c].bitvec == self.mk_bitvec(0),
-                                                                    r.children[c].bitvec2 == self.mk_bitvec(0))), f'empty_arg_{r.id}_{p.id}_{c}')
-                            continue
+                    # se lado esquerdo da leaf for igual ao lado direito posição child da prod add child_var tem de ser igual a leaf or...
+                    for leaf_id in r.children[c].all_vars_lhs.get(p.rhs[c]):
+                        leaf_p = self.get_production(leaf_id)
+                        if leaf_id not in self.line_productions_by_id:
+                            bv1, bv2 = leaf_p.value if isinstance(leaf_p.value, tuple) else ((leaf_p.value, 0) if leaf_p.value is not None else (0, 0))
 
-                        # se lado esquerdo da leaf for igual ao lado direito posição child da prod add child_var tem de ser igual a leaf or...
-                        for leaf_p in self.spec.get_productions_with_lhs(p.rhs[c]):     #see how to improve
-                            if not leaf_p.is_function():
-                                bv1, bv2 = leaf_p.value if isinstance(leaf_p.value, tuple) else ((leaf_p.value, 0) if leaf_p.value is not None else (0, 0))
-                                ctr.append(z3.And(r.children[c].var == leaf_p.id,
-                                                  r.children[c].bitvec == self.mk_bitvec(bv1),
-                                                  r.children[c].bitvec2 == self.mk_bitvec(bv2)))
+                            ctr.append(z3.And(r.children[c].var == leaf_p.id,
+                                              r.children[c].bitvec == self.mk_bitvec(bv1),
+                                              r.children[c].bitvec2 == self.mk_bitvec(bv2)))
 
-                        # se for table entao pode ser line e line_var tem de ser true
-                        for l in range(r.id - 1):
-                            for line_production in self.line_productions[l]:
-                                if line_production.lhs.name == p.rhs[c].name:
-                                    ctr.append(z3.And(r.children[c].var == line_production.id,
-                                                      r.children[c].bitvec == self.roots[l].bitvec,
-                                                      r.children[c].bitvec2 == self.mk_bitvec(0)))
-                                    # if a previous line is used, then its flag must be true
-                                    line_var = r.children[c].lines[l]
-                                    self.assert_expr(line_var == (r.children[c].var == line_production.id))
+                        else:       # It's a line production
+                            ctr.append(z3.And(r.children[c].var == leaf_id,
+                                              r.children[c].bitvec == self.roots[leaf_p.line].bitvec,
+                                              r.children[c].bitvec2 == self.mk_bitvec(0)))
+                            # if a previous line is used, then its flag must be true
+                            line_var = r.children[c].lines[leaf_p.line]
+                            self.assert_expr(line_var == (r.children[c].var == leaf_id))
 
-                        self.assert_expr(z3.Implies(aux, z3.Or(ctr)), f'arg_{r.id}_{p.id}_{c}')
+                    self.assert_expr(z3.Implies(aux, z3.Or(ctr)), f'arg_{r.id}_{p.id}_{c}')
 
     def empty_children_constraints(self, r, p, c, aux, incomplete) -> None:
         ctr = []
