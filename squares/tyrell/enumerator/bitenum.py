@@ -69,6 +69,7 @@ class Root(Node):
                     self.all_vars.append(p.id)
 
         enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
+        # enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'root_{self.id}_range')
         return var
 
     def _create_type_variable(self, enumerator: 'BitEnumerator') -> z3.ExprRef:
@@ -91,7 +92,6 @@ class Leaf(Node):
         self.all_vars = []
         self.all_vars_lhs = {}
         self.var = self._create_leaf_variable(enumerator)
-        # don't need to create this vars if there is solution in sketch already?
         self.lines = self._create_lines_variables(enumerator)
         self.bitvec = enumerator.create_variable(f'bv_{parent.id}_{child_id}_a', z3.BitVec, enumerator.specification.n_columns)
         self.bitvec2 = enumerator.create_variable(f'bv_{parent.id}_{child_id}_b', z3.BitVec, enumerator.specification.n_columns)
@@ -122,7 +122,7 @@ class Leaf(Node):
 
         else:
             for p in enumerator.spec.productions():
-                if not p.is_function() or p.lhs.name == 'Empty':  # FIXME: improve empty integration
+                if not p.is_function() or p.lhs.name == 'Empty':
                     ctr.append(var == p.id)
                     self.all_vars.append(p.id)
 
@@ -143,6 +143,7 @@ class Leaf(Node):
                         self.all_vars_lhs[line_production.lhs].append(line_production.id)
 
         enumerator.assert_expr(z3.Or(ctr), f'leaf_{self.parent.id}_{self.child_id}_domain')
+        # enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'leaf_{self.parent.id}_{self.child_id}_range')
 
         return var
 
@@ -243,7 +244,7 @@ class BitEnumerator(Enumerator):
 
         self.blocked_models = set()
 
-        print(self.z3_solver.sexpr())
+        # print(self.z3_solver.sexpr())
 
         logger.debug('Enumerator for loc %d constructed using %d variables and %d constraints', self.loc, self.num_variables,
                      self.num_constraints)
@@ -465,7 +466,11 @@ class BitEnumerator(Enumerator):
                         continue
 
                     # se lado esquerdo da leaf for igual ao lado direito posição child da prod add child_var tem de ser igual a leaf or...
-                    for leaf_id in r.children[c].all_vars_lhs.get(p.rhs[c]):
+                    leaves = r.children[c].all_vars_lhs.get(p.rhs[c])
+                    if leaves is None:
+                        self.assert_expr(z3.Not(aux), f'arg_{r.id}_{p.id}_{c}')
+                        break
+                    for leaf_id in leaves:
                         leaf_p = self.get_production(leaf_id)
                         if leaf_id not in self.line_productions_by_id:
                             bv1, bv2 = leaf_p.value if isinstance(leaf_p.value, tuple) else ((leaf_p.value, 0) if leaf_p.value is not None else (0, 0))

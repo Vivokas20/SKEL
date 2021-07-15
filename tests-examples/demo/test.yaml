@@ -39,7 +39,7 @@ sql: |
 #  T2 = summarise(T1, grade = min(grade))
 #  out = select(grade)
 
-#full_sketch: |
-#  T1 = filter(grades, courseId == 11)
-#  T2 = summarise(T1, grade = min(grade))
-#  out = select(grade)
+full_sketch: |
+  T1 = filter(grades, courseId == 11)
+  T2 = summarise(T1, grade = min(grade))
+  out = select(grade)
