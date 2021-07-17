@@ -107,6 +107,6 @@ if sol[0]:
 else:
     figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), solved_plot(csv_list, name_list), gt_plot(csv_list, name_list)]
 
-with PdfPages("evaluation/plots/"+out_file+".pdf") as pdf:
-    for fig in figs:
-        pdf.savefig(fig)
+    with PdfPages("evaluation/plots/"+out_file+".pdf") as pdf:
+        for fig in figs:
+            pdf.savefig(fig)

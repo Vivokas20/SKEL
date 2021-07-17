@@ -74,14 +74,7 @@ def test_file(filename: str, run: str = ''):
                 file_select = re.search('out <- df[0-9]+ %>% select(.+)', log)[0]
                 file_select = file_select.split("%>% ", 1)[1]
 
-                if 'scythe' in filename:
-                    folder = 'scythe_full/'
-                elif 'textbook' in filename:
-                    folder = 'textbook_full/'
-                else:
-                    folder = 'placeholder_full'
-
-                l_name = "evaluation/data/" + folder + filename[:-5] + "_0.log"
+                l_name = "evaluation/data/Full/" + filename[:-5] + "_0.log"
 
                 with open(l_name) as l:
                     log_solution = l.read()
@@ -128,8 +121,9 @@ if __name__ == '__main__':
         # instances = ['tests-examples/scythe/top_rated_posts/027.yaml']
         # instances = glob.glob('tests-examples/scythe/top_rated_posts/*.yaml')
         scythe_top = ['tests-examples/scythe/top_rated_posts/001.yaml', 'tests-examples/scythe/top_rated_posts/002.yaml', 'tests-examples/scythe/top_rated_posts/003.yaml', 'tests-examples/scythe/top_rated_posts/004.yaml', 'tests-examples/scythe/top_rated_posts/005.yaml', 'tests-examples/scythe/top_rated_posts/006.yaml', 'tests-examples/scythe/top_rated_posts/007.yaml', 'tests-examples/scythe/top_rated_posts/008.yaml', 'tests-examples/scythe/top_rated_posts/009.yaml', 'tests-examples/scythe/top_rated_posts/010.yaml', 'tests-examples/scythe/top_rated_posts/011.yaml', 'tests-examples/scythe/top_rated_posts/012.yaml', 'tests-examples/scythe/top_rated_posts/013.yaml', 'tests-examples/scythe/top_rated_posts/014.yaml', 'tests-examples/scythe/top_rated_posts/016.yaml', 'tests-examples/scythe/top_rated_posts/017.yaml', 'tests-examples/scythe/top_rated_posts/019.yaml', 'tests-examples/scythe/top_rated_posts/021.yaml', 'tests-examples/scythe/top_rated_posts/023.yaml', 'tests-examples/scythe/top_rated_posts/025.yaml', 'tests-examples/scythe/top_rated_posts/027.yaml', 'tests-examples/scythe/top_rated_posts/028.yaml', 'tests-examples/scythe/top_rated_posts/029.yaml', 'tests-examples/scythe/top_rated_posts/031.yaml', 'tests-examples/scythe/top_rated_posts/032.yaml', 'tests-examples/scythe/top_rated_posts/034.yaml', 'tests-examples/scythe/top_rated_posts/036.yaml', 'tests-examples/scythe/top_rated_posts/037.yaml', 'tests-examples/scythe/top_rated_posts/038.yaml', 'tests-examples/scythe/top_rated_posts/043.yaml', 'tests-examples/scythe/top_rated_posts/044.yaml', 'tests-examples/scythe/top_rated_posts/047.yaml', 'tests-examples/scythe/top_rated_posts/048.yaml', 'tests-examples/scythe/top_rated_posts/049.yaml', 'tests-examples/scythe/top_rated_posts/050.yaml', 'tests-examples/scythe/top_rated_posts/051.yaml', 'tests-examples/scythe/top_rated_posts/054.yaml', 'tests-examples/scythe/top_rated_posts/055.yaml', 'tests-examples/scythe/top_rated_posts/057.yaml']
+        scythe_recent = ['tests-examples/scythe/recent_posts/003.yaml', 'tests-examples/scythe/recent_posts/004.yaml', 'tests-examples/scythe/recent_posts/007.yaml', 'tests-examples/scythe/recent_posts/009.yaml', 'tests-examples/scythe/recent_posts/011.yaml', 'tests-examples/scythe/recent_posts/012.yaml', 'tests-examples/scythe/recent_posts/013.yaml', 'tests-examples/scythe/recent_posts/016.yaml', 'tests-examples/scythe/recent_posts/019.yaml', 'tests-examples/scythe/recent_posts/021.yaml', 'tests-examples/scythe/recent_posts/028.yaml', 'tests-examples/scythe/recent_posts/031.yaml', 'tests-examples/scythe/recent_posts/032.yaml', 'tests-examples/scythe/recent_posts/034.yaml', 'tests-examples/scythe/recent_posts/036.yaml', 'tests-examples/scythe/recent_posts/038.yaml', 'tests-examples/scythe/recent_posts/040.yaml', 'tests-examples/scythe/recent_posts/042.yaml', 'tests-examples/scythe/recent_posts/044.yaml', 'tests-examples/scythe/recent_posts/045.yaml', 'tests-examples/scythe/recent_posts/046.yaml', 'tests-examples/scythe/recent_posts/051.yaml']
         textbook = ['tests-examples/textbook/1.yaml', 'tests-examples/textbook/10.yaml', 'tests-examples/textbook/11.yaml', 'tests-examples/textbook/13.yaml', 'tests-examples/textbook/14.yaml', 'tests-examples/textbook/15.yaml', 'tests-examples/textbook/16.yaml', 'tests-examples/textbook/17.yaml', 'tests-examples/textbook/18.yaml', 'tests-examples/textbook/19.yaml', 'tests-examples/textbook/2.yaml', 'tests-examples/textbook/20.yaml', 'tests-examples/textbook/21.yaml', 'tests-examples/textbook/22.yaml', 'tests-examples/textbook/23.yaml', 'tests-examples/textbook/24.yaml', 'tests-examples/textbook/25.yaml', 'tests-examples/textbook/26.yaml', 'tests-examples/textbook/28.yaml', 'tests-examples/textbook/29.yaml', 'tests-examples/textbook/3.yaml', 'tests-examples/textbook/31.yaml', 'tests-examples/textbook/34.yaml', 'tests-examples/textbook/35.yaml', 'tests-examples/textbook/4.yaml', 'tests-examples/textbook/5.yaml', 'tests-examples/textbook/6.yaml', 'tests-examples/textbook/7.yaml', 'tests-examples/textbook/8.yaml', 'tests-examples/textbook/9.yaml']
-        instances = textbook + scythe_top
+        instances = textbook + scythe_top + scythe_recent
 
     else:
         instances = []
