@@ -15,7 +15,7 @@ solution:
   - cross_join
   - summarise
 sql:
-  select od.id_product, count(od2.id_order) as NumTimesWith2
+  select od.id_product, count(od2.id_order) as count_od2
   from 021 od left join
   021 od2
   on od.id_order = od2.id_order and
@@ -28,3 +28,9 @@ comment: |
   df3 <- full_join(input1 %>% mutate(tmp.col=1), df2 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(id_product.other != id_product & id_order.other == id_order)
   df4 <- df3 %>% group_by(id_product) %>% summarise(n = n()) %>% ungroup()
   out <- df4 %>% select(product_id = id_product, count_od2 = n) %>% arrange(product_id)
+full_sketch: |
+  T1 = filter(021, id_product == 22)
+  T2 = cross_join(021, T1, id_order == id_order.other)
+  T3 = filter(T2, id_product != 22)
+  T4 = summarise(T3, n = n(), id_product)
+  out = select(id_product, n) order by(count_od2)

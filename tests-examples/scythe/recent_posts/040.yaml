@@ -26,3 +26,8 @@ comment: |
   df3 <- df2 %>% filter(n_distinct == 2)
   df4 <- inner_join(df2, input1) %>% inner_join(df3)
   out <- df4 %>% select(id, timestamp, first_name, last_name, action) %>% arrange(id)
+full_sketch: |
+  T1 = summarise(040, n_distinct = n_distinct(action), (first_name, last_name))
+  T2 = filter(T1, n_distinct >= 2)
+  T3 = natural_join(040, T2)
+  out = select(id, timestamp, first_name, last_name, action)

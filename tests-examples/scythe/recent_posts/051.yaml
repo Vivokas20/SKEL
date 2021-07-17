@@ -20,3 +20,7 @@ comment: |
   df3 <- inner_join(input2, input1)
   df4 <- df3 %>% group_by(isbn, title) %>% summarise(concatAuthor = string_agg(Author, ', ')) %>% ungroup()
   out <- df4 %>% select(isbn, title, author = concatAuthor)
+full_sketch: |
+  T1 = natural_join(051_1, 051_2)
+  T2 = summarise(T1, concatAuthor = string_agg(Author, ', '), (isbn, title))
+  out = select(isbn, title, concatAuthor)

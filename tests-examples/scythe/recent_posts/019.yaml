@@ -28,3 +28,9 @@ comment: |
   df3 <- full_join(df2 %>% mutate(tmp.col=1), input1 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(maxBalance == Balance.other & Date.other < Date)
   df4 <- df3 %>% filter(Balance > 0 | maxBalance >= 0)
   out <- df4 %>% select(CustomerID, Balance, Date) %>% arrange(CustomerID)
+
+full_sketch: |
+  T1 = filter(019, Balance > 0)
+  T2 = mutate(T1, maxBalance = max(Balance))
+  T3 = cross_join(T2, 019, Balance >= maxBalance & Date < Date.other)
+  out = select(CustomerID, Balance.other, Date.other)

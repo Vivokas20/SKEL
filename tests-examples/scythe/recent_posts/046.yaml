@@ -31,3 +31,9 @@ comment: |
   df4 <- anti_join(input1, df3, by=c('ID'))
   df5 <- bind_rows(df2, df4)
   out <- df5 %>% select(Id = ID, Type, Value)
+full_sketch: |
+  T1 = filter(046, Type == 'Z01')
+  T2 = filter(046, Type == 'Z01' | Type != 'Z09')
+  T3 = anti_join(046, T2, ID)
+  T4 = union(T1, T3)
+  out = select(ID, Type, Value)

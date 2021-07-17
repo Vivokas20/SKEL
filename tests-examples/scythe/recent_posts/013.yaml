@@ -26,3 +26,7 @@ comment: |
   df3 <- inner_join(input2, input1)
   df4 <- full_join(df3, df3, by=character(), suffix = c("", ".other")) %>% filter(Name != Company_group.other & Company_group == Name.other)
   out <- df4 %>% select(ID, Name, RootName = Company_group, RootId = ID.other) %>% arrange(ID)
+full_sketch: |
+  T1 = natural_join(013_1, 013_2)
+  T2 = cross_join(T1, 013_1, ID != ID.other & Company_group == Name.other)
+  out = select(ID, Name, Company_group, ID.other)

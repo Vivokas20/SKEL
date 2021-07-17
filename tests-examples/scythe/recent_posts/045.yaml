@@ -22,7 +22,7 @@ comment: |
   df4 <- left_join(input1, df3)
   out <- df4 %>% select(MenuName = Name, Quantity = sumQuantity)
 
-sketch: |
+full_sketch: |
   T1 = summarise(045_2, sumQuantity = sum(Quantity), Menu_id)
   T2 = left_join(045_1, T1)
-  out = select(T2, MenuName = Name, Quantity = sumQuantity)
+  out = select(Name, sumQuantity)

@@ -15,3 +15,6 @@ sql: |
 comment: |
   df3 <- inner_join(input1, input2, by=c('item' = 'f2','f2' = 'f2'), suffix = c('', '.other'))
   out <- df3 %>% select(ID, item = f1) %>% arrange(ID)
+full_sketch: |
+  T1 = inner_join(003_1, 003_2, item = f2)
+  out = select(ID, f1) order by(ID)

@@ -23,3 +23,8 @@ comment: |
   df3 <- input1 %>% group_by(code, product_variants_id) %>% summarise(concatvariants_value = string_agg(variants_value, ', ')) %>% ungroup()
   df4 <- left_join(df2, df3)
   out <- df4 %>% select(code, product_variants_id, product_name, variants = concatvariants, variants_value = concatvariants_value) %>% arrange(code)
+full_sketch: |
+  T1 = summarise(012, concatvariants = string_agg(variants, ', '), (product_name, code))
+  T2 = summarise(012, concatvariants_value = string_agg(variants_value, ', '), (product_variants_id, code))
+  T3 = natural_join(T1, T2)
+  out = select(code, product_variants_id, product_name, concatvariants, concatvariants_value)

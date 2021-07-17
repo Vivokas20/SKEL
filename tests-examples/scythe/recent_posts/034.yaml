@@ -23,3 +23,7 @@ comment: |
   df2 <- input1 %>% mutate(maxDATE_UPDATE = max(DATE_UPDATE))
   df3 <- df2 %>% filter(maxDATE_UPDATE <= DATE_UPDATE)
   out <- df3 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = DATE_UPDATE) %>% arrange(c1)
+full_sketch: |
+  T1 = mutate(034, maxDATE_UPDATE = max(DATE_UPDATE))
+  T2 = inner_join(T1, T1, DATE_UPDATE = maxDATE_UPDATE)
+  out = select distinct(MATERIAL, DISCO_DATE, DATE_UPDATE)

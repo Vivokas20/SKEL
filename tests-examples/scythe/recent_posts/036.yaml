@@ -16,3 +16,8 @@ comment: |
   df4 <- inner_join(input1, df3, by=c('Sen1' = 'Sen2'), suffix = c('', '.other'))
   df5 <- bind_rows(df3, df4)
   out <- df5 %>% select(Account, Name) %>% arrange(Account)
+full_sketch: |
+  T1 = inner_join(036_1, 036_2, ID = Sen1)
+  T2 = inner_join(036_1, 036_2, ID = Sen2)
+  T3 = union(T1, T2)
+  out = select(Account, Name)

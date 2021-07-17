@@ -29,3 +29,10 @@ comment: |
   df2 <- input1 %>% group_by(job_num) %>% summarise(call_ref = max(call_ref)) %>% ungroup()
   df3 <- bind_rows(df1, df2)
   out <- df3 %>% select(call_ref, job_num) %>% distinct()
+full_sketch: |
+  T1 = filter(004, job_num != 0)
+  T2 = summarise(T1, call_ref = max(call_ref), job_num)
+  T3 = filter(004, job_num == 0)
+  T4 = union(T2, T3)
+  out = select(call_ref, job_num)
+

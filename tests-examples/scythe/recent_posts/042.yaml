@@ -12,3 +12,6 @@ sql: |
 comment: |
   df2 <- bind_rows(input1, input1)
   out <- df2 %>% select(id, name) %>% distinct() %>% arrange(id)
+full_sketch: |
+  T1 = union(042, 042)
+  out = select distinct(id, name) order by(id)

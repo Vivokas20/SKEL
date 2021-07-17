@@ -19,3 +19,7 @@ comment: |
   df2 <- input1 %>% group_by(crit1, crit2) %>% summarise(Id = max(Id)) %>% ungroup()
   df3 <- inner_join(input1, df2)
   out <- df3 %>% select(crit1)
+full_sketch: |
+  T1 = summarise(032, Id = max(Id), (crit1, crit2))
+  T2 = natural_join(032, T1)
+  out = select(crit1, crit2, value) order by(crit1, crit2)

@@ -14,3 +14,6 @@ sql: |
 comment: |
   df3 <- left_join(input2, input1)
   out <- df3 %>% select(Date, Tapped, Sold)
+full_sketch: |
+  T1 = left_join(038_2, 038_1)
+  out = select(Date, Tapped, Sold)

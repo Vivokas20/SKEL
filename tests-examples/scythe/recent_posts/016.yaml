@@ -32,3 +32,9 @@ comment: |
   df4 <- inner_join(df2, df3) %>% inner_join(input1)
   df5 <- df4 %>% filter(n > 1 & ReportDt > mdy('10/19/2016'))
   out <- df5 %>% select(c1 = CustomerId, c2 = maxReportDt, c3 = n) %>% distinct()
+full_sketch: |
+  T1 = summarise(016_2, maxReportDt = max(ReportDt), CustomerId)
+  T2 = summarise(016_2, n = n(), CustomerId)
+  T3 = natural_join(016_2, T1, T2)
+  T4 = filter(T3, n > 1 & ReportDt >= mdy('10/19/2016'))
+  out = select distinct(CustomerId, maxReportDt, n)

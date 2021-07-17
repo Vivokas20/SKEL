@@ -24,3 +24,9 @@ comment: |
   df3 <- full_join(input1 %>% mutate(tmp.col=1), df2 %>% mutate(tmp.col=1), by="tmp.col", suffix = c("", ".other")) %>% select(-tmp.col) %>% filter(Member != Member.other & Element.other == Element)
   df4 <- df3 %>% group_by(Member) %>% summarise(n = n()) %>% ungroup()
   out <- df4 %>% select(c1 = Member, c2 = n) %>% arrange(c1)
+full_sketch: |
+  T1 = filter(028, Member > 1)
+  T2 = filter(028, Member == 1)
+  T3 = inner_join(T1, T2, Element)
+  T4 = summarise(T3, n = n(), Member)
+  out = select(Member, n) order by(c2)

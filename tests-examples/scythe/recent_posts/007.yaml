@@ -30,3 +30,8 @@ comment: |
   df3 <- input1 %>% group_by(Code, Employee) %>% summarise(maxToDate = max(ToDate)) %>% ungroup()
   df4 <- inner_join(df2, df3)
   out <- df4 %>% select(Employee, FromDate = minFromDate, ToDate = maxToDate, Code) %>% arrange(Employee)
+full_sketch: |
+  T1 = summarise(007, minFromDate = min(FromDate), (Employee, Code))
+  T2 = summarise(007, maxToDate = max(ToDate), (Employee, Code))
+  T3 = natural_join(T1, T2)
+  out = select(Employee, minFromDate, maxToDate, Code)
