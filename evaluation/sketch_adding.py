@@ -120,12 +120,15 @@ def sketch_no_summarise(sketch, spec):
 
 def parse_sketch(instances):
     global last
+    all = []
     for file in instances:
         last = file
         with open(file, "r+") as f:
             spec = yaml.safe_load(f)
 
             if 'full_sketch' in spec:
+                all.append(file)
+
                 out = {}
                 sketch = Sketch(spec['full_sketch'])
                 inputs = spec['inputs']
@@ -147,6 +150,8 @@ def parse_sketch(instances):
                 if out != {}:
                     output = yaml.dump(out, default_flow_style=False, sort_keys=False)
                     f.write("\n" + output)
+
+    # print(all)
 
 
 # def remove_sketch(instances):
@@ -222,7 +227,7 @@ def get_comments(instances):
                 #     tb.write(output + "\n")
 
 if __name__ == '__main__':
-    # get_comments(glob.glob('tests-examples/textbook/*.yaml'))
     # parse_sketch(['tests-examples/textbook/31.yaml'])
-    parse_sketch(glob.glob('tests-examples/scythe/top_rated_posts/*.yaml'))
     # parse_sketch(glob.glob('tests-examples/textbook/*.yaml'))
+    # parse_sketch(glob.glob('tests-examples/scythe/top_rated_posts/*.yaml'))
+    parse_sketch(glob.glob('tests-examples/scythe/recent_posts/*.yaml'))

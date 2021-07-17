@@ -5,6 +5,18 @@ from matplotlib import rcParams
 
 ####################### Plot Functions ########################
 
+def check(datas, name_list):
+
+    for n in range(len(datas)):
+        df = datas[n]
+        df = df[df.timeout == False]
+        programs = pd.isnull(df.programs)
+        programs = programs[programs == True]
+        if len(programs) > 0:
+            return True, name_list[n]
+
+    return False, None
+
 def time_plot(datas, names):
     fig, ax = plt.subplots()
 
@@ -79,7 +91,9 @@ def gt_plot(datas, names):
 dir = "evaluation/data/"
 # files = [dir+"st-no_sketch.csv", dir+"st-no_children.csv", dir+"st-no_root.csv"]
 # files = [dir+"st-no_sketch.csv", dir+"st-no_sketch_no_out_ctr.csv", dir+"st-no_sketch_no_out_ctr_new_opt.csv"]
-files = [dir+"st-no_sketch_no_out_ctr_new_opt.csv", dir+"st-sketch_no_children_ctr_new_opt.csv", dir+"st-no_sketch_no_children_ctr_new_opt_flag.csv", dir+"new_no_children_off.csv", dir+"new_no_children_on.csv", dir+"new_no_sketch.csv", dir+"new_root_no_sketch.csv"]
+files = [dir+"st-no_sketch_no_out_ctr_new_opt.csv", dir+"st-sketch_no_children_ctr_new_opt.csv", dir+"st-no_sketch_no_children_ctr_new_opt_flag.csv", dir+"new_no_children_off.csv", dir+"new_no_children_on.csv", dir+"new_no_sketch.csv", dir+"new_no_sketch_both.csv", dir+"new_no_children_on_both.csv", dir+"new_no_children_off_both.csv"]
+out_file = "compare_new_opt_max_min"
+
 csv_list = []
 name_list = []
 
@@ -87,9 +101,11 @@ for file in files:
     csv_list.append(pd.read_csv(file))
     name_list.append(file.rsplit("/", 1)[1][:-4])
 
-figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), solved_plot(csv_list, name_list)]#, gt_plot(csv_list, name_list)]
-
-out_file = "compare_new_opt_max_min"
+sol = check(csv_list, name_list)
+if sol[0]:
+    print("There are errors in csv: " + sol[1])
+else:
+    figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), solved_plot(csv_list, name_list), gt_plot(csv_list, name_list)]
 
 with PdfPages("evaluation/plots/"+out_file+".pdf") as pdf:
     for fig in figs:
