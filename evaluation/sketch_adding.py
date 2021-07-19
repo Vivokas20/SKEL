@@ -230,4 +230,5 @@ if __name__ == '__main__':
     # parse_sketch(['tests-examples/textbook/31.yaml'])
     # parse_sketch(glob.glob('tests-examples/textbook/*.yaml'))
     # parse_sketch(glob.glob('tests-examples/scythe/top_rated_posts/*.yaml'))
-    parse_sketch(glob.glob('tests-examples/scythe/recent_posts/*.yaml'))
+    # parse_sketch(glob.glob('tests-examples/scythe/recent_posts/*.yaml'))
+    parse_sketch(glob.glob('tests-examples/spider/architecture/*.yaml'))
