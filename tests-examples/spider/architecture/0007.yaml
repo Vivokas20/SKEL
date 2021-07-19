@@ -15,3 +15,6 @@ sql: |-
   SELECT name
   FROM mill
   WHERE LOCATION != 'Donceel'
+full_sketch: |
+  T1 = filter(mill, location != 'Donceel')
+  out = select(name)

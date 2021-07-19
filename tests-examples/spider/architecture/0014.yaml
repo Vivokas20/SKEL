@@ -21,3 +21,8 @@ sql: |-
   JOIN architect AS t2 ON T1.architect_id = T2.id
   JOIN bridge AS T3 ON T3.architect_id = T2.id
   WHERE T3.length_meters > 80
+#full_sketch: |
+#  T1 = filter(bridge, length_meters > 80)
+#  T2 = anti_join(T1, architect)
+#  T3 = inner_join(mill, T2, architect_id)
+#  out = select distinct(name)

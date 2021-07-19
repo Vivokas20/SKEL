@@ -22,3 +22,8 @@ sql: |-
   JOIN bridge AS T2 ON T1.id = T2.architect_id
   GROUP BY T1.id
   HAVING count(*) >= 3
+full_sketch: |
+  T1 = summarise(bridge, n = n(), architect_id)
+  T2 = filter(T1, n >= 3)
+  T3 = inner_join(architect, T2, id = architect_id)
+  out = select(id, name)

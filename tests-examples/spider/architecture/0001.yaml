@@ -17,3 +17,7 @@ sql: |-
   SELECT count(*)
   FROM architect
   WHERE gender = 'female'
+full_sketch: |
+  T1 = filter(architect, gender == 'female')
+  T2 = summarise(T1, n = n())
+  out = select(n)

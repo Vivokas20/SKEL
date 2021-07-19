@@ -18,6 +18,12 @@ comment: |-
        FROM mill
        WHERE built_year < 1850 );
 
+  df4 <- df_mill %>% filter(built_year < 1850)
+  df5 <- intersect(select(df_architect,gender), select(df_architect, gender))
+  df6 <- df5 %>% group_by() %>% summarise(n = n()) %>% ungroup()
+  out <- df6 %>% select(count___ = n)
+
+
 sql: |-
   SELECT count(*)
   FROM architect

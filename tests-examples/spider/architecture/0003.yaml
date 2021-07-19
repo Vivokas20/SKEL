@@ -18,3 +18,8 @@ sql: |-
          T2.name
   FROM bridge AS T1
   JOIN architect AS T2 ON T1.architect_id = T2.id
+full_sketch: |
+  T1 = inner_join(architect, bridge, id = architect_id)
+  T2 = summarise(T1, length_meters = max(length_meters))
+  T3 = inner_join(T1, T2, length_meters)
+  out = select(length_meters, name)

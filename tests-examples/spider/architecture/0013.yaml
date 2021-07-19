@@ -17,3 +17,6 @@ sql: |-
   SELECT name
   FROM mill
   WHERE name LIKE '%Moulin%'
+full_sketch: |
+  T1 = filter(mill, str_detect(name, 'Moulin'))
+  out = select(name)

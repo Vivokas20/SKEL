@@ -14,3 +14,6 @@ sql: |-
                   T1.nationality
   FROM architect AS T1
   JOIN mill AS t2 ON T1.id = T2.architect_id
+full_sketch: |
+  T1 = inner_join(architect, mill, id = architect_id)
+  out = select distinct(name, nationality)

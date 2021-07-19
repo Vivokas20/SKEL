@@ -21,3 +21,6 @@ sql: |-
   FROM architect
   WHERE gender = 'male'
   ORDER BY name
+full_sketch: |
+  T1 = filter(architect, gender == 'male')
+  out = select(name, nationality, id) order by(name)

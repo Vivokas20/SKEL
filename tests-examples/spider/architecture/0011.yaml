@@ -42,3 +42,13 @@ sql: |-
   JOIN mill AS T2 ON T1.id = T2.architect_id
   GROUP BY T1.id
   HAVING count(*) = 1
+full_sketch: |
+  T1 = inner_join(architect, bridge, id = architect_id)
+  T2 = summarise(T1, n = n(), id)
+  T3 = filter(T2, n == 2)
+  T4 = inner_join(architect, mill, id = architect_id)
+  T5 = summarise(T4, n = n(), id)
+  T6 = filter(T5, n == 1)
+  T7 = union(T3, T6)
+  T8 = natural_join(architect, T7)
+  out = select distinct(id, name, gender) order by(id)

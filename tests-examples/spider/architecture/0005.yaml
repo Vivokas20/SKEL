@@ -17,3 +17,6 @@ sql: |-
          built_year
   FROM mill
   WHERE TYPE = 'Grondzeiler'
+full_sketch: |
+  T1 = filter(mill, type == 'Grondzeiler')
+  out = select(name, built_year)

@@ -13,3 +13,6 @@ comment: |-
 sql: |-
   SELECT avg(length_feet)
   FROM bridge
+full_sketch: |
+  T1 = summarise(bridge, meanlength_feet = mean(length_feet))
+  out = select(meanlength_feet)

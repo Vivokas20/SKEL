@@ -21,3 +21,7 @@ sql: |-
   JOIN architect AS t2 ON T1.architect_id = T2.id
   WHERE T2.nationality = 'American'
     OR T2.nationality = 'Canadian'
+full_sketch: |
+  T1 = filter(architect, nationality == 'American' | nationality == 'Canadian')
+  T2 = inner_join(T1, mill, architect_id = id)
+  out = select distinct(type)
