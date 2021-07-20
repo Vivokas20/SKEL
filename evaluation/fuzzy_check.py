@@ -15,7 +15,8 @@ import rpy2
 import sqlalchemy
 from pebble import ProcessPool
 from rpy2 import robjects
-from TestSuiteEval.fuzz import fuzz
+# from TestSuiteEval.fuzz import fuzz
+from fuzzywuzzy import fuzz
 
 from squares import util
 from squares.config import Config
@@ -73,7 +74,7 @@ config = Config(seed=seed, verbosity=args.verbose, print_r=not args.no_r, cache_
                 max_column_combinations=args.max_cols_combo, max_join_combinations=args.max_join_combo,
                 subsume_conditions=args.subsume_conditions, transitive_blocking=args.transitive_blocking,
                 use_solution_dsl=args.use_dsl, use_solution_cube=args.use_cube, bitenum_enabled=args.bitenum,
-                z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable)
+                z3_QF_FD=args.qffd, z3_sat_phase='caching', disabled=args.disable, sketch=args.sketch, flag_types=args.flag_types)
 util.store_config(config)
 
 fuzzies = args.fuzzies
@@ -149,9 +150,9 @@ def compare(instance_file: str, file_total=None, file_i=None):
 
     print(instance)
 
-    log = f'analysis/data/{run}/{instance}_0.log'
+    log = f'evaluation/data/{run}/{instance}_0.log'
     if not os.path.isfile(log):
-        log = f'analysis/data/{run}/{instance}.log'
+        log = f'evaluation/data/{run}/{instance}.log'
     if not os.path.isfile(log):
         print('No log for', instance, f'{file_i}/{file_total}' if file_i is not None else '')
         return instance, -3, []
@@ -275,17 +276,15 @@ def compare(instance_file: str, file_total=None, file_i=None):
         return instance, -2, []
 
 
-instances = list(glob.glob('tests/**/*.yaml', recursive=True))
-# instances = list(glob.glob('tests/spider/club_1/*.yaml', recursive=True))
-
-
 def shuffled(lst):
     lst = list(lst)
     random.shuffle(lst)
     return lst
 
+# instances = list(glob.glob('tests/**/*.yaml', recursive=True))
+instances = ['tests-examples/scythe/recent_posts/003.yaml', 'tests-examples/scythe/recent_posts/004.yaml']
 
-output_file = f'analysis/fuzzy/{run}{"_" if args.save_alt else ""}.csv'
+output_file = f'evaluation/fuzzy/{run}{"_" if args.save_alt else ""}.csv'
 
 if args.p == 1 and not args.force_pool:
     with open(output_file, 'w') as results_f:

@@ -94,3 +94,5 @@ _build/
 /evaluation/data/
 /evaluation/plots/
 /analysis/
+/helper-scripts/
+/evaluation/fuzzy/

@@ -318,7 +318,8 @@ class Sketch:
                         args = args_in_brackets(line[2].split('(')[1].split(')')[0])[0]
                         if not args:
                             logger.error('Order by cannot be empty')
-                            raise RuntimeError()
+                            parsed = False
+                            break
                         for arg in args:
                             if arg == "??":
                                 hole = True
@@ -331,6 +332,7 @@ class Sketch:
                     except:
                         logger.error('Could not parse select line', sketch_line)
                         parsed = False
+                        break
                 else:
                     self.select["arrange"] = []
 
@@ -341,6 +343,7 @@ class Sketch:
                 except:
                     logger.error('Could not parse select line', sketch_line)
                     parsed = False
+                    break
 
                 if "select distinct" in line:
                     self.select["distinct"] = [' %>% distinct()']
