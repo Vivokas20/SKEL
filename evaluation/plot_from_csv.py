@@ -122,12 +122,15 @@ out_file = "plots"
 ################# PREPARATIONS #################
 
 if flag_filter:
-    files = [dir + 'no_sketch.csv', dir + 'On/no_children_on.csv', dir + 'On/no_root_on.csv', dir + 'On/Filter/no_filter_on.csv', dir + 'On/Filter/only_filter_on.csv']
-    out_file = "filter"
+    # files = [dir + 'no_sketch.csv', dir + 'On/no_children_on.csv', dir + 'On/no_root_on.csv', dir + 'On/Filter/no_filter_on.csv', dir + 'On/Filter/only_filter_on.csv']
+    files = [dir + 'no_sketch.csv', dir + 'Off/no_children_off.csv', dir + 'Off/no_root_off.csv', dir + 'Off/Filter/no_filter_off.csv', dir + 'Off/Filter/only_filter_off.csv']
+    # out_file = "filter_on"
+    out_file = "filter_off"
 elif flag_summarise:
-    files = [dir + 'no_sketch.csv', dir + 'On/no_children_on.csv', dir + 'On/no_root_on.csv', dir + 'On/Summarise/no_summarise_on.csv', dir+'On/Summarise/only_summarise_on.csv']
-    out_file = "summarise"
-
+    # files = [dir + 'no_sketch.csv', dir + 'On/no_children_on.csv', dir + 'On/no_root_on.csv', dir + 'On/Summarise/no_summarise_on.csv', dir+'On/Summarise/only_summarise_on.csv']
+    files = [dir + 'no_sketch.csv', dir + 'Off/no_children_off.csv', dir + 'Off/no_root_off.csv', dir + 'Off/Summarise/no_summarise_off.csv', dir + 'Off/Summarise/only_summarise_off.csv']
+    # out_file = "summarise_on"
+    out_file = "summarise_off"
 
 for file in files:
     csv_list.append(pd.read_csv(file))
