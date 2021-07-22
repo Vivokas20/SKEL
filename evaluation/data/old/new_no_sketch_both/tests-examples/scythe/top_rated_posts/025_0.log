@@ -1,0 +1,54 @@
+[     2.316][MainProcess][INFO] Parsing specification...
+[     2.322][MainProcess][INFO] File read
+[     2.322][MainProcess][DEBUG] Reading input files...
+[     2.331][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i025.csv: ['int64', 'string']
+[     2.337][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o025.csv: ['int64', 'string']
+[     2.378][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 6, 'filter': 84, 'summarise': 4, 'mutate': 1}
+[     2.378][MainProcess][DEBUG] {'natural_join': 0.008771929824561403, 'natural_join3': 0.008771929824561403, 'natural_join4': 0.008771929824561403, 'inner_join': 0.06140350877192982, 'anti_join': 0.03508771929824561, 'left_join': 0.008771929824561403, 'union': 0.008771929824561403, 'intersect': 0.017543859649122806, 'semi_join': 0.008771929824561403, 'cross_join': 0.05263157894736842, 'filter': 0.7368421052631579, 'summarise': 0.03508771929824561, 'mutate': 0.008771929824561403}
+[     2.378][MainProcess][DEBUG] {'natural_join': 0.008771929824561403, 'natural_join3': 0.008771929824561403, 'natural_join4': 0.008771929824561403, 'inner_join': 0.06140350877192982, 'anti_join': 0.03508771929824561, 'left_join': 0.008771929824561403, 'union': 0.008771929824561403, 'intersect': 0.017543859649122806, 'semi_join': 0.008771929824561403, 'cross_join': 0.05263157894736842, 'filter': 0.7368421052631579, 'summarise': 0.03508771929824561, 'mutate': 0.008771929824561403}
+[     2.378][MainProcess][INFO] Building synthesizer...
+[     2.790][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 227 constraints
+[     2.817][MainProcess][DEBUG] Enumeration time: 0.43903422355651855
+[     9.600][MainProcess][DEBUG] Synthesis time: 6.782374143600464
+[     9.600][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, 'row_number_ >= 3 & row_number_ < 5')]
+[     9.605][MainProcess][DEBUG] Solution found using process 0
+[     9.605][MainProcess][INFO] Statistics:
+[     9.605][MainProcess][INFO] 	Attempted programs: 305 (approx)
+[     9.605][MainProcess][INFO] 		Rejected: 304 (approx)
+[     9.605][MainProcess][INFO] 		Failed: 0 (approx)
+[     9.605][MainProcess][INFO] 		Empty outputs: 117 (38.4%) (approx)
+[     9.605][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     9.605][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     9.605][MainProcess][INFO] 	Total time spent in enumerator init: 0.439034 (approx)
+[     9.605][MainProcess][INFO] 	Total time spent in enumerator: 0.687907 (approx)
+[     9.606][MainProcess][INFO] 		Enumerated 443.373745 programs/s avg. (just enumeration time)
+[     9.606][MainProcess][INFO] 		Enumerated 33.990703 programs/s avg. (overall)
+[     9.606][MainProcess][INFO] 	Total time spent in evaluation & testing: 5.877983 (approx)
+[     9.606][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.214347 (approx)
+[     9.606][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, 'row_number_ >= 3 & row_number_ < 5')]
+[     9.606][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i025 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i025.csv", col_types = cols("Id" = col_integer(),"Value" = col_character()))
+df_i025 <- copy_to(con, df_i025)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o025.csv", col_types = cols("Id" = col_integer(),"Value" = col_character()))
+
+df311 <- df_i025 %>% mutate(row_number_ = row_number())
+df312 <- df311 %>% filter(row_number_ >= 3 & row_number_ < 5)
+out <- df312 %>% select(Id, Value) %>% arrange(Id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Id,
+       Value
+FROM
+  (SELECT Id,
+          Value,
+          ROW_NUMBER() OVER () AS row_number_
+   FROM df_i025)
+WHERE (row_number_ >= 3.0
+       AND row_number_ < 5.0)
+ORDER BY Id

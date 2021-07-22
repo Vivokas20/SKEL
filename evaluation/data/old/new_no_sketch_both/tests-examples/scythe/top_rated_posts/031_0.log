@@ -1,0 +1,55 @@
+[     2.333][MainProcess][INFO] Parsing specification...
+[     2.338][MainProcess][INFO] File read
+[     2.339][MainProcess][DEBUG] Reading input files...
+[     2.348][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i031.csv: ['int64', 'string', 'int64']
+[     2.353][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o031.csv: ['int64', 'int64', 'string']
+[     2.389][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 30, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 32, 'filter': 2, 'summarise': 7, 'mutate': 1}
+[     2.389][MainProcess][DEBUG] {'natural_join': 0.011363636363636364, 'natural_join3': 0.011363636363636364, 'natural_join4': 0.011363636363636364, 'inner_join': 0.3409090909090909, 'anti_join': 0.07954545454545454, 'left_join': 0.011363636363636364, 'union': 0.011363636363636364, 'intersect': 0.03409090909090909, 'semi_join': 0.011363636363636364, 'cross_join': 0.36363636363636365, 'filter': 0.022727272727272728, 'summarise': 0.07954545454545454, 'mutate': 0.011363636363636364}
+[     2.389][MainProcess][DEBUG] {'natural_join': 0.011363636363636364, 'natural_join3': 0.011363636363636364, 'natural_join4': 0.011363636363636364, 'inner_join': 0.3409090909090909, 'anti_join': 0.07954545454545454, 'left_join': 0.011363636363636364, 'union': 0.011363636363636364, 'intersect': 0.03409090909090909, 'semi_join': 0.011363636363636364, 'cross_join': 0.36363636363636365, 'filter': 0.022727272727272728, 'summarise': 0.07954545454545454, 'mutate': 0.011363636363636364}
+[     2.389][MainProcess][INFO] Building synthesizer...
+[     2.606][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 226 constraints
+[     2.625][MainProcess][DEBUG] Enumeration time: 0.23560619354248047
+[     2.855][MainProcess][DEBUG] Synthesis time: 0.2295057773590088
+[     2.855][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, "name == 'Beta'")]
+[     2.856][MainProcess][DEBUG] Solution found using process 0
+[     2.856][MainProcess][INFO] Statistics:
+[     2.857][MainProcess][INFO] 	Attempted programs: 7 (approx)
+[     2.857][MainProcess][INFO] 		Rejected: 6 (approx)
+[     2.857][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.857][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.857][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.857][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.857][MainProcess][INFO] 	Total time spent in enumerator init: 0.235606 (approx)
+[     2.857][MainProcess][INFO] 	Total time spent in enumerator: 0.012072 (approx)
+[     2.857][MainProcess][INFO] 		Enumerated 579.872966 programs/s avg. (just enumeration time)
+[     2.857][MainProcess][INFO] 		Enumerated 3.205533 programs/s avg. (overall)
+[     2.857][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.210451 (approx)
+[     2.857][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.005725 (approx)
+[     2.857][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, "name == 'Beta'")]
+[     2.857][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i031 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i031.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"name_ascii" = col_integer()))
+df_i031 <- copy_to(con, df_i031)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o031.csv", col_types = cols("id" = col_integer(),"position" = col_integer(),"name" = col_character()))
+
+df12 <- df_i031 %>% mutate(row_number_ = row_number())
+df13 <- df12 %>% filter(name == 'Beta')
+out <- df13 %>% select(id, position = row_number_, name) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `row_number_` AS `position`,
+       `name`
+FROM
+  (SELECT `id`,
+          `name`,
+          `name_ascii`,
+          ROW_NUMBER() OVER () AS `row_number_`
+   FROM `df_i031`)
+WHERE (`name` = 'Beta')
+ORDER BY id

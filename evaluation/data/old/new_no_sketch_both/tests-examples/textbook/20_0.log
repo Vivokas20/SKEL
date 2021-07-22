@@ -1,0 +1,22 @@
+[     2.340][MainProcess][INFO] Parsing specification...
+[     2.346][MainProcess][INFO] File read
+[     2.347][MainProcess][DEBUG] Reading input files...
+[     2.356][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/20-1.txt: ['string', 'string']
+[     2.361][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/20-2.txt: ['string', 'string']
+[     2.367][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/20-3.txt: ['string', 'string']
+[     2.372][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/20.out: ['string']
+[     2.415][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 738, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 18, 'filter': 36}
+[     2.416][MainProcess][DEBUG] {'natural_join': 0.008403361344537815, 'natural_join3': 0.025210084033613446, 'natural_join4': 0.07563025210084033, 'inner_join': 0.6890756302521008, 'anti_join': 0.09243697478991597, 'left_join': 0.008403361344537815, 'union': 0.008403361344537815, 'intersect': 0.03361344537815126, 'semi_join': 0.008403361344537815, 'cross_join': 0.01680672268907563, 'filter': 0.03361344537815126}
+[     2.416][MainProcess][DEBUG] {'natural_join': 0.008403361344537815, 'natural_join3': 0.025210084033613446, 'natural_join4': 0.07563025210084033, 'inner_join': 0.6890756302521008, 'anti_join': 0.09243697478991597, 'left_join': 0.008403361344537815, 'union': 0.008403361344537815, 'intersect': 0.03361344537815126, 'semi_join': 0.008403361344537815, 'cross_join': 0.01680672268907563, 'filter': 0.03361344537815126}
+[     2.416][MainProcess][INFO] Building synthesizer...
+[     2.565][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 88 constraints
+[     2.577][MainProcess][DEBUG] There is no solution for current loc (1).
+[     2.577][MainProcess][DEBUG] Enumeration time: 0.1614084243774414
+[     2.578][MainProcess][DEBUG] Synthesis time: 0.0003809928894042969
+[     2.578][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     2.884][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 202 constraints
+[     2.906][MainProcess][DEBUG] Enumeration time: 0.3279423713684082
+[     4.109][MainProcess][DEBUG] Synthesis time: 1.2026970386505127
+[     4.110][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     4.600][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 346 constraints
+[     4.643][MainProcess][DEBUG] Enumeration time: 0.5335142612457275

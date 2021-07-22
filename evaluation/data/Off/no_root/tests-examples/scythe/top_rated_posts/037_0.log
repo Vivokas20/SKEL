@@ -1,0 +1,62 @@
+[     2.402][MainProcess][INFO] Parsing specification...
+[     2.407][MainProcess][INFO] File read
+[     2.408][MainProcess][DEBUG] Reading input files...
+[     2.419][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i037.csv: ['int64', 'string', 'string']
+[     2.425][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o037.csv: ['int64', 'string', 'string']
+[     2.426][MainProcess][INFO] Parsing sketch...
+[     2.426][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['c1 = min(c1)'], type=Unknown, var=[]),Child(['c2'], type=Unknown, var=[])])
+[     2.426][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[])])
+[     2.494][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 22, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 14, 'mutate': 2}
+[     2.495][MainProcess][DEBUG] {'natural_join': 0.0008547008547008547, 'natural_join3': 0.0008547008547008547, 'natural_join4': 0.0008547008547008547, 'inner_join': 0.018803418803418803, 'anti_join': 0.005982905982905983, 'left_join': 0.0008547008547008547, 'union': 0.0008547008547008547, 'intersect': 0.002564102564102564, 'semi_join': 0.0008547008547008547, 'cross_join': 0.9487179487179487, 'filter': 0.005128205128205128, 'summarise': 0.011965811965811967, 'mutate': 0.0017094017094017094}
+[     2.495][MainProcess][DEBUG] {'natural_join': 0.0008547008547008548, 'natural_join3': 0.0008547008547008548, 'natural_join4': 0.0008547008547008548, 'inner_join': 0.018803418803418806, 'anti_join': 0.005982905982905984, 'left_join': 0.0008547008547008548, 'union': 0.0008547008547008548, 'intersect': 0.0025641025641025645, 'semi_join': 0.0008547008547008548, 'cross_join': 0.9487179487179488, 'filter': 0.005128205128205129, 'summarise': 0.011965811965811968, 'mutate': 0.0017094017094017096}
+[     2.495][MainProcess][INFO] Building synthesizer...
+[     2.497][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Table, var=[[1164], [1162], [15, 19, 41]]),Child(['c1 = min(c1)'], type=Unknown, var=[[1164], [1162], [15, 19, 41]]),Child(['c2'], type=Unknown, var=[[1164], [1162], [15, 19, 41]]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Table, var=[[1164], [1166]]),Child([0], type=Line, var=[[1164], [1166]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.603][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 148 constraints
+[     2.610][MainProcess][DEBUG] Enumeration time: 0.11538410186767578
+[     2.668][MainProcess][DEBUG] Synthesis time: 0.05730843544006348
+[     2.668][MainProcess][INFO] Solution found: [summarise(input0, 'c1 = min(c1)', 'c2'), left_join(line0, input0)]
+[     2.669][MainProcess][DEBUG] Solution found using process 0
+[     2.669][MainProcess][INFO] Statistics:
+[     2.669][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.670][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.670][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.670][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.670][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.670][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.670][MainProcess][INFO] 	Total time spent in enumerator init: 0.115384 (approx)
+[     2.670][MainProcess][INFO] 	Total time spent in enumerator: 0.001186 (approx)
+[     2.670][MainProcess][INFO] 		Enumerated 843.076181 programs/s avg. (just enumeration time)
+[     2.670][MainProcess][INFO] 		Enumerated 0.509191 programs/s avg. (overall)
+[     2.670][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.053289 (approx)
+[     2.670][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.670][MainProcess][INFO] Solution found: [summarise(input0, 'c1 = min(c1)', 'c2'), left_join(line0, input0)]
+[     2.670][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i037 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i037.csv", col_types = cols("c1" = col_integer(),"c2" = col_character(),"c3" = col_character()))
+df_i037 <- copy_to(con, df_i037)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o037.csv", col_types = cols("c1" = col_integer(),"c2" = col_character(),"c3" = col_character()))
+
+df3 <- df_i037 %>% group_by(c2) %>% summarise(c1 = min(c1)) %>% ungroup()
+df4 <- left_join(df3, df_i037, na_matches="never")
+out <- df4 %>% select(c1, c2, c3)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT c1,
+       c2,
+       c3
+FROM
+  (SELECT LHS.c2 AS c2,
+          LHS.c1 AS c1,
+          c3
+   FROM
+     (SELECT c2,
+             MIN(c1) AS c1
+      FROM df_i037
+      GROUP BY c2) AS LHS
+   LEFT JOIN df_i037 AS RHS ON (LHS.c2 = RHS.c2
+                                AND LHS.c1 = RHS.c1))

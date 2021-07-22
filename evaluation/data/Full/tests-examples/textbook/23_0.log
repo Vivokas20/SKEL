@@ -1,0 +1,155 @@
+[     2.389][MainProcess][INFO] Parsing specification...
+[     2.395][MainProcess][INFO] File read
+[     2.396][MainProcess][DEBUG] Reading input files...
+[     2.405][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/23-1.txt: ['string', 'string', 'int64']
+[     2.412][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/23-2.txt: ['string', 'string', 'string']
+[     2.417][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/23-3.txt: ['string', 'string']
+[     2.424][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/23.out: ['string', 'string', 'int64']
+[     2.424][MainProcess][INFO] Parsing sketch...
+[     2.424][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child([2], type=Table, var=[])])
+[     2.424][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child([0], type=Line, var=[]),Child(["color == 'green'"], type=FilterCondition, var=[])])
+[     2.424][MainProcess][DEBUG] Sketch creation: Line(T3, root=['filter'], var=[], children=[Child([0], type=Line, var=[]),Child(["color == 'red'"], type=FilterCondition, var=[])])
+[     2.424][MainProcess][DEBUG] Sketch creation: Line(T4, root=['intersect'], var=[], children=[Child([1], type=Line, var=[]),Child([2], type=Line, var=[]),Child(['S_name'], type=Col, var=[])])
+[     2.424][MainProcess][DEBUG] Sketch creation: Line(T5, root=['summarise'], var=[], children=[Child([0], type=Line, var=[]),Child(['cost = max(cost)'], type=SummariseCondition, var=[]),Child(['S_key, S_name'], type=Cols, var=[])])
+[     2.425][MainProcess][DEBUG] Sketch creation: Line(T6, root=['natural_join3'], var=[], children=[Child([0], type=Line, var=[]),Child([3], type=Line, var=[]),Child([4], type=Line, var=[])])
+[     2.502][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 2817, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 11304, 'filter': 198, 'summarise': 132, 'mutate': 6}
+[     2.503][MainProcess][DEBUG] {'natural_join': 0.000605938194304181, 'natural_join3': 0.001817814582912543, 'natural_join4': 0.005453443748737629, 'inner_join': 0.18965865481720864, 'anti_join': 0.013330640274691982, 'left_join': 0.000605938194304181, 'union': 0.000605938194304181, 'intersect': 0.003635629165825086, 'semi_join': 0.000605938194304181, 'cross_join': 0.7610583720460513, 'filter': 0.013330640274691982, 'summarise': 0.00888709351646132, 'mutate': 0.0004039587962027873}
+[     2.503][MainProcess][DEBUG] {'natural_join': 0.000605938194304181, 'natural_join3': 0.001817814582912543, 'natural_join4': 0.005453443748737629, 'inner_join': 0.18965865481720864, 'anti_join': 0.013330640274691982, 'left_join': 0.000605938194304181, 'union': 0.000605938194304181, 'intersect': 0.003635629165825086, 'semi_join': 0.000605938194304181, 'cross_join': 0.7610583720460513, 'filter': 0.013330640274691982, 'summarise': 0.00888709351646132, 'mutate': 0.0004039587962027873}
+[     2.503][MainProcess][INFO] Building synthesizer...
+[     2.505][MainProcess][DEBUG] [Line(T1, root=['natural_join3'], var=[2], children=[Child([0], type=Table, var=[1679]),Child([1], type=Table, var=[1680]),Child([2], type=Table, var=[1681]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child([0], type=Line, var=[1683]),Child(["color == 'green'"], type=FilterCondition, var=[1611]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['filter'], var=[11], children=[Child([0], type=Line, var=[1683]),Child(["color == 'red'"], type=FilterCondition, var=[1613]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T4, root=['intersect'], var=[8], children=[Child([1], type=Line, var=[1684]),Child([2], type=Line, var=[1685]),Child(['S_name'], type=Col, var=[17]),Child([None], type=None, var=[0])]), Line(T5, root=['summarise'], var=[12], children=[Child([0], type=Line, var=[1683]),Child(['cost = max(cost)'], type=SummariseCondition, var=[1677]),Child(['S_key, S_name'], type=Cols, var=[36]),Child([None], type=None, var=[0])]), Line(T6, root=['natural_join3'], var=[2], children=[Child([0], type=Line, var=[1683]),Child([3], type=Line, var=[1686]),Child([4], type=Line, var=[1687]),Child([None], type=None, var=[0])])]
+[     2.908][MainProcess][DEBUG] Enumerator for loc 6 constructed using 150 variables and 391 constraints
+[     2.928][MainProcess][DEBUG] Enumeration time: 0.4248483180999756
+[     3.031][MainProcess][DEBUG] Synthesis time: 0.10328984260559082
+[     3.031][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "color == 'green'"), filter(line0, "color == 'red'"), intersect(line1, line2, 'S_name'), summarise(line0, 'cost = max(cost)', 'S_key,S_name'), natural_join3(line0, line3, line4)]
+[     3.033][MainProcess][DEBUG] Solution found using process 0
+[     3.033][MainProcess][INFO] Statistics:
+[     3.033][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     3.034][MainProcess][INFO] 		Rejected: 0 (approx)
+[     3.034][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.034][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     3.034][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.034][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.034][MainProcess][INFO] 	Total time spent in enumerator init: 0.424848 (approx)
+[     3.034][MainProcess][INFO] 	Total time spent in enumerator: 0.002657 (approx)
+[     3.034][MainProcess][INFO] 		Enumerated 376.339524 programs/s avg. (just enumeration time)
+[     3.034][MainProcess][INFO] 		Enumerated 0.431160 programs/s avg. (overall)
+[     3.034][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.093597 (approx)
+[     3.034][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     3.034][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "color == 'green'"), filter(line0, "color == 'red'"), intersect(line1, line2, 'S_name'), summarise(line0, 'cost = max(cost)', 'S_key,S_name'), natural_join3(line0, line3, line4)]
+[     3.034][MainProcess][INFO] Solution size: 6
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_23_1 <- read_csv("tests-examples/textbook/tables/23-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character(),"cost" = col_integer()))
+df_23_1 <- copy_to(con, df_23_1)
+df_23_2 <- read_csv("tests-examples/textbook/tables/23-2.txt", col_types = cols("P_id" = col_character(),"color" = col_character(),"P_name" = col_character()))
+df_23_2 <- copy_to(con, df_23_2)
+df_23_3 <- read_csv("tests-examples/textbook/tables/23-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_23_3 <- copy_to(con, df_23_3)
+expected_output <- read_csv("tests-examples/textbook/tables/23.out", col_types = cols("S_name" = col_character(),"P_name" = col_character(),"n" = col_integer()))
+
+df7 <- inner_join(df_23_1, df_23_2, na_matches="never") %>% inner_join(df_23_3, na_matches="never")
+df8 <- df7 %>% filter(color == 'green')
+df9 <- df7 %>% filter(color == 'red')
+df10 <- intersect(select(df8,S_name), select(df9, S_name))
+df11 <- df7 %>% group_by(S_key,S_name) %>% summarise(cost = max(cost)) %>% ungroup()
+df12 <- inner_join(df7, df10, na_matches="never") %>% inner_join(df11, na_matches="never")
+out <- df12 %>% select(S_name, P_name, n = cost)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `S_name`,
+       `P_name`,
+       `cost` AS `n`
+FROM
+  (SELECT `LHS`.`S_key` AS `S_key`,
+          `P_id`,
+          `LHS`.`cost` AS `cost`,
+          `color`,
+          `P_name`,
+          `LHS`.`S_name` AS `S_name`
+   FROM
+     (SELECT `S_key`,
+             `P_id`,
+             `cost`,
+             `color`,
+             `P_name`,
+             `LHS`.`S_name` AS `S_name`
+      FROM
+        (SELECT `LHS`.`S_key` AS `S_key`,
+                `P_id`,
+                `cost`,
+                `color`,
+                `P_name`,
+                `S_name`
+         FROM
+           (SELECT `S_key`,
+                   `LHS`.`P_id` AS `P_id`,
+                   `cost`,
+                   `color`,
+                   `P_name`
+            FROM `df_23_1` AS `LHS`
+            INNER JOIN `df_23_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+         INNER JOIN `df_23_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+      INNER JOIN
+        (SELECT `S_name`
+         FROM
+           (SELECT `LHS`.`S_key` AS `S_key`,
+                   `P_id`,
+                   `cost`,
+                   `color`,
+                   `P_name`,
+                   `S_name`
+            FROM
+              (SELECT `S_key`,
+                      `LHS`.`P_id` AS `P_id`,
+                      `cost`,
+                      `color`,
+                      `P_name`
+               FROM `df_23_1` AS `LHS`
+               INNER JOIN `df_23_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+            INNER JOIN `df_23_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`))
+         WHERE (`color` = 'green') INTERSECT
+           SELECT `S_name`
+           FROM
+             (SELECT `LHS`.`S_key` AS `S_key`,
+                     `P_id`,
+                     `cost`,
+                     `color`,
+                     `P_name`,
+                     `S_name`
+              FROM
+                (SELECT `S_key`,
+                        `LHS`.`P_id` AS `P_id`,
+                        `cost`,
+                        `color`,
+                        `P_name`
+                 FROM `df_23_1` AS `LHS`
+                 INNER JOIN `df_23_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+              INNER JOIN `df_23_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) WHERE (`color` = 'red')) AS RHS ON (LHS.S_name = RHS.S_name)) AS LHS
+   INNER JOIN
+     (SELECT S_key,
+             S_name,
+             MAX(cost) AS cost
+      FROM
+        (SELECT LHS.S_key AS S_key,
+                P_id,
+                cost,
+                color,
+                P_name,
+                S_name
+         FROM
+           (SELECT S_key,
+                   LHS.P_id AS P_id,
+                   cost,
+                   color,
+                   P_name
+            FROM df_23_1 AS LHS
+            INNER JOIN df_23_2 AS RHS ON (LHS.P_id = RHS.P_id)) AS LHS
+         INNER JOIN df_23_3 AS RHS ON (LHS.S_key = RHS.S_key))
+      GROUP BY S_key,
+               S_name) AS RHS ON (LHS.S_key = RHS.S_key
+                                  AND LHS.cost = RHS.cost
+                                  AND LHS.S_name = RHS.S_name))

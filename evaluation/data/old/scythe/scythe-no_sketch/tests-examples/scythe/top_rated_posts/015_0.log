@@ -1,0 +1,15 @@
+[     1.598][MainProcess][INFO] Parsing specification...
+[     1.621][MainProcess][INFO] File read
+[     1.622][MainProcess][DEBUG] Reading input files...
+[     1.656][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i015.csv: ['int64', 'string', 'string']
+[     1.687][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o015.csv: ['string', 'Float64', 'string', 'string', 'int64']
+[     1.717][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 10, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 0}
+[     1.717][MainProcess][DEBUG] {'natural_join': 0.038461538461538464, 'natural_join3': 0.038461538461538464, 'natural_join4': 0.038461538461538464, 'inner_join': 0.38461538461538464, 'anti_join': 0.2692307692307692, 'left_join': 0.038461538461538464, 'union': 0.038461538461538464, 'intersect': 0.11538461538461539, 'semi_join': 0.038461538461538464, 'cross_join': 0.0}
+[     1.717][MainProcess][DEBUG] {'natural_join': 0.03846153846153847, 'natural_join3': 0.03846153846153847, 'natural_join4': 0.03846153846153847, 'inner_join': 0.3846153846153847, 'anti_join': 0.2692307692307693, 'left_join': 0.03846153846153847, 'union': 0.03846153846153847, 'intersect': 0.1153846153846154, 'semi_join': 0.03846153846153847, 'cross_join': 0.0}
+[     1.717][MainProcess][INFO] Building synthesizer...
+[     1.756][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 74 constraints
+[     1.760][MainProcess][DEBUG] Enumeration time: 0.04287075996398926
+[     8.102][MainProcess][DEBUG] Synthesis time: 6.342151403427124
+[     8.103][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     8.185][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 176 constraints
+[     8.192][MainProcess][DEBUG] Enumeration time: 0.08937597274780273

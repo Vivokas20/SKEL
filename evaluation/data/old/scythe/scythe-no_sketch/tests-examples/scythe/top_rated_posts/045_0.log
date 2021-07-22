@@ -1,0 +1,72 @@
+[     1.771][MainProcess][INFO] Parsing specification...
+[     1.803][MainProcess][INFO] File read
+[     1.804][MainProcess][DEBUG] Reading input files...
+[     1.834][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i045.csv: ['int64', 'int64', 'int64', 'datetime64[ns]']
+[     1.864][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o045.csv: ['int64', 'int64']
+[     1.906][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 94, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 6, 'filter': 6, 'summarise': 11, 'mutate': 1}
+[     1.906][MainProcess][DEBUG] {'natural_join': 0.007194244604316547, 'natural_join3': 0.007194244604316547, 'natural_join4': 0.007194244604316547, 'inner_join': 0.6762589928057554, 'anti_join': 0.07913669064748201, 'left_join': 0.007194244604316547, 'union': 0.007194244604316547, 'intersect': 0.02877697841726619, 'semi_join': 0.007194244604316547, 'cross_join': 0.04316546762589928, 'filter': 0.04316546762589928, 'summarise': 0.07913669064748201, 'mutate': 0.007194244604316547}
+[     1.906][MainProcess][DEBUG] {'natural_join': 0.00719424460431655, 'natural_join3': 0.00719424460431655, 'natural_join4': 0.00719424460431655, 'inner_join': 0.6762589928057556, 'anti_join': 0.07913669064748204, 'left_join': 0.00719424460431655, 'union': 0.00719424460431655, 'intersect': 0.0287769784172662, 'semi_join': 0.00719424460431655, 'cross_join': 0.0431654676258993, 'filter': 0.0431654676258993, 'summarise': 0.07913669064748204, 'mutate': 0.00719424460431655}
+[     1.906][MainProcess][INFO] Building synthesizer...
+[     2.100][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 217 constraints
+[     2.119][MainProcess][DEBUG] Enumeration time: 0.21325397491455078
+[     3.793][MainProcess][DEBUG] Synthesis time: 1.6738409996032715
+[     3.793][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     4.094][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 372 constraints
+[     4.124][MainProcess][DEBUG] Enumeration time: 0.33046436309814453
+[    11.263][MainProcess][DEBUG] Synthesis time: 7.13761305809021
+[    11.263][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'user_id'), cross_join(line0, line0, 'n < n.other'), filter(line1, 'n > 1')]
+[    11.265][MainProcess][DEBUG] Solution found using process 0
+[    11.266][MainProcess][INFO] Statistics:
+[    11.266][MainProcess][INFO] 	Attempted programs: 209 (approx)
+[    11.266][MainProcess][INFO] 		Rejected: 208 (approx)
+[    11.266][MainProcess][INFO] 		Failed: 0 (approx)
+[    11.266][MainProcess][INFO] 		Empty outputs: 126 (60.3%) (approx)
+[    11.266][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    11.266][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    11.266][MainProcess][INFO] 	Total time spent in enumerator init: 0.543718 (approx)
+[    11.266][MainProcess][INFO] 	Total time spent in enumerator: 0.462687 (approx)
+[    11.266][MainProcess][INFO] 		Enumerated 451.709705 programs/s avg. (just enumeration time)
+[    11.266][MainProcess][INFO] 		Enumerated 19.479517 programs/s avg. (overall)
+[    11.266][MainProcess][INFO] 	Total time spent in evaluation & testing: 8.231713 (approx)
+[    11.266][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.115381 (approx)
+[    11.266][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'user_id'), cross_join(line0, line0, 'n < n.other'), filter(line1, 'n > 1')]
+[    11.266][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i045 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i045.csv", col_types = cols("user_id" = col_integer(),"account_no" = col_integer(),"zip" = col_integer(),"date" = col_character()))
+df_i045$date <- parse_datetime(df_i045$date)
+df_i045 <- copy_to(con, df_i045)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o045.csv", col_types = cols("user_id" = col_integer(),"n" = col_integer()))
+
+df271 <- df_i045 %>% group_by(user_id) %>% summarise(n = n()) %>% ungroup()
+df272 <- full_join(df271, df271, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(n < n.other)
+df273 <- df272 %>% filter(n > 1)
+out <- df273 %>% select(user_id, n = user_id.other) %>% arrange(user_id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT user_id,
+       user_id_other AS n
+FROM
+  (SELECT *
+   FROM
+     (SELECT LHS.user_id AS user_id,
+             LHS.n AS n,
+             RHS.user_id AS user_id_other,
+             RHS.n AS n_other
+      FROM
+        (SELECT user_id,
+                COUNT(*) AS n
+         FROM df_i045
+         GROUP BY user_id) AS LHS
+      CROSS JOIN
+        (SELECT user_id,
+                COUNT(*) AS n
+         FROM df_i045
+         GROUP BY user_id) AS RHS)
+   WHERE (n < n_other))
+WHERE (n > 1.0)
+ORDER BY user_id

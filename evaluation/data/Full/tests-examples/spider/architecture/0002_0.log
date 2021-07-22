@@ -1,0 +1,52 @@
+[     2.308][MainProcess][INFO] Parsing specification...
+[     2.315][MainProcess][INFO] File read
+[     2.316][MainProcess][DEBUG] Reading input files...
+[     2.328][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/architect.csv: ['int64', 'string', 'string', 'string']
+[     2.336][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0002.csv: ['string', 'string', 'int64']
+[     2.336][MainProcess][INFO] Parsing sketch...
+[     2.336][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child([0], type=Table, var=[]),Child(["gender == 'male'"], type=FilterCondition, var=[])])
+[     2.375][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 34, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 2, 'filter': 2}
+[     2.375][MainProcess][DEBUG] {'natural_join': 0.01694915254237288, 'natural_join3': 0.01694915254237288, 'natural_join4': 0.01694915254237288, 'inner_join': 0.576271186440678, 'anti_join': 0.1864406779661017, 'left_join': 0.01694915254237288, 'union': 0.01694915254237288, 'intersect': 0.06779661016949153, 'semi_join': 0.01694915254237288, 'cross_join': 0.03389830508474576, 'filter': 0.03389830508474576}
+[     2.375][MainProcess][DEBUG] {'natural_join': 0.01694915254237288, 'natural_join3': 0.01694915254237288, 'natural_join4': 0.01694915254237288, 'inner_join': 0.576271186440678, 'anti_join': 0.1864406779661017, 'left_join': 0.01694915254237288, 'union': 0.01694915254237288, 'intersect': 0.06779661016949153, 'semi_join': 0.01694915254237288, 'cross_join': 0.03389830508474576, 'filter': 0.03389830508474576}
+[     2.375][MainProcess][INFO] Building synthesizer...
+[     2.376][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child([0], type=Table, var=[65]),Child(["gender == 'male'"], type=FilterCondition, var=[63]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.412][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 45 constraints
+[     2.414][MainProcess][DEBUG] Enumeration time: 0.038999080657958984
+[     2.455][MainProcess][DEBUG] Synthesis time: 0.04090428352355957
+[     2.455][MainProcess][INFO] Solution found: [filter(input0, "gender == 'male'")]
+[     2.456][MainProcess][DEBUG] Solution found using process 0
+[     2.456][MainProcess][INFO] Statistics:
+[     2.456][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.456][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.457][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.457][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.457][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.457][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.457][MainProcess][INFO] 	Total time spent in enumerator init: 0.038999 (approx)
+[     2.457][MainProcess][INFO] 	Total time spent in enumerator: 0.000772 (approx)
+[     2.457][MainProcess][INFO] 		Enumerated 1295.337863 programs/s avg. (just enumeration time)
+[     2.457][MainProcess][INFO] 		Enumerated 0.565796 programs/s avg. (overall)
+[     2.457][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.038069 (approx)
+[     2.457][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.457][MainProcess][INFO] Solution found: [filter(input0, "gender == 'male'")]
+[     2.457][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_architect <- read_csv("tests-examples/spider/architecture/tables/architect.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"nationality" = col_character(),"gender" = col_character()))
+df_architect <- copy_to(con, df_architect)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0002.csv", col_types = cols("name" = col_character(),"nationality" = col_character(),"id" = col_integer()))
+
+df2 <- df_architect %>% filter(gender == 'male')
+out <- df2 %>% select(name, nationality, id) %>% arrange(name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `name`,
+       `nationality`,
+       `id`
+FROM `df_architect`
+WHERE (`gender` = 'male')
+ORDER BY name

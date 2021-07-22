@@ -1,0 +1,60 @@
+[     2.365][MainProcess][INFO] Parsing specification...
+[     2.370][MainProcess][INFO] File read
+[     2.371][MainProcess][DEBUG] Reading input files...
+[     2.381][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i036.csv: ['string', 'datetime64[ns]', 'Float64']
+[     2.389][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o036.csv: ['string', 'datetime64[ns]', 'Float64']
+[     2.389][MainProcess][INFO] Parsing sketch...
+[     2.389][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child([0], type=Table, var=[]),Child(['maxdate = max(date)'], type=SummariseCondition, var=[]),Child(['username'], type=Cols, var=[])])
+[     2.389][MainProcess][DEBUG] Sketch creation: Line(T2, root=['inner_join'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[]),Child(['username = username, date = maxdate'], type=JoinCondition, var=[])])
+[     2.458][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 12, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 7, 'mutate': 1}
+[     2.458][MainProcess][DEBUG] {'natural_join': 0.0008680555555555555, 'natural_join3': 0.0008680555555555555, 'natural_join4': 0.0008680555555555555, 'inner_join': 0.010416666666666666, 'anti_join': 0.006076388888888889, 'left_join': 0.0008680555555555555, 'union': 0.0008680555555555555, 'intersect': 0.0026041666666666665, 'semi_join': 0.0008680555555555555, 'cross_join': 0.9635416666666666, 'filter': 0.005208333333333333, 'summarise': 0.006076388888888889, 'mutate': 0.0008680555555555555}
+[     2.459][MainProcess][DEBUG] {'natural_join': 0.0008680555555555555, 'natural_join3': 0.0008680555555555555, 'natural_join4': 0.0008680555555555555, 'inner_join': 0.010416666666666666, 'anti_join': 0.006076388888888889, 'left_join': 0.0008680555555555555, 'union': 0.0008680555555555555, 'intersect': 0.0026041666666666665, 'semi_join': 0.0008680555555555555, 'cross_join': 0.9635416666666666, 'filter': 0.005208333333333333, 'summarise': 0.006076388888888889, 'mutate': 0.0008680555555555555}
+[     2.459][MainProcess][INFO] Building synthesizer...
+[     2.460][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child([0], type=Table, var=[1153]),Child(['maxdate = max(date)'], type=SummariseCondition, var=[1152]),Child(['username'], type=Cols, var=[19]),Child([None], type=None, var=[0])]), Line(T2, root=['inner_join'], var=[4], children=[Child([0], type=Table, var=[1153]),Child([0], type=Line, var=[1155]),Child(['username = username, date = maxdate'], type=JoinCondition, var=[24]),Child([None], type=None, var=[0])])]
+[     2.525][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 104 constraints
+[     2.528][MainProcess][DEBUG] Enumeration time: 0.06930112838745117
+[     2.585][MainProcess][DEBUG] Synthesis time: 0.05631756782531738
+[     2.585][MainProcess][INFO] Solution found: [summarise(input0, 'maxdate = max(date)', 'username'), inner_join(input0, line0, 'username = username,date = maxdate')]
+[     2.586][MainProcess][DEBUG] Solution found using process 0
+[     2.586][MainProcess][INFO] Statistics:
+[     2.586][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.586][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.586][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.586][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.586][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.586][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.586][MainProcess][INFO] 	Total time spent in enumerator init: 0.069301 (approx)
+[     2.586][MainProcess][INFO] 	Total time spent in enumerator: 0.001248 (approx)
+[     2.586][MainProcess][INFO] 		Enumerated 801.357279 programs/s avg. (just enumeration time)
+[     2.587][MainProcess][INFO] 		Enumerated 0.524105 programs/s avg. (overall)
+[     2.587][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.051784 (approx)
+[     2.587][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.587][MainProcess][INFO] Solution found: [summarise(input0, 'maxdate = max(date)', 'username'), inner_join(input0, line0, 'username = username,date = maxdate')]
+[     2.587][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i036 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i036.csv", col_types = cols("username" = col_character(),"date" = col_character(),"value" = col_double()))
+df_i036$date <- ymd(df_i036$date)
+df_i036 <- copy_to(con, df_i036)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o036.csv", col_types = cols("username" = col_character(),"date" = col_character(),"value" = col_double()))
+expected_output$date <- ymd(expected_output$date)
+
+df3 <- df_i036 %>% group_by(username) %>% summarise(maxdate = max(date)) %>% ungroup()
+df4 <- inner_join(df_i036, df3, by=c('username' = 'username','date' = 'maxdate'), suffix = c('', '.other'), na_matches='never') %>% mutate(maxdate = date)
+out <- df4 %>% select(username, date, value)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT username, date, value
+FROM
+  (SELECT LHS.username AS username, date, value
+   FROM df_i036 AS LHS
+   INNER JOIN
+     (SELECT username,
+             MAX(date) AS maxdate
+      FROM df_i036
+      GROUP BY username) AS RHS ON (LHS.username = RHS.username
+                                    AND LHS.date = RHS.maxdate))

@@ -1,0 +1,45 @@
+[     2.365][MainProcess][INFO] Parsing specification...
+[     2.370][MainProcess][INFO] File read
+[     2.371][MainProcess][DEBUG] Reading input files...
+[     2.381][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/042.csv: ['int64', 'string', 'string']
+[     2.387][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/042_o.csv: ['int64', 'string']
+[     2.387][MainProcess][INFO] Parsing sketch...
+[     2.388][MainProcess][DEBUG] Sketch creation: Line(T1, root=['union'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Table, var=[])])
+[     2.423][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 10, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 0}
+[     2.423][MainProcess][DEBUG] {'natural_join': 0.038461538461538464, 'natural_join3': 0.038461538461538464, 'natural_join4': 0.038461538461538464, 'inner_join': 0.38461538461538464, 'anti_join': 0.2692307692307692, 'left_join': 0.038461538461538464, 'union': 0.038461538461538464, 'intersect': 0.11538461538461539, 'semi_join': 0.038461538461538464, 'cross_join': 0.0}
+[     2.423][MainProcess][DEBUG] {'natural_join': 0.03846153846153847, 'natural_join3': 0.03846153846153847, 'natural_join4': 0.03846153846153847, 'inner_join': 0.3846153846153847, 'anti_join': 0.2692307692307693, 'left_join': 0.03846153846153847, 'union': 0.03846153846153847, 'intersect': 0.1153846153846154, 'semi_join': 0.03846153846153847, 'cross_join': 0.0}
+[     2.423][MainProcess][INFO] Building synthesizer...
+[     2.424][MainProcess][DEBUG] [Line(T1, root=['union'], var=[7], children=[Child([0], type=Table, var=[31]),Child([0], type=Table, var=[31]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.453][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 42 constraints
+[     2.455][MainProcess][DEBUG] Enumeration time: 0.03174257278442383
+[     2.493][MainProcess][DEBUG] Synthesis time: 0.03788638114929199
+[     2.493][MainProcess][INFO] Solution found: [union(input0, input0)]
+[     2.494][MainProcess][DEBUG] Solution found using process 0
+[     2.494][MainProcess][INFO] Statistics:
+[     2.494][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.494][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.494][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.494][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.494][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.494][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.494][MainProcess][INFO] 	Total time spent in enumerator init: 0.031743 (approx)
+[     2.495][MainProcess][INFO] 	Total time spent in enumerator: 0.000686 (approx)
+[     2.495][MainProcess][INFO] 		Enumerated 1456.861410 programs/s avg. (just enumeration time)
+[     2.495][MainProcess][INFO] 		Enumerated 0.554806 programs/s avg. (overall)
+[     2.495][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.035115 (approx)
+[     2.495][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.495][MainProcess][INFO] Solution found: [union(input0, input0)]
+[     2.495][MainProcess][INFO] Solution size: 1
+[     2.755][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_042 <- read_csv("tests-examples/scythe/recent_posts/tables/042.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"school" = col_character()))
+df_042 <- copy_to(con, df_042)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/042_o.csv", col_types = cols("id" = col_integer(),"name" = col_character()))
+
+df2 <- bind_rows(df_042, df_042)
+out <- df2 %>% select(id, name) %>% distinct() %>% arrange(id)
+
+Failed to generate SQL query

@@ -1,0 +1,45 @@
+[     2.355][MainProcess][INFO] Parsing specification...
+[     2.360][MainProcess][INFO] File read
+[     2.361][MainProcess][DEBUG] Reading input files...
+[     2.372][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/mill.csv: ['int64', 'int64', 'string', 'string', 'string', 'int64', 'string']
+[     2.379][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0013.csv: ['string']
+[     2.379][MainProcess][INFO] Parsing sketch...
+[     2.379][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child([0], type=Table, var=[]),Child(["str_detect(name, 'Moulin')"], type=FilterCondition, var=[])])
+[     2.423][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 250, 'anti_join': 29, 'left_join': 1, 'union': 1, 'intersect': 7, 'semi_join': 1, 'cross_join': 2, 'filter': 2}
+[     2.423][MainProcess][DEBUG] {'natural_join': 0.0033783783783783786, 'natural_join3': 0.0033783783783783786, 'natural_join4': 0.0033783783783783786, 'inner_join': 0.8445945945945946, 'anti_join': 0.09797297297297297, 'left_join': 0.0033783783783783786, 'union': 0.0033783783783783786, 'intersect': 0.02364864864864865, 'semi_join': 0.0033783783783783786, 'cross_join': 0.006756756756756757, 'filter': 0.006756756756756757}
+[     2.423][MainProcess][DEBUG] {'natural_join': 0.0033783783783783786, 'natural_join3': 0.0033783783783783786, 'natural_join4': 0.0033783783783783786, 'inner_join': 0.8445945945945946, 'anti_join': 0.09797297297297297, 'left_join': 0.0033783783783783786, 'union': 0.0033783783783783786, 'intersect': 0.02364864864864865, 'semi_join': 0.0033783783783783786, 'cross_join': 0.006756756756756757, 'filter': 0.006756756756756757}
+[     2.423][MainProcess][INFO] Building synthesizer...
+[     2.424][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child([0], type=Table, var=[302]),Child(["str_detect(name, 'Moulin')"], type=FilterCondition, var=[300]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.458][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 45 constraints
+[     2.460][MainProcess][DEBUG] Enumeration time: 0.03700685501098633
+[     2.503][MainProcess][DEBUG] Synthesis time: 0.04326128959655762
+[     2.504][MainProcess][INFO] Solution found: [filter(input0, "str_detect(name, 'Moulin')")]
+[     2.504][MainProcess][DEBUG] Solution found using process 0
+[     2.504][MainProcess][INFO] Statistics:
+[     2.504][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.505][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.505][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.505][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.505][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.505][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.505][MainProcess][INFO] 	Total time spent in enumerator init: 0.037007 (approx)
+[     2.505][MainProcess][INFO] 	Total time spent in enumerator: 0.000714 (approx)
+[     2.505][MainProcess][INFO] 		Enumerated 1400.903140 programs/s avg. (just enumeration time)
+[     2.505][MainProcess][INFO] 		Enumerated 0.549092 programs/s avg. (overall)
+[     2.505][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.040485 (approx)
+[     2.505][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.505][MainProcess][INFO] Solution found: [filter(input0, "str_detect(name, 'Moulin')")]
+[     2.505][MainProcess][INFO] Solution size: 1
+[     2.775][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_mill <- read_csv("tests-examples/spider/architecture/tables/mill.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"location" = col_character(),"name" = col_character(),"type" = col_character(),"built_year" = col_integer(),"notes" = col_character()))
+df_mill <- copy_to(con, df_mill)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0013.csv", col_types = cols("name" = col_character()))
+
+df2 <- df_mill %>% filter(str_detect(name, 'Moulin'))
+out <- df2 %>% select(name)
+
+Failed to generate SQL query

@@ -1,0 +1,16 @@
+[     5.937][MainProcess][INFO] Parsing specification...
+[     5.945][MainProcess][INFO] File read
+[     5.947][MainProcess][DEBUG] Reading input files...
+[     5.960][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/012.csv: ['int64', 'int64', 'int64', 'string', 'string', 'string']
+[     5.969][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/012_o.csv: ['int64', 'int64', 'string', 'string', 'string']
+[     5.969][MainProcess][INFO] Parsing sketch...
+[     5.969][MainProcess][DEBUG] Sketch creation: Line(T1, root=[None], var=[], children=[])
+[     5.969][MainProcess][DEBUG] Sketch creation: Line(T2, root=[None], var=[], children=[])
+[     5.969][MainProcess][DEBUG] Sketch creation: Line(T3, root=['natural_join'], var=[], children=[Child([0], type=Line, var=[]),Child([1], type=Line, var=[])])
+[     6.109][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 449, 'anti_join': 22, 'left_join': 1, 'union': 1, 'intersect': 6, 'semi_join': 1, 'cross_join': 2948, 'unite': 36, 'summarise': 176, 'mutate': 8}
+[     6.109][MainProcess][DEBUG] {'natural_join': 0.0002738975623116954, 'natural_join3': 0.0002738975623116954, 'natural_join4': 0.0002738975623116954, 'inner_join': 0.12298000547795125, 'anti_join': 0.006025746370857299, 'left_join': 0.0002738975623116954, 'union': 0.0002738975623116954, 'intersect': 0.0016433853738701725, 'semi_join': 0.0002738975623116954, 'cross_join': 0.8074500136948781, 'unite': 0.009860312243221035, 'summarise': 0.04820597096685839, 'mutate': 0.0021911804984935633}
+[     6.109][MainProcess][DEBUG] {'natural_join': 0.0002738975623116954, 'natural_join3': 0.0002738975623116954, 'natural_join4': 0.0002738975623116954, 'inner_join': 0.12298000547795125, 'anti_join': 0.006025746370857299, 'left_join': 0.0002738975623116954, 'union': 0.0002738975623116954, 'intersect': 0.0016433853738701725, 'semi_join': 0.0002738975623116954, 'cross_join': 0.8074500136948781, 'unite': 0.009860312243221035, 'summarise': 0.04820597096685839, 'mutate': 0.0021911804984935633}
+[     6.109][MainProcess][INFO] Building synthesizer...
+[     6.111][MainProcess][DEBUG] [Line(T1, root=[None], var=[], children=[]), Line(T2, root=[None], var=[], children=[]), Line(T3, root=['natural_join'], var=[1], children=[Child([0], type=Line, var=[3449]),Child([1], type=Line, var=[3450]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[    10.932][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 287 constraints
+[    11.519][MainProcess][DEBUG] Enumeration time: 5.410005331039429

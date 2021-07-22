@@ -1,0 +1,82 @@
+[     2.230][MainProcess][INFO] Parsing specification...
+[     2.235][MainProcess][INFO] File read
+[     2.236][MainProcess][DEBUG] Reading input files...
+[     2.245][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i032.csv: ['string', 'string', 'int64']
+[     2.251][MainProcess][WARNING] Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!
+[     2.251][MainProcess][WARNING] Replacing column "Count.other" in table tests-examples/scythe/top_rated_posts/tables/o032.csv with Count_other
+[     2.252][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o032.csv: ['string', 'int64', 'int64']
+[     2.300][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 10, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 2, 'filter': 12}
+[     2.300][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.300][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.300][MainProcess][INFO] Building synthesizer...
+[     2.388][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 81 constraints
+[     2.395][MainProcess][DEBUG] Enumeration time: 0.09498190879821777
+[     2.731][MainProcess][DEBUG] Synthesis time: 0.3355851173400879
+[     2.731][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     2.887][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 190 constraints
+[     2.898][MainProcess][DEBUG] Enumeration time: 0.1664872169494629
+[   126.203][MainProcess][DEBUG] Synthesis time: 123.30463004112244
+[   126.203][MainProcess][INFO] Increasing the number of lines of code to 3.
+[   126.452][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 329 constraints
+[   126.467][MainProcess][DEBUG] Enumeration time: 0.2639477252960205
+[   193.158][MainProcess][DEBUG] Synthesis time: 66.68912172317505
+[   193.158][MainProcess][INFO] Solution found: [filter(input0, "Status != 'Active' & Status == 'Inactive'"), inner_join(input0, line0, 'Section'), anti_join(line1, line0, 'Count')]
+[   193.171][MainProcess][DEBUG] Solution found using process 0
+[   193.172][MainProcess][INFO] Statistics:
+[   193.172][MainProcess][INFO] 	Attempted programs: 1670 (approx)
+[   193.172][MainProcess][INFO] 		Rejected: 1669 (approx)
+[   193.172][MainProcess][INFO] 		Failed: 0 (approx)
+[   193.172][MainProcess][INFO] 		Empty outputs: 1026 (61.4%) (approx)
+[   193.172][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[   193.172][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[   193.172][MainProcess][INFO] 	Total time spent in enumerator init: 0.525417 (approx)
+[   193.172][MainProcess][INFO] 	Total time spent in enumerator: 5.114360 (approx)
+[   193.172][MainProcess][INFO] 		Enumerated 326.531564 programs/s avg. (just enumeration time)
+[   193.172][MainProcess][INFO] 		Enumerated 8.673079 programs/s avg. (overall)
+[   193.172][MainProcess][INFO] 	Total time spent in evaluation & testing: 183.967456 (approx)
+[   193.172][MainProcess][INFO] 	Total time spent blocking cubes/programs: 1.238108 (approx)
+[   193.173][MainProcess][INFO] Solution found: [filter(input0, "Status != 'Active' & Status == 'Inactive'"), inner_join(input0, line0, 'Section'), anti_join(line1, line0, 'Count')]
+[   193.173][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i032 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i032.csv", col_types = cols("Section" = col_character(),"Status" = col_character(),"Count" = col_integer()))
+df_i032 <- copy_to(con, df_i032)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o032.csv", col_types = cols("Section" = col_character(),"Count" = col_integer(),"Count.other" = col_integer()))
+expected_output <- rename(expected_output, Count_other = "Count.other")
+
+df1754 <- df_i032 %>% filter(Status != 'Active' & Status == 'Inactive')
+df1755 <- inner_join(df_i032, df1754, by=c('Section'), suffix = c('', '.other'), na_matches='never')
+df1756 <- anti_join(df1755, df1754, by=c('Count'), na_matches="never")
+out <- df1756 %>% select(Section, Count, Count_other = Count.other) %>% arrange(Section)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `Section`,
+       `Count`,
+       `Count_other` AS `Count_other`
+FROM
+  (SELECT *
+   FROM
+     (SELECT `LHS`.`Section` AS `Section`,
+             `LHS`.`Status` AS `Status`,
+             `LHS`.`Count` AS `Count`,
+             `RHS`.`Status` AS `Status_other`,
+             `RHS`.`Count` AS `Count_other`
+      FROM `df_i032` AS `LHS`
+      INNER JOIN
+        (SELECT *
+         FROM `df_i032`
+         WHERE (`Status` != 'Active'
+                AND `Status` = 'Inactive')) AS `RHS` ON (`LHS`.`Section` = `RHS`.`Section`)) AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM `df_i032`
+           WHERE (`Status` != 'Active'
+                  AND `Status` = 'Inactive')) AS RHS
+        WHERE (LHS.Count = RHS.Count) ))
+ORDER BY SECTION

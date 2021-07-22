@@ -1,0 +1,64 @@
+[     2.351][MainProcess][INFO] Parsing specification...
+[     2.355][MainProcess][INFO] File read
+[     2.356][MainProcess][DEBUG] Reading input files...
+[     2.365][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/architect.csv: ['int64', 'string', 'string', 'string']
+[     2.371][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/mill.csv: ['int64', 'int64', 'string', 'string', 'string', 'int64', 'string']
+[     2.376][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0006.csv: ['string', 'string']
+[     2.377][MainProcess][INFO] Parsing sketch...
+[     2.377][MainProcess][DEBUG] Sketch creation: Line(T1, root=['inner_join'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child(['id = architect_id'], type=JoinCondition, var=[])])
+[     2.426][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 3276, 'anti_join': 184, 'left_join': 4, 'union': 4, 'intersect': 36, 'semi_join': 4, 'cross_join': 0}
+[     2.427][MainProcess][DEBUG] {'natural_join': 0.0011312217194570137, 'natural_join3': 0.0022624434389140274, 'natural_join4': 0.004524886877828055, 'inner_join': 0.9264705882352942, 'anti_join': 0.05203619909502263, 'left_join': 0.0011312217194570137, 'union': 0.0011312217194570137, 'intersect': 0.010180995475113122, 'semi_join': 0.0011312217194570137, 'cross_join': 0.0}
+[     2.427][MainProcess][DEBUG] {'natural_join': 0.0011312217194570137, 'natural_join3': 0.0022624434389140274, 'natural_join4': 0.004524886877828055, 'inner_join': 0.9264705882352942, 'anti_join': 0.05203619909502263, 'left_join': 0.0011312217194570137, 'union': 0.0011312217194570137, 'intersect': 0.010180995475113122, 'semi_join': 0.0011312217194570137, 'cross_join': 0.0}
+[     2.427][MainProcess][INFO] Building synthesizer...
+[     2.428][MainProcess][DEBUG] [Line(T1, root=['inner_join'], var=[4], children=[Child([0], type=Table, var=[885]),Child([1], type=Table, var=[886]),Child(['id = architect_id'], type=JoinCondition, var=[822]),Child([None], type=None, var=[0])])]
+[     2.461][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 43 constraints
+[     2.463][MainProcess][DEBUG] Enumeration time: 0.036097049713134766
+[     2.512][MainProcess][DEBUG] Synthesis time: 0.04897451400756836
+[     2.512][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'id = architect_id')]
+[     2.514][MainProcess][DEBUG] Solution found using process 0
+[     2.514][MainProcess][INFO] Statistics:
+[     2.514][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.514][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.514][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.514][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.515][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.515][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.515][MainProcess][INFO] 	Total time spent in enumerator init: 0.036097 (approx)
+[     2.515][MainProcess][INFO] 	Total time spent in enumerator: 0.000698 (approx)
+[     2.515][MainProcess][INFO] 		Enumerated 1433.460014 programs/s avg. (just enumeration time)
+[     2.515][MainProcess][INFO] 		Enumerated 0.547315 programs/s avg. (overall)
+[     2.515][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.046273 (approx)
+[     2.515][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.515][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'id = architect_id')]
+[     2.515][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_architect <- read_csv("tests-examples/spider/architecture/tables/architect.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"nationality" = col_character(),"gender" = col_character()))
+df_architect <- copy_to(con, df_architect)
+df_mill <- read_csv("tests-examples/spider/architecture/tables/mill.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"location" = col_character(),"name" = col_character(),"type" = col_character(),"built_year" = col_integer(),"notes" = col_character()))
+df_mill <- copy_to(con, df_mill)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0006.csv", col_types = cols("name" = col_character(),"nationality" = col_character()))
+
+df2 <- inner_join(df_architect, df_mill, by=c('id' = 'architect_id'), suffix = c('', '.other'), na_matches='never') %>% mutate(architect_id = id)
+out <- df2 %>% select(name, nationality) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT name,
+                nationality
+FROM
+  (SELECT LHS.id AS id,
+          LHS.name AS name,
+          nationality,
+          gender,
+          RHS.id AS id_other,
+          LOCATION,
+          RHS.name AS name_other,
+          TYPE,
+          built_year,
+          notes
+   FROM df_architect AS LHS
+   INNER JOIN df_mill AS RHS ON (LHS.id = RHS.architect_id))

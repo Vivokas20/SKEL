@@ -1,0 +1,76 @@
+[     6.173][MainProcess][INFO] Parsing specification...
+[     6.180][MainProcess][INFO] File read
+[     6.181][MainProcess][DEBUG] Reading input files...
+[     6.198][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/013_1.csv: ['int64', 'string']
+[     6.205][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/013_2.csv: ['int64', 'string']
+[     6.213][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/013_o.csv: ['int64', 'string', 'string', 'int64']
+[     6.213][MainProcess][INFO] Parsing sketch...
+[     6.213][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     6.213][MainProcess][DEBUG] Sketch creation: Line(T2, root=['cross_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=CrossJoinCondition, var=[])])
+[     6.277][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 40, 'anti_join': 28, 'left_join': 4, 'union': 4, 'intersect': 12, 'semi_join': 4, 'cross_join': 1120}
+[     6.277][MainProcess][DEBUG] {'natural_join': 0.0032258064516129032, 'natural_join3': 0.0064516129032258064, 'natural_join4': 0.012903225806451613, 'inner_join': 0.03225806451612903, 'anti_join': 0.02258064516129032, 'left_join': 0.0032258064516129032, 'union': 0.0032258064516129032, 'intersect': 0.00967741935483871, 'semi_join': 0.0032258064516129032, 'cross_join': 0.9032258064516129}
+[     6.277][MainProcess][DEBUG] {'natural_join': 0.0032258064516129032, 'natural_join3': 0.0064516129032258064, 'natural_join4': 0.012903225806451613, 'inner_join': 0.03225806451612903, 'anti_join': 0.02258064516129032, 'left_join': 0.0032258064516129032, 'union': 0.0032258064516129032, 'intersect': 0.00967741935483871, 'semi_join': 0.0032258064516129032, 'cross_join': 0.9032258064516129}
+[     6.277][MainProcess][INFO] Building synthesizer...
+[     6.279][MainProcess][DEBUG] [Line(T1, root=['natural_join'], var=[1], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['cross_join'], var=[10], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=CrossJoinCondition, var=[]),Child([None], type=None, var=[0])])]
+[     6.624][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 93 constraints
+[     6.655][MainProcess][DEBUG] Enumeration time: 0.37789034843444824
+[     7.868][MainProcess][DEBUG] Synthesis time: 1.212930679321289
+[     7.869][MainProcess][INFO] Solution found: [natural_join(input0, input1), cross_join(line0, line0, 'ID != ID.other & Company_group == Name.other')]
+[     7.871][MainProcess][DEBUG] Solution found using process 0
+[     7.871][MainProcess][INFO] Statistics:
+[     7.871][MainProcess][INFO] 	Attempted programs: 55 (approx)
+[     7.871][MainProcess][INFO] 		Rejected: 54 (approx)
+[     7.871][MainProcess][INFO] 		Failed: 0 (approx)
+[     7.871][MainProcess][INFO] 		Empty outputs: 2 (3.6%) (approx)
+[     7.871][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     7.871][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     7.871][MainProcess][INFO] 	Total time spent in enumerator init: 0.377890 (approx)
+[     7.871][MainProcess][INFO] 	Total time spent in enumerator: 0.102682 (approx)
+[     7.871][MainProcess][INFO] 		Enumerated 535.632452 programs/s avg. (just enumeration time)
+[     7.872][MainProcess][INFO] 		Enumerated 8.848740 programs/s avg. (overall)
+[     7.872][MainProcess][INFO] 	Total time spent in evaluation & testing: 1.068440 (approx)
+[     7.872][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.040750 (approx)
+[     7.872][MainProcess][INFO] Solution found: [natural_join(input0, input1), cross_join(line0, line0, 'ID != ID.other & Company_group == Name.other')]
+[     7.872][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_013_1 <- read_csv("tests-examples/scythe/recent_posts/tables/013_1.csv", col_types = cols("ID" = col_integer(),"Name" = col_character()))
+df_013_1 <- copy_to(con, df_013_1)
+df_013_2 <- read_csv("tests-examples/scythe/recent_posts/tables/013_2.csv", col_types = cols("ID" = col_integer(),"Company_group" = col_character()))
+df_013_2 <- copy_to(con, df_013_2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/013_o.csv", col_types = cols("ID" = col_integer(),"Name" = col_character(),"RootName" = col_character(),"RootId" = col_integer()))
+
+df57 <- inner_join(df_013_1, df_013_2, na_matches="never")
+df58 <- full_join(df57, df57, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(ID != ID.other & Company_group == Name.other)
+out <- df58 %>% select(ID, Name, RootName = Company_group, RootId = ID.other)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ID,
+       Name,
+       Company_group AS RootName,
+       ID_other AS RootId
+FROM
+  (SELECT LHS.ID AS ID,
+          LHS.Name AS Name,
+          LHS.Company_group AS Company_group,
+          RHS.ID AS ID_other,
+          RHS.Name AS Name_other,
+          RHS.Company_group AS Company_group_other
+   FROM
+     (SELECT LHS.ID AS ID,
+             Name,
+             Company_group
+      FROM df_013_1 AS LHS
+      INNER JOIN df_013_2 AS RHS ON (LHS.ID = RHS.ID)) AS LHS
+   CROSS JOIN
+     (SELECT LHS.ID AS ID,
+             Name,
+             Company_group
+      FROM df_013_1 AS LHS
+      INNER JOIN df_013_2 AS RHS ON (LHS.ID = RHS.ID)) AS RHS)
+WHERE (ID != ID_other
+       AND Company_group = Name_other)

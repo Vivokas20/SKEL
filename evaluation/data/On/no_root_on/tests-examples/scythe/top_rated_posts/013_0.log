@@ -1,0 +1,66 @@
+[     2.230][MainProcess][INFO] Parsing specification...
+[     2.235][MainProcess][INFO] File read
+[     2.236][MainProcess][DEBUG] Reading input files...
+[     2.245][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i013.csv: ['string', 'int64']
+[     2.251][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o013.csv: ['string', 'int64', 'int64']
+[     2.251][MainProcess][INFO] Parsing sketch...
+[     2.251][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['n = n()'], type=Unknown, var=[]),Child(['orgName'], type=Unknown, var=[])])
+[     2.252][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Line, var=[]),Child(['n > 1'], type=Unknown, var=[])])
+[     2.252][MainProcess][DEBUG] Sketch creation: Line(T3, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Line, var=[]),Child(['orgName'], type=Unknown, var=[])])
+[     2.289][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 6, 'filter': 6, 'summarise': 4, 'mutate': 1}
+[     2.289][MainProcess][DEBUG] {'natural_join': 0.027777777777777776, 'natural_join3': 0.027777777777777776, 'natural_join4': 0.027777777777777776, 'inner_join': 0.19444444444444445, 'anti_join': 0.1111111111111111, 'left_join': 0.027777777777777776, 'union': 0.027777777777777776, 'intersect': 0.05555555555555555, 'semi_join': 0.027777777777777776, 'cross_join': 0.16666666666666666, 'filter': 0.16666666666666666, 'summarise': 0.1111111111111111, 'mutate': 0.027777777777777776}
+[     2.289][MainProcess][DEBUG] {'natural_join': 0.02777777777777778, 'natural_join3': 0.02777777777777778, 'natural_join4': 0.02777777777777778, 'inner_join': 0.19444444444444448, 'anti_join': 0.11111111111111112, 'left_join': 0.02777777777777778, 'union': 0.02777777777777778, 'intersect': 0.05555555555555556, 'semi_join': 0.02777777777777778, 'cross_join': 0.16666666666666669, 'filter': 0.16666666666666669, 'summarise': 0.11111111111111112, 'mutate': 0.02777777777777778}
+[     2.289][MainProcess][INFO] Building synthesizer...
+[     2.291][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Table, var=[[40], [39], [15, 18, 25]]),Child(['n = n()'], type=Unknown, var=[[40], [39], [15, 18, 25]]),Child(['orgName'], type=Unknown, var=[[40], [39], [15, 18, 25]]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Line, var=[[42], [38]]),Child(['n > 1'], type=Unknown, var=[[42], [38]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['??'], var=[2, 4, 5, 8, 10], children=[Child([0], type=Table, var=[[40], [43], [15, 18, 25]]),Child([1], type=Line, var=[[40], [43], [15, 18, 25]]),Child(['orgName'], type=Unknown, var=[[40], [43], [15, 18, 25]]),Child([None], type=None, var=[0])])]
+[     2.460][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 237 constraints
+[     2.473][MainProcess][DEBUG] Enumeration time: 0.18385910987854004
+[     2.710][MainProcess][DEBUG] Synthesis time: 0.23730921745300293
+[     2.711][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'orgName'), filter(line0, 'n > 1'), inner_join(line1, input0, 'orgName')]
+[     2.712][MainProcess][DEBUG] Solution found using process 0
+[     2.712][MainProcess][INFO] Statistics:
+[     2.712][MainProcess][INFO] 	Attempted programs: 8 (approx)
+[     2.712][MainProcess][INFO] 		Rejected: 7 (approx)
+[     2.712][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.712][MainProcess][INFO] 		Empty outputs: 1 (12.5%) (approx)
+[     2.712][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.712][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.713][MainProcess][INFO] 	Total time spent in enumerator init: 0.183859 (approx)
+[     2.713][MainProcess][INFO] 	Total time spent in enumerator: 0.023141 (approx)
+[     2.713][MainProcess][INFO] 		Enumerated 345.704578 programs/s avg. (just enumeration time)
+[     2.713][MainProcess][INFO] 		Enumerated 3.829926 programs/s avg. (overall)
+[     2.713][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.202331 (approx)
+[     2.713][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.010469 (approx)
+[     2.713][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'orgName'), filter(line0, 'n > 1'), inner_join(line1, input0, 'orgName')]
+[     2.713][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i013 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i013.csv", col_types = cols("orgName" = col_character(),"id" = col_integer()))
+df_i013 <- copy_to(con, df_i013)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o013.csv", col_types = cols("orgName" = col_character(),"n" = col_integer(),"id" = col_integer()))
+
+df11 <- df_i013 %>% group_by(orgName) %>% summarise(n = n()) %>% ungroup()
+df12 <- df11 %>% filter(n > 1)
+df13 <- inner_join(df12, df_i013, by=c('orgName'), suffix = c('', '.other'), na_matches='never')
+out <- df13 %>% select(orgName, n, id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT orgName,
+       n,
+       id
+FROM
+  (SELECT LHS.orgName AS orgName,
+          n,
+          id
+   FROM
+     (SELECT *
+      FROM
+        (SELECT orgName,
+                COUNT(*) AS n
+         FROM df_i013
+         GROUP BY orgName)
+      WHERE (n > 1.0)) AS LHS
+   INNER JOIN df_i013 AS RHS ON (LHS.orgName = RHS.orgName))

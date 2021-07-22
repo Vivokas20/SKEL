@@ -1,0 +1,63 @@
+[     2.360][MainProcess][INFO] Parsing specification...
+[     2.365][MainProcess][INFO] File read
+[     2.366][MainProcess][DEBUG] Reading input files...
+[     2.376][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_1.csv: ['int64', 'string']
+[     2.381][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_2.csv: ['int64', 'int64', 'int64']
+[     2.388][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/045_o.csv: ['string', 'Float64']
+[     2.388][MainProcess][INFO] Parsing sketch...
+[     2.388][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child([1], type=Table, var=[]),Child(['sumQuantity = sum(Quantity)'], type=SummariseCondition, var=[]),Child(['Menu_id'], type=Cols, var=[])])
+[     2.388][MainProcess][DEBUG] Sketch creation: Line(T2, root=['left_join'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[])])
+[     2.455][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 376, 'anti_join': 44, 'left_join': 4, 'union': 4, 'intersect': 16, 'semi_join': 4, 'cross_join': 4440, 'filter': 12, 'summarise': 22, 'mutate': 2}
+[     2.455][MainProcess][DEBUG] {'natural_join': 0.0008077544426494346, 'natural_join3': 0.0016155088852988692, 'natural_join4': 0.0032310177705977385, 'inner_join': 0.07592891760904685, 'anti_join': 0.008885298869143781, 'left_join': 0.0008077544426494346, 'union': 0.0008077544426494346, 'intersect': 0.0032310177705977385, 'semi_join': 0.0008077544426494346, 'cross_join': 0.8966074313408724, 'filter': 0.0024232633279483036, 'summarise': 0.0044426494345718905, 'mutate': 0.0004038772213247173}
+[     2.456][MainProcess][DEBUG] {'natural_join': 0.0008077544426494346, 'natural_join3': 0.0016155088852988692, 'natural_join4': 0.0032310177705977385, 'inner_join': 0.07592891760904685, 'anti_join': 0.008885298869143781, 'left_join': 0.0008077544426494346, 'union': 0.0008077544426494346, 'intersect': 0.0032310177705977385, 'semi_join': 0.0008077544426494346, 'cross_join': 0.8966074313408724, 'filter': 0.0024232633279483036, 'summarise': 0.0044426494345718905, 'mutate': 0.0004038772213247173}
+[     2.456][MainProcess][INFO] Building synthesizer...
+[     2.457][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child([1], type=Table, var=[1241]),Child(['sumQuantity = sum(Quantity)'], type=SummariseCondition, var=[1239]),Child(['Menu_id'], type=Cols, var=[20]),Child([None], type=None, var=[0])]), Line(T2, root=['left_join'], var=[6], children=[Child([0], type=Table, var=[1240]),Child([0], type=Line, var=[1243]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.525][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 105 constraints
+[     2.528][MainProcess][DEBUG] Enumeration time: 0.07236790657043457
+[     2.584][MainProcess][DEBUG] Synthesis time: 0.055750131607055664
+[     2.584][MainProcess][INFO] Solution found: [summarise(input1, 'sumQuantity = sum(Quantity)', 'Menu_id'), left_join(input0, line0)]
+[     2.585][MainProcess][DEBUG] Solution found using process 0
+[     2.585][MainProcess][INFO] Statistics:
+[     2.585][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.586][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.586][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.586][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.586][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.586][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.586][MainProcess][INFO] 	Total time spent in enumerator init: 0.072368 (approx)
+[     2.586][MainProcess][INFO] 	Total time spent in enumerator: 0.001081 (approx)
+[     2.586][MainProcess][INFO] 		Enumerated 924.874090 programs/s avg. (just enumeration time)
+[     2.586][MainProcess][INFO] 		Enumerated 0.528954 programs/s avg. (overall)
+[     2.586][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.051775 (approx)
+[     2.586][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.586][MainProcess][INFO] Solution found: [summarise(input1, 'sumQuantity = sum(Quantity)', 'Menu_id'), left_join(input0, line0)]
+[     2.586][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_045_1 <- read_csv("tests-examples/scythe/recent_posts/tables/045_1.csv", col_types = cols("Menu_id" = col_integer(),"Name" = col_character()))
+df_045_1 <- copy_to(con, df_045_1)
+df_045_2 <- read_csv("tests-examples/scythe/recent_posts/tables/045_2.csv", col_types = cols("ID" = col_integer(),"Quantity" = col_integer(),"Menu_id" = col_integer()))
+df_045_2 <- copy_to(con, df_045_2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/045_o.csv", col_types = cols("MenuName" = col_character(),"Quantity" = col_double()))
+
+df3 <- df_045_2 %>% group_by(Menu_id) %>% summarise(sumQuantity = sum(Quantity)) %>% ungroup()
+df4 <- left_join(df_045_1, df3, na_matches="never")
+out <- df4 %>% select(MenuName = Name, Quantity = sumQuantity)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Name AS MenuName,
+       sumQuantity AS Quantity
+FROM
+  (SELECT LHS.Menu_id AS Menu_id,
+          Name,
+          sumQuantity
+   FROM df_045_1 AS LHS
+   LEFT JOIN
+     (SELECT Menu_id,
+             SUM(Quantity) AS sumQuantity
+      FROM df_045_2
+      GROUP BY Menu_id) AS RHS ON (LHS.Menu_id = RHS.Menu_id))

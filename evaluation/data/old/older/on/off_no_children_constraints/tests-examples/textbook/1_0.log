@@ -1,0 +1,51 @@
+[     4.198][MainProcess][INFO] Parsing specification...
+[     4.204][MainProcess][INFO] File read
+[     4.204][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     4.204][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     4.205][MainProcess][DEBUG] Reading input files...
+[     4.214][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/1-1.txt: ['string', 'string']
+[     4.219][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/1-2.txt: ['string', 'string']
+[     4.224][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/1-3.txt: ['string', 'string']
+[     4.230][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/1-4.txt: ['string', 'string', 'string']
+[     4.234][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/1.out: ['string']
+[     4.234][MainProcess][INFO] Parsing sketch...
+[     4.234][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join4'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     4.235][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     4.287][MainProcess][DEBUG] {'natural_join': 16, 'natural_join3': 64, 'natural_join4': 256, 'inner_join': 7536, 'anti_join': 352, 'left_join': 16, 'union': 16, 'intersect': 96, 'semi_join': 16, 'cross_join': 2080, 'filter': 48}
+[     4.287][MainProcess][DEBUG] {'natural_join': 0.001524390243902439, 'natural_join3': 0.006097560975609756, 'natural_join4': 0.024390243902439025, 'inner_join': 0.7179878048780488, 'anti_join': 0.03353658536585366, 'left_join': 0.001524390243902439, 'union': 0.001524390243902439, 'intersect': 0.009146341463414634, 'semi_join': 0.001524390243902439, 'cross_join': 0.19817073170731708, 'filter': 0.004573170731707317}
+[     4.287][MainProcess][DEBUG] {'natural_join': 0.0015243902439024393, 'natural_join3': 0.006097560975609757, 'natural_join4': 0.02439024390243903, 'inner_join': 0.7179878048780489, 'anti_join': 0.03353658536585367, 'left_join': 0.0015243902439024393, 'union': 0.0015243902439024393, 'intersect': 0.009146341463414635, 'semi_join': 0.0015243902439024393, 'cross_join': 0.1981707317073171, 'filter': 0.004573170731707318}
+[     4.287][MainProcess][INFO] Building synthesizer...
+[     4.288][MainProcess][DEBUG] [Line(T1, root=['natural_join4'], var=[3], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     4.589][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 82 constraints
+[     4.638][MainProcess][DEBUG] Enumeration time: 0.35053348541259766
+Traceback (most recent call last):
+  File "sequential.py", line 84, in <module>
+    main()
+  File "sequential.py", line 60, in main
+    squares_enumerator.main(args, specification, 0, configs[0], queue)
+  File "/home/vbernardo/SKEL/squares/squares_enumerator.py", line 74, in main
+    prog, attempts = synthesizer.synthesize()
+  File "/home/vbernardo/SKEL/squares/tyrell/synthesizer/synthesizer.py", line 73, in synthesize
+    res = self.decider.analyze(prog)
+  File "/home/vbernardo/SKEL/squares/decider.py", line 36, in analyze
+    failed_examples = self.get_failed_examples(prog)
+  File "/home/vbernardo/SKEL/squares/decider.py", line 29, in get_failed_examples
+    output = self.interpreter.eval(prog, example.input)
+  File "/home/vbernardo/SKEL/squares/program.py", line 66, in eval
+    new_var = method(tuple(self.transform_arg(arg, inputs, vars) for arg in line.arguments), self.filled_program(prog, line))
+  File "/home/vbernardo/SKEL/squares/dsl/interpreter.py", line 51, in wrapper
+    self.try_execute(func(self, name, args))
+  File "/home/vbernardo/SKEL/squares/dsl/interpreter.py", line 147, in eval_natural_join4
+    if robjects.r(f'length(intersect(colnames({args[0]}), colnames({args[1]})))')[0] > 0:
+  File "/home/vbernardo/miniconda3/envs/SKEL/lib/python3.8/site-packages/rpy2/robjects/__init__.py", line 438, in __call__
+    res = self.eval(p)
+  File "/home/vbernardo/miniconda3/envs/SKEL/lib/python3.8/site-packages/rpy2/robjects/functions.py", line 198, in __call__
+    return (super(SignatureTranslatedFunction, self)
+  File "/home/vbernardo/miniconda3/envs/SKEL/lib/python3.8/site-packages/rpy2/robjects/functions.py", line 125, in __call__
+    res = super(Function, self).__call__(*new_args, **new_kwargs)
+  File "/home/vbernardo/miniconda3/envs/SKEL/lib/python3.8/site-packages/rpy2/rinterface_lib/conversion.py", line 45, in _
+    cdata = function(*args, **kwargs)
+  File "/home/vbernardo/miniconda3/envs/SKEL/lib/python3.8/site-packages/rpy2/rinterface.py", line 680, in __call__
+    raise embedded.RRuntimeError(_rinterface._geterrmessage())
+rpy2.rinterface_lib.embedded.RRuntimeError: Error in is.data.frame(x) : object 'F_name' not found
+

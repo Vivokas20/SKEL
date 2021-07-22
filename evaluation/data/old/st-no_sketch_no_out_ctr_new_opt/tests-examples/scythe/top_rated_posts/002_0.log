@@ -1,0 +1,54 @@
+[     2.343][MainProcess][INFO] Parsing specification...
+[     2.348][MainProcess][INFO] File read
+[     2.349][MainProcess][DEBUG] Reading input files...
+[     2.357][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i002.csv: ['int64', 'string', 'string']
+[     2.361][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o002.csv: ['string']
+[     2.394][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 22, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 6, 'filter': 6, 'summarise': 7, 'mutate': 1}
+[     2.394][MainProcess][DEBUG] {'natural_join': 0.017241379310344827, 'natural_join3': 0.017241379310344827, 'natural_join4': 0.017241379310344827, 'inner_join': 0.3793103448275862, 'anti_join': 0.1206896551724138, 'left_join': 0.017241379310344827, 'union': 0.017241379310344827, 'intersect': 0.05172413793103448, 'semi_join': 0.017241379310344827, 'cross_join': 0.10344827586206896, 'filter': 0.10344827586206896, 'summarise': 0.1206896551724138, 'mutate': 0.017241379310344827}
+[     2.394][MainProcess][DEBUG] {'natural_join': 0.017241379310344827, 'natural_join3': 0.017241379310344827, 'natural_join4': 0.017241379310344827, 'inner_join': 0.3793103448275862, 'anti_join': 0.1206896551724138, 'left_join': 0.017241379310344827, 'union': 0.017241379310344827, 'intersect': 0.05172413793103448, 'semi_join': 0.017241379310344827, 'cross_join': 0.10344827586206896, 'filter': 0.10344827586206896, 'summarise': 0.1206896551724138, 'mutate': 0.017241379310344827}
+[     2.394][MainProcess][INFO] Building synthesizer...
+[     2.571][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 216 constraints
+[     2.585][MainProcess][DEBUG] Enumeration time: 0.1903672218322754
+[     2.867][MainProcess][DEBUG] Synthesis time: 0.28183841705322266
+[     2.867][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'EMAIL,NAME'), filter(line0, 'n > 1')]
+[     2.868][MainProcess][DEBUG] Solution found using process 0
+[     2.868][MainProcess][INFO] Statistics:
+[     2.868][MainProcess][INFO] 	Attempted programs: 17 (approx)
+[     2.868][MainProcess][INFO] 		Rejected: 16 (approx)
+[     2.868][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.868][MainProcess][INFO] 		Empty outputs: 6 (35.3%) (approx)
+[     2.868][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.868][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.868][MainProcess][INFO] 	Total time spent in enumerator init: 0.190367 (approx)
+[     2.869][MainProcess][INFO] 	Total time spent in enumerator: 0.030827 (approx)
+[     2.869][MainProcess][INFO] 		Enumerated 551.472343 programs/s avg. (just enumeration time)
+[     2.869][MainProcess][INFO] 		Enumerated 7.755361 programs/s avg. (overall)
+[     2.869][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.238256 (approx)
+[     2.869][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.011739 (approx)
+[     2.869][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'EMAIL,NAME'), filter(line0, 'n > 1')]
+[     2.869][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i002 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i002.csv", col_types = cols("ID" = col_integer(),"NAME" = col_character(),"EMAIL" = col_character()))
+df_i002 <- copy_to(con, df_i002)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o002.csv", col_types = cols("NAME" = col_character()))
+
+df22 <- df_i002 %>% group_by(EMAIL,NAME) %>% summarise(n = n()) %>% ungroup()
+df23 <- df22 %>% filter(n > 1)
+out <- df23 %>% select(NAME) %>% arrange(NAME)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT NAME
+FROM
+  (SELECT EMAIL,
+          NAME,
+          COUNT(*) AS n
+   FROM df_i002
+   GROUP BY EMAIL,
+            NAME)
+WHERE (n > 1.0)
+ORDER BY NAME

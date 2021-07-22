@@ -1,0 +1,58 @@
+[     2.424][MainProcess][INFO] Parsing specification...
+[     2.453][MainProcess][INFO] File read
+[     2.455][MainProcess][DEBUG] Reading input files...
+[     2.489][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i025.csv: ['int64', 'string']
+[     2.496][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o025.csv: ['int64', 'string']
+[     2.496][MainProcess][INFO] Parsing sketch...
+[     2.496][MainProcess][DEBUG] Sketch creation: Line(T1, root=['mutate'], var=[], children=[Child([0], type=Table, var=[]),Child(['row_number_ = row_number()'], type=SummariseCondition, var=[])])
+[     2.496][MainProcess][DEBUG] Sketch creation: Line(T2, root=[None], var=[], children=[])
+[     2.540][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 6, 'filter': 84, 'summarise': 4, 'mutate': 1}
+[     2.540][MainProcess][DEBUG] {'natural_join': 0.008771929824561403, 'natural_join3': 0.008771929824561403, 'natural_join4': 0.008771929824561403, 'inner_join': 0.06140350877192982, 'anti_join': 0.03508771929824561, 'left_join': 0.008771929824561403, 'union': 0.008771929824561403, 'intersect': 0.017543859649122806, 'semi_join': 0.008771929824561403, 'cross_join': 0.05263157894736842, 'filter': 0.7368421052631579, 'summarise': 0.03508771929824561, 'mutate': 0.008771929824561403}
+[     2.540][MainProcess][DEBUG] {'natural_join': 0.008771929824561403, 'natural_join3': 0.008771929824561403, 'natural_join4': 0.008771929824561403, 'inner_join': 0.06140350877192982, 'anti_join': 0.03508771929824561, 'left_join': 0.008771929824561403, 'union': 0.008771929824561403, 'intersect': 0.017543859649122806, 'semi_join': 0.008771929824561403, 'cross_join': 0.05263157894736842, 'filter': 0.7368421052631579, 'summarise': 0.03508771929824561, 'mutate': 0.008771929824561403}
+[     2.540][MainProcess][INFO] Building synthesizer...
+[     2.542][MainProcess][DEBUG] [Line(T1, root=['mutate'], var=[13], children=[Child([0], type=Table, var=[118]),Child(['row_number_ = row_number()'], type=SummariseCondition, var=[117]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=[None], var=[], children=[])]
+[     2.863][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 179 constraints
+[     2.884][MainProcess][DEBUG] Enumeration time: 0.34384799003601074
+[     3.647][MainProcess][DEBUG] Synthesis time: 0.7630970478057861
+[     3.648][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, 'row_number_ >= 3 & row_number_ < 5')]
+[     3.650][MainProcess][DEBUG] Solution found using process 0
+[     3.650][MainProcess][INFO] Statistics:
+[     3.650][MainProcess][INFO] 	Attempted programs: 71 (approx)
+[     3.650][MainProcess][INFO] 		Rejected: 70 (approx)
+[     3.650][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.650][MainProcess][INFO] 		Empty outputs: 9 (12.7%) (approx)
+[     3.650][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.650][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.650][MainProcess][INFO] 	Total time spent in enumerator init: 0.343848 (approx)
+[     3.650][MainProcess][INFO] 	Total time spent in enumerator: 0.121574 (approx)
+[     3.650][MainProcess][INFO] 		Enumerated 584.006809 programs/s avg. (just enumeration time)
+[     3.650][MainProcess][INFO] 		Enumerated 24.215283 programs/s avg. (overall)
+[     3.651][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.594113 (approx)
+[     3.651][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.046433 (approx)
+[     3.651][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, 'row_number_ >= 3 & row_number_ < 5')]
+[     3.651][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i025 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i025.csv", col_types = cols("Id" = col_integer(),"Value" = col_character()))
+df_i025 <- copy_to(con, df_i025)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o025.csv", col_types = cols("Id" = col_integer(),"Value" = col_character()))
+
+df73 <- df_i025 %>% mutate(row_number_ = row_number())
+df74 <- df73 %>% filter(row_number_ >= 3 & row_number_ < 5)
+out <- df74 %>% select(Id, Value) %>% arrange(Id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Id,
+       Value
+FROM
+  (SELECT Id,
+          Value,
+          ROW_NUMBER() OVER () AS row_number_
+   FROM df_i025)
+WHERE (row_number_ >= 3.0
+       AND row_number_ < 5.0)
+ORDER BY Id

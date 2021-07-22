@@ -1,0 +1,65 @@
+[     2.509][MainProcess][INFO] Parsing specification...
+[     2.526][MainProcess][INFO] File read
+[     2.528][MainProcess][DEBUG] Reading input files...
+[     2.543][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i012.csv: ['int64', 'int64', 'string', 'datetime64[ns]']
+[     2.552][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o012.csv: ['int64', 'string', 'datetime64[ns]']
+[     2.552][MainProcess][INFO] Parsing sketch...
+[     2.553][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.553][MainProcess][DEBUG] Sketch creation: Line(T2, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     2.638][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 30, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 11, 'mutate': 1}
+[     2.638][MainProcess][DEBUG] {'natural_join': 0.0008481764206955047, 'natural_join3': 0.0008481764206955047, 'natural_join4': 0.0008481764206955047, 'inner_join': 0.02544529262086514, 'anti_join': 0.009329940627650551, 'left_join': 0.0008481764206955047, 'union': 0.0008481764206955047, 'intersect': 0.0033927056827820186, 'semi_join': 0.0008481764206955047, 'cross_join': 0.9414758269720102, 'filter': 0.005089058524173028, 'summarise': 0.009329940627650551, 'mutate': 0.0008481764206955047}
+[     2.638][MainProcess][DEBUG] {'natural_join': 0.0008481764206955047, 'natural_join3': 0.0008481764206955047, 'natural_join4': 0.0008481764206955047, 'inner_join': 0.02544529262086514, 'anti_join': 0.009329940627650551, 'left_join': 0.0008481764206955047, 'union': 0.0008481764206955047, 'intersect': 0.0033927056827820186, 'semi_join': 0.0008481764206955047, 'cross_join': 0.9414758269720102, 'filter': 0.005089058524173028, 'summarise': 0.009329940627650551, 'mutate': 0.0008481764206955047}
+[     2.638][MainProcess][INFO] Building synthesizer...
+[     2.640][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])]), Line(T2, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[]),Child([None], type=None, var=[0])])]
+[     3.427][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 105 constraints
+[     3.514][MainProcess][DEBUG] Enumeration time: 0.8762094974517822
+[     5.068][MainProcess][DEBUG] Synthesis time: 1.553483009338379
+[     5.068][MainProcess][INFO] Solution found: [summarise(input0, 'maxDateCreated = max(DateCreated)', 'DocumentID'), inner_join(input0, line0, 'DocumentID = DocumentID,DateCreated = maxDateCreated')]
+[     5.071][MainProcess][DEBUG] Solution found using process 0
+[     5.071][MainProcess][INFO] Statistics:
+[     5.072][MainProcess][INFO] 	Attempted programs: 92 (approx)
+[     5.072][MainProcess][INFO] 		Rejected: 91 (approx)
+[     5.072][MainProcess][INFO] 		Failed: 0 (approx)
+[     5.072][MainProcess][INFO] 		Empty outputs: 17 (18.5%) (approx)
+[     5.072][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     5.072][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     5.072][MainProcess][INFO] 	Total time spent in enumerator init: 0.876209 (approx)
+[     5.072][MainProcess][INFO] 	Total time spent in enumerator: 0.220478 (approx)
+[     5.072][MainProcess][INFO] 		Enumerated 417.275535 programs/s avg. (just enumeration time)
+[     5.072][MainProcess][INFO] 		Enumerated 21.092748 programs/s avg. (overall)
+[     5.072][MainProcess][INFO] 	Total time spent in evaluation & testing: 1.267248 (approx)
+[     5.072][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.064479 (approx)
+[     5.072][MainProcess][INFO] Solution found: [summarise(input0, 'maxDateCreated = max(DateCreated)', 'DocumentID'), inner_join(input0, line0, 'DocumentID = DocumentID,DateCreated = maxDateCreated')]
+[     5.072][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i012 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i012.csv", col_types = cols("ID" = col_integer(),"DocumentID" = col_integer(),"Status" = col_character(),"DateCreated" = col_character()))
+df_i012$DateCreated <- mdy(df_i012$DateCreated)
+df_i012 <- copy_to(con, df_i012)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o012.csv", col_types = cols("DocumentID" = col_integer(),"Status" = col_character(),"DateCreated" = col_character()))
+expected_output$DateCreated <- mdy(expected_output$DateCreated)
+
+df77 <- df_i012 %>% group_by(DocumentID) %>% summarise(maxDateCreated = max(DateCreated)) %>% ungroup()
+df78 <- inner_join(df_i012, df77, by=c('DocumentID' = 'DocumentID','DateCreated' = 'maxDateCreated'), suffix = c('', '.other'), na_matches='never') %>% mutate(maxDateCreated = DateCreated)
+out <- df78 %>% select(DocumentID, Status, DateCreated)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DocumentID,
+       Status,
+       DateCreated
+FROM
+  (SELECT ID,
+          LHS.DocumentID AS DocumentID,
+          Status,
+          DateCreated
+   FROM df_i012 AS LHS
+   INNER JOIN
+     (SELECT DocumentID,
+             MAX(DateCreated) AS maxDateCreated
+      FROM df_i012
+      GROUP BY DocumentID) AS RHS ON (LHS.DocumentID = RHS.DocumentID
+                                      AND LHS.DateCreated = RHS.maxDateCreated))

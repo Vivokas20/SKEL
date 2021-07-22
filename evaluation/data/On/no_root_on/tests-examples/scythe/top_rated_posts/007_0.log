@@ -1,0 +1,68 @@
+[     2.284][MainProcess][INFO] Parsing specification...
+[     2.290][MainProcess][INFO] File read
+[     2.291][MainProcess][DEBUG] Reading input files...
+[     2.303][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i007.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     2.312][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o007.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     2.312][MainProcess][INFO] Parsing sketch...
+[     2.312][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['maxdatetime = max(datetime)'], type=Unknown, var=[]),Child(['home'], type=Unknown, var=[])])
+[     2.313][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[]),Child(['home = home,datetime = maxdatetime'], type=Unknown, var=[])])
+[     2.395][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 73, 'anti_join': 16, 'left_join': 1, 'union': 1, 'intersect': 5, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 16, 'mutate': 1}
+[     2.395][MainProcess][DEBUG] {'natural_join': 0.0008110300081103001, 'natural_join3': 0.0008110300081103001, 'natural_join4': 0.0008110300081103001, 'inner_join': 0.059205190592051905, 'anti_join': 0.012976480129764802, 'left_join': 0.0008110300081103001, 'union': 0.0008110300081103001, 'intersect': 0.0040551500405515, 'semi_join': 0.0008110300081103001, 'cross_join': 0.9002433090024331, 'filter': 0.004866180048661801, 'summarise': 0.012976480129764802, 'mutate': 0.0008110300081103001}
+[     2.395][MainProcess][DEBUG] {'natural_join': 0.0008110300081103001, 'natural_join3': 0.0008110300081103001, 'natural_join4': 0.0008110300081103001, 'inner_join': 0.059205190592051905, 'anti_join': 0.012976480129764802, 'left_join': 0.0008110300081103001, 'union': 0.0008110300081103001, 'intersect': 0.0040551500405515, 'semi_join': 0.0008110300081103001, 'cross_join': 0.9002433090024331, 'filter': 0.004866180048661801, 'summarise': 0.012976480129764802, 'mutate': 0.0008110300081103001}
+[     2.396][MainProcess][INFO] Building synthesizer...
+[     2.398][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Table, var=[[1225], [1224], [15, 21, 94]]),Child(['maxdatetime = max(datetime)'], type=Unknown, var=[[1225], [1224], [15, 21, 94]]),Child(['home'], type=Unknown, var=[[1225], [1224], [15, 21, 94]]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[2, 4, 5, 8, 10], children=[Child([0], type=Table, var=[[1225], [1227], [65]]),Child([0], type=Line, var=[[1225], [1227], [65]]),Child(['home = home,datetime = maxdatetime'], type=Unknown, var=[[1225], [1227], [65]]),Child([None], type=None, var=[0])])]
+[     2.509][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 146 constraints
+[     2.519][MainProcess][DEBUG] Enumeration time: 0.12380146980285645
+[     2.584][MainProcess][DEBUG] Synthesis time: 0.064056396484375
+[     2.584][MainProcess][INFO] Solution found: [summarise(input0, 'maxdatetime = max(datetime)', 'home'), inner_join(input0, line0, 'home = home,datetime = maxdatetime')]
+[     2.585][MainProcess][DEBUG] Solution found using process 0
+[     2.585][MainProcess][INFO] Statistics:
+[     2.585][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.586][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.586][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.586][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.586][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.586][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.586][MainProcess][INFO] 	Total time spent in enumerator init: 0.123801 (approx)
+[     2.586][MainProcess][INFO] 	Total time spent in enumerator: 0.001493 (approx)
+[     2.586][MainProcess][INFO] 		Enumerated 669.802619 programs/s avg. (just enumeration time)
+[     2.586][MainProcess][INFO] 		Enumerated 0.523777 programs/s avg. (overall)
+[     2.586][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.059466 (approx)
+[     2.586][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.586][MainProcess][INFO] Solution found: [summarise(input0, 'maxdatetime = max(datetime)', 'home'), inner_join(input0, line0, 'home = home,datetime = maxdatetime')]
+[     2.587][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i007 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i007.csv", col_types = cols("id" = col_integer(),"home" = col_integer(),"datetime" = col_character(),"player" = col_character(),"resource" = col_integer()))
+df_i007$datetime <- mdy(df_i007$datetime)
+df_i007 <- copy_to(con, df_i007)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o007.csv", col_types = cols("id" = col_integer(),"home" = col_integer(),"datetime" = col_character(),"player" = col_character(),"resource" = col_integer()))
+expected_output$datetime <- mdy(expected_output$datetime)
+
+df3 <- df_i007 %>% group_by(home) %>% summarise(maxdatetime = max(datetime)) %>% ungroup()
+df4 <- inner_join(df_i007, df3, by=c('home' = 'home','datetime' = 'maxdatetime'), suffix = c('', '.other'), na_matches='never') %>% mutate(maxdatetime = datetime)
+out <- df4 %>% select(id, home, datetime, player, resource)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       home,
+       datetime,
+       player,
+       RESOURCE
+FROM
+  (SELECT id,
+          LHS.home AS home,
+          datetime,
+          player,
+          RESOURCE
+   FROM df_i007 AS LHS
+   INNER JOIN
+     (SELECT home,
+             MAX(datetime) AS maxdatetime
+      FROM df_i007
+      GROUP BY home) AS RHS ON (LHS.home = RHS.home
+                                AND LHS.datetime = RHS.maxdatetime))

@@ -1,0 +1,55 @@
+[     3.625][MainProcess][INFO] Parsing specification...
+[     3.630][MainProcess][INFO] File read
+[     3.631][MainProcess][DEBUG] Reading input files...
+[     3.640][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15-1.txt: ['string', 'string']
+[     3.645][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15-2.txt: ['string', 'string']
+[     3.649][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15-3.txt: ['string', 'string']
+[     3.653][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15.out: ['string']
+[     3.695][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 846, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 288, 'filter': 36, 'summarise': 33, 'mutate': 3}
+[     3.695][MainProcess][DEBUG] {'natural_join': 0.006060606060606061, 'natural_join3': 0.01818181818181818, 'natural_join4': 0.05454545454545454, 'inner_join': 0.5696969696969697, 'anti_join': 0.06666666666666667, 'left_join': 0.006060606060606061, 'union': 0.006060606060606061, 'intersect': 0.024242424242424242, 'semi_join': 0.006060606060606061, 'cross_join': 0.19393939393939394, 'filter': 0.024242424242424242, 'summarise': 0.022222222222222223, 'mutate': 0.00202020202020202}
+[     3.695][MainProcess][DEBUG] {'natural_join': 0.006060606060606059, 'natural_join3': 0.018181818181818177, 'natural_join4': 0.05454545454545453, 'inner_join': 0.5696969696969696, 'anti_join': 0.06666666666666665, 'left_join': 0.006060606060606059, 'union': 0.006060606060606059, 'intersect': 0.024242424242424235, 'semi_join': 0.006060606060606059, 'cross_join': 0.19393939393939388, 'filter': 0.024242424242424235, 'summarise': 0.02222222222222222, 'mutate': 0.0020202020202020198}
+[     3.695][MainProcess][INFO] Building synthesizer...
+[     3.954][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 223 constraints
+[     4.006][MainProcess][DEBUG] There is no solution for current loc (2).
+[     4.006][MainProcess][DEBUG] Enumeration time: 0.3112671375274658
+[     4.007][MainProcess][DEBUG] Synthesis time: 0.00045299530029296875
+[     4.007][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     4.410][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 384 constraints
+[     4.526][MainProcess][DEBUG] Enumeration time: 0.5190527439117432
+[     6.057][MainProcess][DEBUG] Synthesis time: 1.529365062713623
+[     6.057][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), summarise(line0, 'n = n()', 'S_name,color'), filter(line1, "color == 'red' & n == max(n)")]
+[     6.059][MainProcess][DEBUG] Solution found using process 0
+[     6.059][MainProcess][INFO] Statistics:
+[     6.060][MainProcess][INFO] 	Attempted programs: 105 (approx)
+[     6.060][MainProcess][INFO] 		Rejected: 72 (approx)
+[     6.060][MainProcess][INFO] 		Failed: 32 (approx)
+[     6.060][MainProcess][INFO] 		Empty outputs: 16 (15.2%) (approx)
+[     6.060][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     6.060][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     6.060][MainProcess][INFO] 	Total time spent in enumerator init: 0.830320 (approx)
+[     6.060][MainProcess][INFO] 	Total time spent in enumerator: 0.241992 (approx)
+[     6.060][MainProcess][INFO] 		Enumerated 433.899502 programs/s avg. (just enumeration time)
+[     6.060][MainProcess][INFO] 		Enumerated 21.237317 programs/s avg. (overall)
+[     6.060][MainProcess][INFO] 	Total time spent in evaluation & testing: 1.081827 (approx)
+[     6.060][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.063390 (approx)
+[     6.060][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), summarise(line0, 'n = n()', 'S_name,color'), filter(line1, "color == 'red' & n == max(n)")]
+[     6.060][MainProcess][INFO] Solution size: 3
+[     6.353][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_15_1 <- read_csv("tests-examples/textbook/tables/15-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_15_1 <- copy_to(con, df_15_1)
+df_15_2 <- read_csv("tests-examples/textbook/tables/15-2.txt", col_types = cols("P_id" = col_character(),"color" = col_character()))
+df_15_2 <- copy_to(con, df_15_2)
+df_15_3 <- read_csv("tests-examples/textbook/tables/15-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_15_3 <- copy_to(con, df_15_3)
+expected_output <- read_csv("tests-examples/textbook/tables/15.out", col_types = cols("S_name" = col_character()))
+
+df142 <- inner_join(df_15_1, df_15_2, na_matches="never") %>% inner_join(df_15_3, na_matches="never")
+df143 <- df142 %>% group_by(S_name,color) %>% summarise(n = n()) %>% ungroup()
+df144 <- df143 %>% filter(color == 'red' & n == max(n))
+out <- df144 %>% select(S_name) %>% arrange(S_name)
+
+Failed to generate SQL query

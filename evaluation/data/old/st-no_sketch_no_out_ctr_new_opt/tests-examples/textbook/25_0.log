@@ -1,0 +1,17 @@
+[     2.364][MainProcess][INFO] Parsing specification...
+[     2.371][MainProcess][INFO] File read
+[     2.372][MainProcess][DEBUG] Reading input files...
+[     2.381][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     2.385][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     2.390][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/25.out: ['int64', 'int64']
+[     2.676][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 920, 'anti_join': 44, 'left_join': 4, 'union': 4, 'intersect': 16, 'semi_join': 4, 'cross_join': 29664, 'filter': 2232, 'summarise': 66, 'mutate': 6}
+[     2.676][MainProcess][DEBUG] {'natural_join': 0.00012125621438098702, 'natural_join3': 0.00024251242876197404, 'natural_join4': 0.0004850248575239481, 'inner_join': 0.027888929307627017, 'anti_join': 0.0013338183581908573, 'left_join': 0.00012125621438098702, 'union': 0.00012125621438098702, 'intersect': 0.0004850248575239481, 'semi_join': 0.00012125621438098702, 'cross_join': 0.8992360858493997, 'filter': 0.06766096762459076, 'summarise': 0.002000727537286286, 'mutate': 0.00018188432157148054}
+[     2.676][MainProcess][DEBUG] {'natural_join': 0.00012125621438098702, 'natural_join3': 0.00024251242876197404, 'natural_join4': 0.0004850248575239481, 'inner_join': 0.027888929307627017, 'anti_join': 0.0013338183581908573, 'left_join': 0.00012125621438098702, 'union': 0.00012125621438098702, 'intersect': 0.0004850248575239481, 'semi_join': 0.00012125621438098702, 'cross_join': 0.8992360858493997, 'filter': 0.06766096762459076, 'summarise': 0.002000727537286286, 'mutate': 0.00018188432157148054}
+[     2.676][MainProcess][INFO] Building synthesizer...
+[    22.316][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 373 constraints
+[   301.506][MainProcess][DEBUG] There is no solution for current loc (3).
+[   301.506][MainProcess][DEBUG] Enumeration time: 298.8295648097992
+[   301.507][MainProcess][DEBUG] Synthesis time: 0.001132965087890625
+[   301.508][MainProcess][INFO] Increasing the number of lines of code to 4.
+[   327.510][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 560 constraints
+[   331.299][MainProcess][DEBUG] Enumeration time: 29.790979146957397

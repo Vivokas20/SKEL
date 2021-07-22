@@ -1,0 +1,15 @@
+[     4.965][MainProcess][INFO] Parsing specification...
+[     4.972][MainProcess][INFO] File read
+[     4.973][MainProcess][DEBUG] Reading input files...
+[     4.989][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/021.csv: ['string', 'int64']
+[     4.993][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/021_o.csv: ['int64', 'int64']
+[     5.078][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 1256, 'filter': 234, 'summarise': 4, 'mutate': 1}
+[     5.078][MainProcess][DEBUG] {'natural_join': 0.0006605019815059445, 'natural_join3': 0.0006605019815059445, 'natural_join4': 0.0006605019815059445, 'inner_join': 0.004623513870541612, 'anti_join': 0.002642007926023778, 'left_join': 0.0006605019815059445, 'union': 0.0006605019815059445, 'intersect': 0.001321003963011889, 'semi_join': 0.0006605019815059445, 'cross_join': 0.8295904887714664, 'filter': 0.154557463672391, 'summarise': 0.002642007926023778, 'mutate': 0.0006605019815059445}
+[     5.078][MainProcess][DEBUG] {'natural_join': 0.0006605019815059445, 'natural_join3': 0.0006605019815059445, 'natural_join4': 0.0006605019815059445, 'inner_join': 0.004623513870541612, 'anti_join': 0.002642007926023778, 'left_join': 0.0006605019815059445, 'union': 0.0006605019815059445, 'intersect': 0.001321003963011889, 'semi_join': 0.0006605019815059445, 'cross_join': 0.8295904887714664, 'filter': 0.154557463672391, 'summarise': 0.002642007926023778, 'mutate': 0.0006605019815059445}
+[     5.078][MainProcess][INFO] Building synthesizer...
+[     7.586][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 226 constraints
+[     7.848][MainProcess][DEBUG] Enumeration time: 2.7699356079101562
+[    16.279][MainProcess][DEBUG] Synthesis time: 8.430521249771118
+[    16.279][MainProcess][INFO] Increasing the number of lines of code to 3.
+[    19.890][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 386 constraints
+[    20.739][MainProcess][DEBUG] Enumeration time: 4.458797931671143

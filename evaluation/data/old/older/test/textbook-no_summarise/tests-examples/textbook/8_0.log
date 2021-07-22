@@ -1,0 +1,26 @@
+[     1.663][MainProcess][INFO] Parsing specification...
+[     1.667][MainProcess][INFO] File read
+[     1.669][MainProcess][DEBUG] Reading input files...
+[     1.676][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/8-1.txt: ['string', 'string', 'int64']
+[     1.680][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/8.out: ['string', 'int64']
+[     1.680][MainProcess][INFO] Parsing sketch...
+[     1.680][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[])])
+[     1.680][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child([0], type=Line, var=[]),Child(["level != 'JR'"], type=FilterCondition, var=[])])
+[     1.709][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 12, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 134, 'filter': 32, 'summarise': 7, 'mutate': 1}
+[     1.709][MainProcess][DEBUG] {'natural_join': 0.0049504950495049506, 'natural_join3': 0.0049504950495049506, 'natural_join4': 0.0049504950495049506, 'inner_join': 0.0594059405940594, 'anti_join': 0.034653465346534656, 'left_join': 0.0049504950495049506, 'union': 0.0049504950495049506, 'intersect': 0.01485148514851485, 'semi_join': 0.0049504950495049506, 'cross_join': 0.6633663366336634, 'filter': 0.15841584158415842, 'summarise': 0.034653465346534656, 'mutate': 0.0049504950495049506}
+[     1.709][MainProcess][DEBUG] {'natural_join': 0.0049504950495049506, 'natural_join3': 0.0049504950495049506, 'natural_join4': 0.0049504950495049506, 'inner_join': 0.0594059405940594, 'anti_join': 0.034653465346534656, 'left_join': 0.0049504950495049506, 'union': 0.0049504950495049506, 'intersect': 0.01485148514851485, 'semi_join': 0.0049504950495049506, 'cross_join': 0.6633663366336634, 'filter': 0.15841584158415842, 'summarise': 0.034653465346534656, 'mutate': 0.0049504950495049506}
+[     1.710][MainProcess][INFO] Building synthesizer...
+Traceback (most recent call last):
+  File "sequential.py", line 84, in <module>
+    main()
+  File "sequential.py", line 60, in main
+    squares_enumerator.main(args, specification, 0, configs[0], queue)
+  File "/home/vbernardo/SKEL/squares/squares_enumerator.py", line 65, in main
+    enumerator = BitEnumerator(spec, specification, loc=loc)
+  File "/home/vbernardo/SKEL/squares/tyrell/enumerator/bitenum.py", line 183, in __init__
+    self.sketch.fill_vars(self.spec, self.line_productions)
+  File "/home/vbernardo/SKEL/squares/dsl/sketch.py", line 576, in fill_vars
+    child = line.get_child(c)
+  File "/home/vbernardo/SKEL/squares/dsl/sketch.py", line 113, in get_child
+    return self.children[n]
+IndexError: list index out of range

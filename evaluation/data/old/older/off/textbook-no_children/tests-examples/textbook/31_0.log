@@ -1,0 +1,55 @@
+[     1.619][MainProcess][INFO] Parsing specification...
+[     1.624][MainProcess][INFO] File read
+[     1.625][MainProcess][DEBUG] Reading input files...
+[     1.632][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.636][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     1.640][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     1.644][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/31.out: ['string']
+[     1.644][MainProcess][INFO] Parsing sketch...
+[     1.645][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child(['??'], type=Table, var=[]),Child([1], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     1.645][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(["str_detect(aname, 'Boeing') | crusingrange <= 3000"], type=FilterCondition, var=[])])
+[     1.645][MainProcess][DEBUG] Sketch creation: Line(T3, root=['anti_join'], var=[], children=[Child([0], type=Line, var=[]),Child(['??'], type=Table, var=[]),Child(['crusingrange, salary'], type=Cols, var=[])])
+[     1.679][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 288, 'filter': 96}
+[     1.680][MainProcess][DEBUG] {'natural_join': 0.006036217303822937, 'natural_join3': 0.018108651911468814, 'natural_join4': 0.05432595573440644, 'inner_join': 0.4768611670020121, 'anti_join': 0.13279678068410464, 'left_join': 0.006036217303822937, 'union': 0.006036217303822937, 'intersect': 0.03621730382293763, 'semi_join': 0.006036217303822937, 'cross_join': 0.193158953722334, 'filter': 0.06438631790744467}
+[     1.680][MainProcess][DEBUG] {'natural_join': 0.006036217303822937, 'natural_join3': 0.018108651911468814, 'natural_join4': 0.05432595573440644, 'inner_join': 0.4768611670020121, 'anti_join': 0.13279678068410464, 'left_join': 0.006036217303822937, 'union': 0.006036217303822937, 'intersect': 0.03621730382293763, 'semi_join': 0.006036217303822937, 'cross_join': 0.193158953722334, 'filter': 0.06438631790744467}
+[     1.680][MainProcess][INFO] Building synthesizer...
+[     1.681][MainProcess][DEBUG] [Line(T1, root=['natural_join3'], var=[2], children=[Child(['??'], type=Table, var=[]),Child([1], type=Table, var=[184]),Child(['??'], type=Table, var=[]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(["str_detect(aname, 'Boeing') | crusingrange <= 3000"], type=FilterCondition, var=[164]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['anti_join'], var=[5], children=[Child([0], type=Line, var=[187]),Child(['??'], type=Table, var=[]),Child(['crusingrange, salary'], type=Cols, var=[36]),Child([None], type=None, var=[0])])]
+[     1.894][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 203 constraints
+[     1.908][MainProcess][DEBUG] Enumeration time: 0.2286980152130127
+[     1.954][MainProcess][DEBUG] Synthesis time: 0.04551815986633301
+[     1.954][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "str_detect(aname, 'Boeing') | crusingrange <= 3000"), anti_join(line0, line1, 'crusingrange,salary')]
+[     1.955][MainProcess][DEBUG] Solution found using process 0
+[     1.955][MainProcess][INFO] Statistics:
+[     1.956][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     1.956][MainProcess][INFO] 		Rejected: 0 (approx)
+[     1.956][MainProcess][INFO] 		Failed: 0 (approx)
+[     1.956][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     1.956][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     1.956][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     1.956][MainProcess][INFO] 	Total time spent in enumerator init: 0.228698 (approx)
+[     1.956][MainProcess][INFO] 	Total time spent in enumerator: 0.001091 (approx)
+[     1.956][MainProcess][INFO] 		Enumerated 916.387153 programs/s avg. (just enumeration time)
+[     1.956][MainProcess][INFO] 		Enumerated 0.682882 programs/s avg. (overall)
+[     1.956][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.041755 (approx)
+[     1.956][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     1.956][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "str_detect(aname, 'Boeing') | crusingrange <= 3000"), anti_join(line0, line1, 'crusingrange,salary')]
+[     1.956][MainProcess][INFO] Solution size: 3
+[     2.230][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_aircraft <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols("aid" = col_integer(),"aname" = col_character(),"crusingrange" = col_integer()))
+df_aircraft <- copy_to(con, df_aircraft)
+df_certified <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols("eid" = col_integer(),"aid" = col_integer()))
+df_certified <- copy_to(con, df_certified)
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+expected_output <- read_csv("tests-examples/textbook/tables/31.out", col_types = cols("ename" = col_character()))
+
+df4 <- inner_join(df_aircraft, df_certified, na_matches="never") %>% inner_join(df_employees, na_matches="never")
+df5 <- df4 %>% filter(str_detect(aname, 'Boeing') | crusingrange <= 3000)
+df6 <- anti_join(df4, df5, by=c('crusingrange','salary'), na_matches="never")
+out <- df6 %>% select(ename) %>% distinct() %>% arrange(ename)
+
+Failed to generate SQL query

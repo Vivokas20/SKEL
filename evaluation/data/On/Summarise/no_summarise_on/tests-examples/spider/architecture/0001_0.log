@@ -1,0 +1,58 @@
+[     2.218][MainProcess][INFO] Parsing specification...
+[     2.225][MainProcess][INFO] File read
+[     2.226][MainProcess][DEBUG] Reading input files...
+[     2.238][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/architect.csv: ['int64', 'string', 'string', 'string']
+[     2.243][MainProcess][WARNING] Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!
+[     2.243][MainProcess][WARNING] Replacing column "count(*)" in table tests-examples/spider/architecture/tables/0001.csv with count___
+[     2.244][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0001.csv: ['int64']
+[     2.244][MainProcess][INFO] Parsing sketch...
+[     2.244][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child([0], type=Table, var=[]),Child(["gender == 'female'"], type=FilterCondition, var=[])])
+[     2.244][MainProcess][DEBUG] Sketch creation: Line(T2, root=[None], var=[], children=[])
+[     2.331][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 118, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 1256, 'filter': 32, 'summarise': 22, 'mutate': 2}
+[     2.331][MainProcess][DEBUG] {'natural_join': 0.0006891798759476223, 'natural_join3': 0.0006891798759476223, 'natural_join4': 0.0006891798759476223, 'inner_join': 0.08132322536181943, 'anti_join': 0.007580978635423846, 'left_join': 0.0006891798759476223, 'union': 0.0006891798759476223, 'intersect': 0.0027567195037904893, 'semi_join': 0.0006891798759476223, 'cross_join': 0.8656099241902137, 'filter': 0.022053756030323914, 'summarise': 0.015161957270847692, 'mutate': 0.0013783597518952446}
+[     2.331][MainProcess][DEBUG] {'natural_join': 0.0006891798759476223, 'natural_join3': 0.0006891798759476223, 'natural_join4': 0.0006891798759476223, 'inner_join': 0.08132322536181943, 'anti_join': 0.007580978635423846, 'left_join': 0.0006891798759476223, 'union': 0.0006891798759476223, 'intersect': 0.0027567195037904893, 'semi_join': 0.0006891798759476223, 'cross_join': 0.8656099241902137, 'filter': 0.022053756030323914, 'summarise': 0.015161957270847692, 'mutate': 0.0013783597518952446}
+[     2.331][MainProcess][INFO] Building synthesizer...
+[     2.333][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child([0], type=Table, var=[1437]),Child(["gender == 'female'"], type=FilterCondition, var=[1403]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=[None], var=[], children=[])]
+[     3.479][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 178 constraints
+[     3.599][MainProcess][DEBUG] Enumeration time: 1.2681033611297607
+[     3.807][MainProcess][DEBUG] Synthesis time: 0.2080678939819336
+[     3.808][MainProcess][INFO] Solution found: [filter(input0, "gender == 'female'"), summarise(line0, 'n = n()', 'gender')]
+[     3.811][MainProcess][DEBUG] Solution found using process 0
+[     3.811][MainProcess][INFO] Statistics:
+[     3.811][MainProcess][INFO] 	Attempted programs: 4 (approx)
+[     3.811][MainProcess][INFO] 		Rejected: 3 (approx)
+[     3.811][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.811][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     3.811][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.811][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.811][MainProcess][INFO] 	Total time spent in enumerator init: 1.268103 (approx)
+[     3.811][MainProcess][INFO] 	Total time spent in enumerator: 0.015479 (approx)
+[     3.811][MainProcess][INFO] 		Enumerated 258.421121 programs/s avg. (just enumeration time)
+[     3.811][MainProcess][INFO] 		Enumerated 1.252601 programs/s avg. (overall)
+[     3.812][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.186373 (approx)
+[     3.812][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.005331 (approx)
+[     3.812][MainProcess][INFO] Solution found: [filter(input0, "gender == 'female'"), summarise(line0, 'n = n()', 'gender')]
+[     3.812][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_architect <- read_csv("tests-examples/spider/architecture/tables/architect.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"nationality" = col_character(),"gender" = col_character()))
+df_architect <- copy_to(con, df_architect)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0001.csv", col_types = cols("count(*)" = col_integer()))
+expected_output <- rename(expected_output, count___ = "count(*)")
+
+df6 <- df_architect %>% filter(gender == 'female')
+df7 <- df6 %>% group_by(gender) %>% summarise(n = n()) %>% ungroup()
+out <- df7 %>% select(count___ = n)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `n` AS `count___`
+FROM
+  (SELECT `gender`,
+          COUNT(*) AS `n`
+   FROM `df_architect`
+   WHERE (`gender` = 'female')
+   GROUP BY gender)

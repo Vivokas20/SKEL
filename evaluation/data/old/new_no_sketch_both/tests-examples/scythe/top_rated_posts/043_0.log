@@ -1,0 +1,65 @@
+[     2.317][MainProcess][INFO] Parsing specification...
+[     2.323][MainProcess][INFO] File read
+[     2.324][MainProcess][DEBUG] Reading input files...
+[     2.333][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i043.csv: ['string', 'string']
+[     2.339][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o043.csv: ['string', 'string']
+[     2.379][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 6, 'filter': 6, 'summarise': 4, 'mutate': 1}
+[     2.379][MainProcess][DEBUG] {'natural_join': 0.027777777777777776, 'natural_join3': 0.027777777777777776, 'natural_join4': 0.027777777777777776, 'inner_join': 0.19444444444444445, 'anti_join': 0.1111111111111111, 'left_join': 0.027777777777777776, 'union': 0.027777777777777776, 'intersect': 0.05555555555555555, 'semi_join': 0.027777777777777776, 'cross_join': 0.16666666666666666, 'filter': 0.16666666666666666, 'summarise': 0.1111111111111111, 'mutate': 0.027777777777777776}
+[     2.379][MainProcess][DEBUG] {'natural_join': 0.02777777777777778, 'natural_join3': 0.02777777777777778, 'natural_join4': 0.02777777777777778, 'inner_join': 0.19444444444444448, 'anti_join': 0.11111111111111112, 'left_join': 0.02777777777777778, 'union': 0.02777777777777778, 'intersect': 0.05555555555555556, 'semi_join': 0.02777777777777778, 'cross_join': 0.16666666666666669, 'filter': 0.16666666666666669, 'summarise': 0.11111111111111112, 'mutate': 0.02777777777777778}
+[     2.379][MainProcess][INFO] Building synthesizer...
+[     2.546][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 226 constraints
+[     2.559][MainProcess][DEBUG] Enumeration time: 0.17948317527770996
+[     3.427][MainProcess][DEBUG] Synthesis time: 0.8678498268127441
+[     3.427][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     3.683][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 386 constraints
+[     3.699][MainProcess][DEBUG] Enumeration time: 0.27185511589050293
+[     5.427][MainProcess][DEBUG] Synthesis time: 1.7270362377166748
+[     5.428][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'EmailAddress'), filter(line0, 'n > 1'), left_join(line1, input0)]
+[     5.430][MainProcess][DEBUG] Solution found using process 0
+[     5.431][MainProcess][INFO] Statistics:
+[     5.431][MainProcess][INFO] 	Attempted programs: 91 (approx)
+[     5.431][MainProcess][INFO] 		Rejected: 90 (approx)
+[     5.431][MainProcess][INFO] 		Failed: 0 (approx)
+[     5.431][MainProcess][INFO] 		Empty outputs: 36 (39.6%) (approx)
+[     5.431][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     5.431][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     5.431][MainProcess][INFO] 	Total time spent in enumerator init: 0.451338 (approx)
+[     5.432][MainProcess][INFO] 	Total time spent in enumerator: 0.213381 (approx)
+[     5.432][MainProcess][INFO] 		Enumerated 426.468060 programs/s avg. (just enumeration time)
+[     5.432][MainProcess][INFO] 		Enumerated 19.040689 programs/s avg. (overall)
+[     5.432][MainProcess][INFO] 	Total time spent in evaluation & testing: 2.299884 (approx)
+[     5.432][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.079924 (approx)
+[     5.432][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'EmailAddress'), filter(line0, 'n > 1'), left_join(line1, input0)]
+[     5.432][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i043 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i043.csv", col_types = cols("CustomerName" = col_character(),"EmailAddress" = col_character()))
+df_i043 <- copy_to(con, df_i043)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o043.csv", col_types = cols("CustomerName" = col_character(),"EmailAddress" = col_character()))
+
+df117 <- df_i043 %>% group_by(EmailAddress) %>% summarise(n = n()) %>% ungroup()
+df118 <- df117 %>% filter(n > 1)
+df119 <- left_join(df118, df_i043, na_matches="never")
+out <- df119 %>% select(CustomerName, EmailAddress) %>% arrange(CustomerName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT CustomerName,
+       EmailAddress
+FROM
+  (SELECT LHS.EmailAddress AS EmailAddress,
+          n,
+          CustomerName
+   FROM
+     (SELECT *
+      FROM
+        (SELECT EmailAddress,
+                COUNT(*) AS n
+         FROM df_i043
+         GROUP BY EmailAddress)
+      WHERE (n > 1.0)) AS LHS
+   LEFT JOIN df_i043 AS RHS ON (LHS.EmailAddress = RHS.EmailAddress))
+ORDER BY CustomerName

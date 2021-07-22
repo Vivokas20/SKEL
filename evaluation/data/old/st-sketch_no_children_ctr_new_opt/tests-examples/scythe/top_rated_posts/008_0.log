@@ -1,0 +1,50 @@
+[     2.243][MainProcess][INFO] Parsing specification...
+[     2.248][MainProcess][INFO] File read
+[     2.250][MainProcess][DEBUG] Reading input files...
+[     2.260][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i008_1.csv: ['int64', 'string', 'string']
+[     2.267][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i008_2.csv: ['string', 'int64', 'int64', 'string']
+[     2.273][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o008.csv: ['string', 'int64', 'string']
+[     2.274][MainProcess][INFO] Parsing sketch...
+[     2.274][MainProcess][DEBUG] Sketch creation: Line(T1, root=['left_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     2.274][MainProcess][DEBUG] Sketch creation: Line(T2, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.317][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 604, 'anti_join': 88, 'left_join': 4, 'union': 4, 'intersect': 24, 'semi_join': 4, 'cross_join': 8, 'summarise': 44, 'mutate': 2}
+[     2.317][MainProcess][DEBUG] {'natural_join': 0.0049382716049382715, 'natural_join3': 0.009876543209876543, 'natural_join4': 0.019753086419753086, 'inner_join': 0.745679012345679, 'anti_join': 0.10864197530864197, 'left_join': 0.0049382716049382715, 'union': 0.0049382716049382715, 'intersect': 0.02962962962962963, 'semi_join': 0.0049382716049382715, 'cross_join': 0.009876543209876543, 'summarise': 0.05432098765432099, 'mutate': 0.0024691358024691358}
+[     2.318][MainProcess][DEBUG] {'natural_join': 0.004938271604938271, 'natural_join3': 0.009876543209876541, 'natural_join4': 0.019753086419753083, 'inner_join': 0.7456790123456789, 'anti_join': 0.10864197530864195, 'left_join': 0.004938271604938271, 'union': 0.004938271604938271, 'intersect': 0.029629629629629624, 'semi_join': 0.004938271604938271, 'cross_join': 0.009876543209876541, 'summarise': 0.054320987654320974, 'mutate': 0.0024691358024691353}
+[     2.318][MainProcess][INFO] Building synthesizer...
+[     2.319][MainProcess][DEBUG] [Line(T1, root=['left_join'], var=[6], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['summarise'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])])]
+[     2.498][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 91 constraints
+[     2.515][MainProcess][DEBUG] Enumeration time: 0.19760775566101074
+[     2.680][MainProcess][DEBUG] Synthesis time: 0.1647658348083496
+[     2.681][MainProcess][INFO] Solution found: [left_join(input1, input0), summarise(line0, 'all$first', 'OrderGUID')]
+[     2.681][MainProcess][DEBUG] Solution found using process 0
+[     2.682][MainProcess][INFO] Statistics:
+[     2.682][MainProcess][INFO] 	Attempted programs: 6 (approx)
+[     2.682][MainProcess][INFO] 		Rejected: 5 (approx)
+[     2.682][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.682][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.682][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.682][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.682][MainProcess][INFO] 	Total time spent in enumerator init: 0.197608 (approx)
+[     2.682][MainProcess][INFO] 	Total time spent in enumerator: 0.011439 (approx)
+[     2.682][MainProcess][INFO] 		Enumerated 524.517476 programs/s avg. (just enumeration time)
+[     2.682][MainProcess][INFO] 		Enumerated 2.928461 programs/s avg. (overall)
+[     2.682][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.146914 (approx)
+[     2.683][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.005661 (approx)
+[     2.683][MainProcess][INFO] Solution found: [left_join(input1, input0), summarise(line0, 'all$first', 'OrderGUID')]
+[     2.683][MainProcess][INFO] Solution size: 2
+[     2.955][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i008_1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i008_1.csv", col_types = cols("OrderID" = col_integer(),"OrderGUID" = col_character(),"OrderNumber" = col_character()))
+df_i008_1 <- copy_to(con, df_i008_1)
+df_i008_2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i008_2.csv", col_types = cols("LineItemGUID" = col_character(),"OrderID" = col_integer(),"Quantity" = col_integer(),"Description" = col_character()))
+df_i008_2 <- copy_to(con, df_i008_2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o008.csv", col_types = cols("OrderNumber" = col_character(),"Quantity" = col_integer(),"Description" = col_character()))
+
+df8 <- left_join(df_i008_2, df_i008_1, na_matches="never")
+df9 <- df8 %>% group_by(OrderGUID) %>% summarise_all(first) %>% ungroup()
+out <- df9 %>% select(OrderNumber, Quantity, Description)
+
+Failed to generate SQL query

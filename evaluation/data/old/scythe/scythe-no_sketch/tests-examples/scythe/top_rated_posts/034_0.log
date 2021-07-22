@@ -1,0 +1,63 @@
+[     1.650][MainProcess][INFO] Parsing specification...
+[     1.654][MainProcess][INFO] File read
+[     1.655][MainProcess][DEBUG] Reading input files...
+[     1.662][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i034.csv: ['int64', 'string', 'timedelta64[ns]']
+[     1.668][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o034.csv: ['int64', 'string', 'timedelta64[ns]']
+[     1.709][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 12, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'summarise': 7, 'mutate': 1}
+[     1.709][MainProcess][DEBUG] {'natural_join': 0.0008726003490401396, 'natural_join3': 0.0008726003490401396, 'natural_join4': 0.0008726003490401396, 'inner_join': 0.010471204188481676, 'anti_join': 0.006108202443280977, 'left_join': 0.0008726003490401396, 'union': 0.0008726003490401396, 'intersect': 0.002617801047120419, 'semi_join': 0.0008726003490401396, 'cross_join': 0.9685863874345549, 'summarise': 0.006108202443280977, 'mutate': 0.0008726003490401396}
+[     1.709][MainProcess][DEBUG] {'natural_join': 0.0008726003490401396, 'natural_join3': 0.0008726003490401396, 'natural_join4': 0.0008726003490401396, 'inner_join': 0.010471204188481676, 'anti_join': 0.006108202443280977, 'left_join': 0.0008726003490401396, 'union': 0.0008726003490401396, 'intersect': 0.002617801047120419, 'semi_join': 0.0008726003490401396, 'cross_join': 0.9685863874345549, 'summarise': 0.006108202443280977, 'mutate': 0.0008726003490401396}
+[     1.709][MainProcess][INFO] Building synthesizer...
+[     2.251][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 87 constraints
+[     2.316][MainProcess][DEBUG] Enumeration time: 0.6069982051849365
+[     2.905][MainProcess][DEBUG] Synthesis time: 0.5883259773254395
+[     2.905][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     4.016][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 203 constraints
+[     4.153][MainProcess][DEBUG] Enumeration time: 1.247654676437378
+[   292.769][MainProcess][DEBUG] Synthesis time: 288.6136083602905
+[   292.769][MainProcess][INFO] Solution found: [summarise(input0, 'maxTime = max(Time)', 'Train'), inner_join(input0, line0, 'Time = maxTime')]
+[   292.776][MainProcess][DEBUG] Solution found using process 0
+[   292.776][MainProcess][INFO] Statistics:
+[   292.776][MainProcess][INFO] 	Attempted programs: 559 (approx)
+[   292.776][MainProcess][INFO] 		Rejected: 558 (approx)
+[   292.776][MainProcess][INFO] 		Failed: 0 (approx)
+[   292.776][MainProcess][INFO] 		Empty outputs: 114 (20.4%) (approx)
+[   292.776][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[   292.776][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[   292.776][MainProcess][INFO] 	Total time spent in enumerator init: 1.854653 (approx)
+[   292.776][MainProcess][INFO] 	Total time spent in enumerator: 1.955871 (approx)
+[   292.776][MainProcess][INFO] 		Enumerated 285.806155 programs/s avg. (just enumeration time)
+[   292.777][MainProcess][INFO] 		Enumerated 1.912839 programs/s avg. (overall)
+[   292.777][MainProcess][INFO] 	Total time spent in evaluation & testing: 286.983281 (approx)
+[   292.777][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.259537 (approx)
+[   292.777][MainProcess][INFO] Solution found: [summarise(input0, 'maxTime = max(Time)', 'Train'), inner_join(input0, line0, 'Time = maxTime')]
+[   292.777][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i034 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i034.csv", col_types = cols("Train" = col_integer(),"Dest" = col_character(),"Time" = col_time()))
+df_i034 <- copy_to(con, df_i034)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o034.csv", col_types = cols("Train" = col_integer(),"Dest" = col_character(),"Time" = col_time()))
+
+df573 <- df_i034 %>% group_by(Train) %>% summarise(maxTime = max(Time)) %>% ungroup()
+df574 <- inner_join(df_i034, df573, by=c('Time' = 'maxTime'), suffix = c('', '.other'), na_matches='never') %>% mutate(maxTime = Time)
+out <- df574 %>% select(Train, Dest, Time) %>% arrange(Train)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Train,
+       Dest,
+       TIME
+FROM
+  (SELECT LHS.Train AS Train,
+          Dest,
+          TIME,
+          RHS.Train AS Train_other
+   FROM df_i034 AS LHS
+   INNER JOIN
+     (SELECT Train,
+             MAX(TIME) AS maxTime
+      FROM df_i034
+      GROUP BY Train) AS RHS ON (LHS.Time = RHS.maxTime))
+ORDER BY Train

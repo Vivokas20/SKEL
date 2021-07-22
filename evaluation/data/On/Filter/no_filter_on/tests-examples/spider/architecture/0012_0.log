@@ -1,0 +1,50 @@
+[     6.185][MainProcess][INFO] Parsing specification...
+[     6.193][MainProcess][INFO] File read
+[     6.194][MainProcess][DEBUG] Reading input files...
+[     6.214][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/bridge.csv: ['int64', 'int64', 'string', 'string', 'Float64', 'Float64']
+[     6.220][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0012.csv: ['string']
+[     6.220][MainProcess][INFO] Parsing sketch...
+[     6.220][MainProcess][DEBUG] Sketch creation: Line(T1, root=[None], var=[], children=[])
+[     6.275][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 63, 'anti_join': 22, 'left_join': 1, 'union': 1, 'intersect': 6, 'semi_join': 1, 'cross_join': 2, 'filter': 12}
+[     6.275][MainProcess][DEBUG] {'natural_join': 0.009009009009009009, 'natural_join3': 0.009009009009009009, 'natural_join4': 0.009009009009009009, 'inner_join': 0.5675675675675675, 'anti_join': 0.1981981981981982, 'left_join': 0.009009009009009009, 'union': 0.009009009009009009, 'intersect': 0.05405405405405406, 'semi_join': 0.009009009009009009, 'cross_join': 0.018018018018018018, 'filter': 0.10810810810810811}
+[     6.276][MainProcess][DEBUG] {'natural_join': 0.009009009009009009, 'natural_join3': 0.009009009009009009, 'natural_join4': 0.009009009009009009, 'inner_join': 0.5675675675675675, 'anti_join': 0.1981981981981982, 'left_join': 0.009009009009009009, 'union': 0.009009009009009009, 'intersect': 0.05405405405405406, 'semi_join': 0.009009009009009009, 'cross_join': 0.018018018018018018, 'filter': 0.10810810810810811}
+[     6.276][MainProcess][INFO] Building synthesizer...
+[     6.278][MainProcess][DEBUG] [Line(T1, root=[None], var=[], children=[])]
+[     6.425][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 86 constraints
+[     6.438][MainProcess][DEBUG] Enumeration time: 0.16196417808532715
+[     6.532][MainProcess][DEBUG] Synthesis time: 0.09364867210388184
+[     6.532][MainProcess][INFO] Solution found: [filter(input0, "name == 'Kolob Arch' | name == 'Rainbow Bridge'")]
+[     6.533][MainProcess][DEBUG] Solution found using process 0
+[     6.533][MainProcess][INFO] Statistics:
+[     6.533][MainProcess][INFO] 	Attempted programs: 6 (approx)
+[     6.533][MainProcess][INFO] 		Rejected: 5 (approx)
+[     6.534][MainProcess][INFO] 		Failed: 0 (approx)
+[     6.534][MainProcess][INFO] 		Empty outputs: 1 (16.7%) (approx)
+[     6.534][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     6.534][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     6.534][MainProcess][INFO] 	Total time spent in enumerator init: 0.161964 (approx)
+[     6.534][MainProcess][INFO] 	Total time spent in enumerator: 0.008076 (approx)
+[     6.534][MainProcess][INFO] 		Enumerated 742.968351 programs/s avg. (just enumeration time)
+[     6.534][MainProcess][INFO] 		Enumerated 1.231005 programs/s avg. (overall)
+[     6.534][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.081382 (approx)
+[     6.534][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.003549 (approx)
+[     6.534][MainProcess][INFO] Solution found: [filter(input0, "name == 'Kolob Arch' | name == 'Rainbow Bridge'")]
+[     6.534][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_bridge <- read_csv("tests-examples/spider/architecture/tables/bridge.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"name" = col_character(),"location" = col_character(),"length_meters" = col_double(),"length_feet" = col_double()))
+df_bridge <- copy_to(con, df_bridge)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0012.csv", col_types = cols("location" = col_character()))
+
+df7 <- df_bridge %>% filter(name == 'Kolob Arch' | name == 'Rainbow Bridge')
+out <- df7 %>% select(location)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `location`
+FROM `df_bridge`
+WHERE (`name` = 'Kolob Arch'
+       OR `name` = 'Rainbow Bridge')

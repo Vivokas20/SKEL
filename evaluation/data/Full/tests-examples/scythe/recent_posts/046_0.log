@@ -1,0 +1,51 @@
+[     2.359][MainProcess][INFO] Parsing specification...
+[     2.365][MainProcess][INFO] File read
+[     2.366][MainProcess][DEBUG] Reading input files...
+[     2.376][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/046.csv: ['string', 'string', 'int64']
+[     2.383][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/046_o.csv: ['string', 'string', 'int64']
+[     2.383][MainProcess][INFO] Parsing sketch...
+[     2.383][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child([0], type=Table, var=[]),Child(["Type == 'Z01'"], type=FilterCondition, var=[])])
+[     2.383][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child([0], type=Table, var=[]),Child(["Type == 'Z01' | Type != 'Z09'"], type=FilterCondition, var=[])])
+[     2.383][MainProcess][DEBUG] Sketch creation: Line(T3, root=['anti_join'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Line, var=[]),Child(['ID'], type=Cols, var=[])])
+[     2.384][MainProcess][DEBUG] Sketch creation: Line(T4, root=['union'], var=[], children=[Child([0], type=Line, var=[]),Child([2], type=Line, var=[])])
+[     2.420][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 10, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 2, 'filter': 12}
+[     2.421][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.421][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.421][MainProcess][INFO] Building synthesizer...
+[     2.422][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child([0], type=Table, var=[46]),Child(["Type == 'Z01'"], type=FilterCondition, var=[34]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child([0], type=Table, var=[46]),Child(["Type == 'Z01' | Type != 'Z09'"], type=FilterCondition, var=[41]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['anti_join'], var=[5], children=[Child([0], type=Table, var=[46]),Child([1], type=Line, var=[49]),Child(['ID'], type=Cols, var=[16]),Child([None], type=None, var=[0])]), Line(T4, root=['union'], var=[7], children=[Child([0], type=Line, var=[48]),Child([2], type=Line, var=[50]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.582][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 217 constraints
+[     2.588][MainProcess][DEBUG] Enumeration time: 0.16740155220031738
+[     2.647][MainProcess][DEBUG] Synthesis time: 0.0581517219543457
+[     2.647][MainProcess][INFO] Solution found: [filter(input0, "Type == 'Z01'"), filter(input0, "Type == 'Z01' | Type != 'Z09'"), anti_join(input0, line1, 'ID'), union(line0, line2)]
+[     2.648][MainProcess][DEBUG] Solution found using process 0
+[     2.648][MainProcess][INFO] Statistics:
+[     2.648][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.648][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.648][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.648][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.648][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.648][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.648][MainProcess][INFO] 	Total time spent in enumerator init: 0.167402 (approx)
+[     2.649][MainProcess][INFO] 	Total time spent in enumerator: 0.001811 (approx)
+[     2.649][MainProcess][INFO] 		Enumerated 552.172722 programs/s avg. (just enumeration time)
+[     2.649][MainProcess][INFO] 		Enumerated 0.509617 programs/s avg. (overall)
+[     2.649][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.051660 (approx)
+[     2.649][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.649][MainProcess][INFO] Solution found: [filter(input0, "Type == 'Z01'"), filter(input0, "Type == 'Z01' | Type != 'Z09'"), anti_join(input0, line1, 'ID'), union(line0, line2)]
+[     2.649][MainProcess][INFO] Solution size: 4
+[     2.902][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_046 <- read_csv("tests-examples/scythe/recent_posts/tables/046.csv", col_types = cols("ID" = col_character(),"Type" = col_character(),"Value" = col_integer()))
+df_046 <- copy_to(con, df_046)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/046_o.csv", col_types = cols("Id" = col_character(),"Type" = col_character(),"Value" = col_integer()))
+
+df5 <- df_046 %>% filter(Type == 'Z01')
+df6 <- df_046 %>% filter(Type == 'Z01' | Type != 'Z09')
+df7 <- anti_join(df_046, df6, by=c('ID'), na_matches="never")
+df8 <- bind_rows(df5, df7)
+out <- df8 %>% select(Id = ID, Type, Value)
+
+Failed to generate SQL query

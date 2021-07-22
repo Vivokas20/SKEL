@@ -1,0 +1,83 @@
+[     6.330][MainProcess][INFO] Parsing specification...
+[     6.338][MainProcess][INFO] File read
+[     6.339][MainProcess][DEBUG] Reading input files...
+[     6.351][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     6.366][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/flights.txt: ['int64', 'string', 'string', 'int64', 'datetime64[ns]', 'datetime64[ns]', 'int64']
+[     6.371][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/26.out: ['string']
+[     6.371][MainProcess][INFO] Parsing sketch...
+[     6.371][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     6.372][MainProcess][DEBUG] Sketch creation: Line(T2, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     6.372][MainProcess][DEBUG] Sketch creation: Line(T3, root=['natural_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     6.372][MainProcess][DEBUG] Sketch creation: Line(T4, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     6.699][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 2956, 'anti_join': 224, 'left_join': 4, 'union': 4, 'intersect': 40, 'semi_join': 4, 'cross_join': 26200, 'filter': 3156, 'summarise': 448, 'mutate': 8}
+[     6.700][MainProcess][DEBUG] {'natural_join': 0.00012094823415578132, 'natural_join3': 0.00024189646831156264, 'natural_join4': 0.0004837929366231253, 'inner_join': 0.0893807450411224, 'anti_join': 0.006773101112723754, 'left_join': 0.00012094823415578132, 'union': 0.00012094823415578132, 'intersect': 0.0012094823415578133, 'semi_join': 0.00012094823415578132, 'cross_join': 0.7922109337203677, 'filter': 0.09542815674891146, 'summarise': 0.013546202225447508, 'mutate': 0.00024189646831156264}
+[     6.700][MainProcess][DEBUG] {'natural_join': 0.00012094823415578132, 'natural_join3': 0.00024189646831156264, 'natural_join4': 0.0004837929366231253, 'inner_join': 0.0893807450411224, 'anti_join': 0.006773101112723754, 'left_join': 0.00012094823415578132, 'union': 0.00012094823415578132, 'intersect': 0.0012094823415578133, 'semi_join': 0.00012094823415578132, 'cross_join': 0.7922109337203677, 'filter': 0.09542815674891146, 'summarise': 0.013546202225447508, 'mutate': 0.00024189646831156264}
+[     6.700][MainProcess][INFO] Building synthesizer...
+[     6.703][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])]), Line(T3, root=['natural_join'], var=[1], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T4, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[    16.240][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 220 constraints
+[    17.836][MainProcess][DEBUG] Enumeration time: 11.135680675506592
+[    43.040][MainProcess][DEBUG] Synthesis time: 25.203893899917603
+[    43.040][MainProcess][INFO] Solution found: [filter(input1, "destination == 'Los Angeles' & destination != 'Honolulu'"), summarise(input0, 'minsalary = min(salary)', 'ename,salary'), natural_join(line0, line1), filter(line2, 'minsalary <= price | minsalary > salary')]
+[    43.064][MainProcess][DEBUG] Solution found using process 0
+[    43.064][MainProcess][INFO] Statistics:
+[    43.064][MainProcess][INFO] 	Attempted programs: 833 (approx)
+[    43.064][MainProcess][INFO] 		Rejected: 832 (approx)
+[    43.064][MainProcess][INFO] 		Failed: 0 (approx)
+[    43.064][MainProcess][INFO] 		Empty outputs: 88 (10.6%) (approx)
+[    43.065][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    43.065][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    43.065][MainProcess][INFO] 	Total time spent in enumerator init: 11.135681 (approx)
+[    43.065][MainProcess][INFO] 	Total time spent in enumerator: 19.781746 (approx)
+[    43.065][MainProcess][INFO] 		Enumerated 42.109528 programs/s avg. (just enumeration time)
+[    43.065][MainProcess][INFO] 		Enumerated 20.142317 programs/s avg. (overall)
+[    43.065][MainProcess][INFO] 	Total time spent in evaluation & testing: 4.515898 (approx)
+[    43.065][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.896581 (approx)
+[    43.065][MainProcess][INFO] Solution found: [filter(input1, "destination == 'Los Angeles' & destination != 'Honolulu'"), summarise(input0, 'minsalary = min(salary)', 'ename,salary'), natural_join(line0, line1), filter(line2, 'minsalary <= price | minsalary > salary')]
+[    43.065][MainProcess][INFO] Solution size: 4
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+df_flights <- read_csv("tests-examples/textbook/tables/flights.txt", col_types = cols("flno" = col_integer(),"origin" = col_character(),"destination" = col_character(),"distance" = col_integer(),"departs" = col_character(),"arrives" = col_character(),"price" = col_integer()))
+df_flights$departs <- parse_datetime(df_flights$departs)
+df_flights$arrives <- parse_datetime(df_flights$arrives)
+df_flights <- copy_to(con, df_flights)
+expected_output <- read_csv("tests-examples/textbook/tables/26.out", col_types = cols("ename" = col_character()))
+
+df404 <- df_flights %>% filter(destination == 'Los Angeles' & destination != 'Honolulu')
+df405 <- df_employees %>% group_by(ename,salary) %>% summarise(minsalary = min(salary)) %>% ungroup()
+df406 <- full_join(df404, df405, by=character(), na_matches="never")
+df407 <- df406 %>% filter(minsalary <= price | minsalary > salary)
+out <- df407 %>% select(ename) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `ename`
+FROM
+  (SELECT `flno`,
+          `origin`,
+          `destination`,
+          `distance`,
+          `departs`,
+          `arrives`,
+          `price`,
+          `ename`,
+          `salary`,
+          `minsalary`
+   FROM
+     (SELECT *
+      FROM `df_flights`
+      WHERE (`destination` = 'Los Angeles'
+             AND `destination` != 'Honolulu')) AS LHS
+   CROSS JOIN
+     (SELECT ename,
+             salary,
+             MIN(salary) AS minsalary
+      FROM df_employees
+      GROUP BY ename,
+               salary) AS RHS)
+WHERE (minsalary <= price
+       OR minsalary > salary)

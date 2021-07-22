@@ -1,0 +1,74 @@
+[     4.387][MainProcess][INFO] Parsing specification...
+[     4.392][MainProcess][INFO] File read
+[     4.393][MainProcess][DEBUG] Reading input files...
+[     4.400][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     4.404][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     4.408][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     4.411][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/24.out: ['string']
+[     4.411][MainProcess][INFO] Parsing sketch...
+[     4.412][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     4.412][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     4.448][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 54, 'filter': 18}
+[     4.448][MainProcess][DEBUG] {'natural_join': 0.007633587786259542, 'natural_join3': 0.022900763358778626, 'natural_join4': 0.06870229007633588, 'inner_join': 0.6030534351145038, 'anti_join': 0.16793893129770993, 'left_join': 0.007633587786259542, 'union': 0.007633587786259542, 'intersect': 0.04580152671755725, 'semi_join': 0.007633587786259542, 'cross_join': 0.04580152671755725, 'filter': 0.015267175572519083}
+[     4.448][MainProcess][DEBUG] {'natural_join': 0.007633587786259542, 'natural_join3': 0.022900763358778626, 'natural_join4': 0.06870229007633588, 'inner_join': 0.6030534351145038, 'anti_join': 0.16793893129770993, 'left_join': 0.007633587786259542, 'union': 0.007633587786259542, 'intersect': 0.04580152671755725, 'semi_join': 0.007633587786259542, 'cross_join': 0.04580152671755725, 'filter': 0.015267175572519083}
+[     4.448][MainProcess][INFO] Building synthesizer...
+[     4.449][MainProcess][DEBUG] [Line(T1, root=['natural_join3'], var=[2], children=[Child(['??'], type=Table, var=[131, 132, 133]),Child(['??'], type=Table, var=[131, 132, 133]),Child(['??'], type=Table, var=[131, 132, 133]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[131, 132, 133]),Child(['??'], type=FilterCondition, var=[125, 126, 127, 128, 129, 130]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     4.497][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 80 constraints
+[     4.500][MainProcess][DEBUG] Enumeration time: 0.05155134201049805
+[     4.670][MainProcess][DEBUG] Synthesis time: 0.1704256534576416
+[     4.670][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, 'salary > 80000')]
+[     4.671][MainProcess][DEBUG] Solution found using process 0
+[     4.671][MainProcess][INFO] Statistics:
+[     4.671][MainProcess][INFO] 	Attempted programs: 14 (approx)
+[     4.671][MainProcess][INFO] 		Rejected: 6 (approx)
+[     4.671][MainProcess][INFO] 		Failed: 7 (approx)
+[     4.671][MainProcess][INFO] 		Empty outputs: 2 (14.3%) (approx)
+[     4.671][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     4.672][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     4.672][MainProcess][INFO] 	Total time spent in enumerator init: 0.051551 (approx)
+[     4.672][MainProcess][INFO] 	Total time spent in enumerator: 0.014727 (approx)
+[     4.672][MainProcess][INFO] 		Enumerated 950.627424 programs/s avg. (just enumeration time)
+[     4.672][MainProcess][INFO] 		Enumerated 4.208143 programs/s avg. (overall)
+[     4.672][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.059359 (approx)
+[     4.672][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.007150 (approx)
+[     4.672][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, 'salary > 80000')]
+[     4.672][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_aircraft <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols("aid" = col_integer(),"aname" = col_character(),"crusingrange" = col_integer()))
+df_aircraft <- copy_to(con, df_aircraft)
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+df_certified <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols("eid" = col_integer(),"aid" = col_integer()))
+df_certified <- copy_to(con, df_certified)
+expected_output <- read_csv("tests-examples/textbook/tables/24.out", col_types = cols("aname" = col_character()))
+
+df16 <- full_join(df_aircraft, df_employees, by=character(), na_matches="never") %>% inner_join(df_certified, na_matches="never")
+df17 <- df16 %>% filter(salary > 80000)
+out <- df17 %>% select(aname) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT aname
+FROM
+  (SELECT LHS.aid AS aid,
+          aname,
+          crusingrange,
+          LHS.eid AS eid,
+          ename,
+          salary
+   FROM
+     (SELECT aid,
+             aname,
+             crusingrange,
+             eid,
+             ename,
+             salary
+      FROM df_aircraft AS LHS
+      CROSS JOIN df_employees AS RHS) AS LHS
+   INNER JOIN df_certified AS RHS ON (LHS.aid = RHS.aid
+                                      AND LHS.eid = RHS.eid))
+WHERE (salary > 80000.0)

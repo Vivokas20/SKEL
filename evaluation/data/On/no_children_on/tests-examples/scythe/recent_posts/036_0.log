@@ -1,0 +1,52 @@
+[     2.375][MainProcess][INFO] Parsing specification...
+[     2.380][MainProcess][INFO] File read
+[     2.381][MainProcess][DEBUG] Reading input files...
+[     2.390][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/036_1.csv: ['int64', 'int64', 'int64']
+[     2.395][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/036_2.csv: ['int64', 'string']
+[     2.401][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/036_o.csv: ['int64', 'string']
+[     2.401][MainProcess][INFO] Parsing sketch...
+[     2.401][MainProcess][DEBUG] Sketch creation: Line(T1, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     2.402][MainProcess][DEBUG] Sketch creation: Line(T2, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     2.402][MainProcess][DEBUG] Sketch creation: Line(T3, root=['union'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     2.446][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 396, 'anti_join': 64, 'left_join': 4, 'union': 4, 'intersect': 20, 'semi_join': 4, 'cross_join': 0}
+[     2.446][MainProcess][DEBUG] {'natural_join': 0.007692307692307693, 'natural_join3': 0.015384615384615385, 'natural_join4': 0.03076923076923077, 'inner_join': 0.7615384615384615, 'anti_join': 0.12307692307692308, 'left_join': 0.007692307692307693, 'union': 0.007692307692307693, 'intersect': 0.038461538461538464, 'semi_join': 0.007692307692307693, 'cross_join': 0.0}
+[     2.446][MainProcess][DEBUG] {'natural_join': 0.007692307692307694, 'natural_join3': 0.015384615384615387, 'natural_join4': 0.030769230769230774, 'inner_join': 0.7615384615384616, 'anti_join': 0.1230769230769231, 'left_join': 0.007692307692307694, 'union': 0.007692307692307694, 'intersect': 0.03846153846153847, 'semi_join': 0.007692307692307694, 'cross_join': 0.0}
+[     2.446][MainProcess][INFO] Building synthesizer...
+[     2.448][MainProcess][DEBUG] [Line(T1, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[131, 132]),Child(['??'], type=Table, var=[131, 132]),Child(['??'], type=JoinCondition, var=[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130]),Child([None], type=None, var=[0])]), Line(T2, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[131, 132]),Child(['??'], type=Table, var=[131, 132]),Child(['??'], type=JoinCondition, var=[32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130]),Child([None], type=None, var=[0])]), Line(T3, root=['union'], var=[7], children=[Child(['??'], type=Table, var=[131, 132]),Child(['??'], type=Table, var=[131, 132]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.631][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 151 constraints
+[     2.644][MainProcess][DEBUG] Enumeration time: 0.1981823444366455
+[    15.753][MainProcess][DEBUG] Synthesis time: 13.108163356781006
+[    15.753][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'Sen2 = ID'), inner_join(input0, line0, 'Sen1 = ID,Sen2 = Sen1'), union(line1, line0)]
+[    15.780][MainProcess][DEBUG] Solution found using process 0
+[    15.781][MainProcess][INFO] Statistics:
+[    15.781][MainProcess][INFO] 	Attempted programs: 1182 (approx)
+[    15.781][MainProcess][INFO] 		Rejected: 1181 (approx)
+[    15.781][MainProcess][INFO] 		Failed: 0 (approx)
+[    15.781][MainProcess][INFO] 		Empty outputs: 151 (12.8%) (approx)
+[    15.781][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    15.781][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    15.781][MainProcess][INFO] 	Total time spent in enumerator init: 0.198182 (approx)
+[    15.781][MainProcess][INFO] 	Total time spent in enumerator: 3.734492 (approx)
+[    15.781][MainProcess][INFO] 		Enumerated 316.508947 programs/s avg. (just enumeration time)
+[    15.781][MainProcess][INFO] 		Enumerated 78.355942 programs/s avg. (overall)
+[    15.782][MainProcess][INFO] 	Total time spent in evaluation & testing: 8.378549 (approx)
+[    15.782][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.989490 (approx)
+[    15.782][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'Sen2 = ID'), inner_join(input0, line0, 'Sen1 = ID,Sen2 = Sen1'), union(line1, line0)]
+[    15.782][MainProcess][INFO] Solution size: 3
+[    16.184][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_036_1 <- read_csv("tests-examples/scythe/recent_posts/tables/036_1.csv", col_types = cols("Account" = col_integer(),"Sen1" = col_integer(),"Sen2" = col_integer()))
+df_036_1 <- copy_to(con, df_036_1)
+df_036_2 <- read_csv("tests-examples/scythe/recent_posts/tables/036_2.csv", col_types = cols("ID" = col_integer(),"Name" = col_character()))
+df_036_2 <- copy_to(con, df_036_2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/036_o.csv", col_types = cols("Account" = col_integer(),"Name" = col_character()))
+
+df986 <- inner_join(df_036_1, df_036_2, by=c('Sen2' = 'ID'), suffix = c('', '.other'), na_matches='never') %>% mutate(ID = Sen2)
+df987 <- inner_join(df_036_1, df986, by=c('Sen1' = 'ID','Sen2' = 'Sen1'), suffix = c('', '.other'), na_matches='never') %>% mutate(ID = Sen1) %>% mutate(Sen1 = Sen2)
+df988 <- bind_rows(df987, df986)
+out <- df988 %>% select(Account, Name)
+
+Failed to generate SQL query

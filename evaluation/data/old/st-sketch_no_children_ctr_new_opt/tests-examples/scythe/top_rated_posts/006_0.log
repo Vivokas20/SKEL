@@ -1,0 +1,62 @@
+[     6.348][MainProcess][INFO] Parsing specification...
+[     6.353][MainProcess][INFO] File read
+[     6.355][MainProcess][DEBUG] Reading input files...
+[     6.366][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i006.csv: ['int64', 'string', 'string']
+[     6.373][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o006.csv: ['int64', 'string', 'string']
+[     6.373][MainProcess][INFO] Parsing sketch...
+[     6.373][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     6.374][MainProcess][DEBUG] Sketch creation: Line(T2, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     6.450][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 22, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 14, 'mutate': 2}
+[     6.450][MainProcess][DEBUG] {'natural_join': 0.0008547008547008547, 'natural_join3': 0.0008547008547008547, 'natural_join4': 0.0008547008547008547, 'inner_join': 0.018803418803418803, 'anti_join': 0.005982905982905983, 'left_join': 0.0008547008547008547, 'union': 0.0008547008547008547, 'intersect': 0.002564102564102564, 'semi_join': 0.0008547008547008547, 'cross_join': 0.9487179487179487, 'filter': 0.005128205128205128, 'summarise': 0.011965811965811967, 'mutate': 0.0017094017094017094}
+[     6.450][MainProcess][DEBUG] {'natural_join': 0.0008547008547008548, 'natural_join3': 0.0008547008547008548, 'natural_join4': 0.0008547008547008548, 'inner_join': 0.018803418803418806, 'anti_join': 0.005982905982905984, 'left_join': 0.0008547008547008548, 'union': 0.0008547008547008548, 'intersect': 0.0025641025641025645, 'semi_join': 0.0008547008547008548, 'cross_join': 0.9487179487179488, 'filter': 0.005128205128205129, 'summarise': 0.011965811965811968, 'mutate': 0.0017094017094017096}
+[     6.450][MainProcess][INFO] Building synthesizer...
+[     6.452][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])]), Line(T2, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[]),Child([None], type=None, var=[0])])]
+[     7.293][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 95 constraints
+[     7.389][MainProcess][DEBUG] Enumeration time: 0.9387705326080322
+[     8.068][MainProcess][DEBUG] Synthesis time: 0.678898811340332
+[     8.068][MainProcess][INFO] Solution found: [summarise(input0, 'Id = max(Id)', 'Name'), inner_join(line0, input0, 'Id')]
+[     8.071][MainProcess][DEBUG] Solution found using process 0
+[     8.071][MainProcess][INFO] Statistics:
+[     8.071][MainProcess][INFO] 	Attempted programs: 38 (approx)
+[     8.071][MainProcess][INFO] 		Rejected: 37 (approx)
+[     8.071][MainProcess][INFO] 		Failed: 0 (approx)
+[     8.071][MainProcess][INFO] 		Empty outputs: 16 (42.1%) (approx)
+[     8.071][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     8.071][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     8.071][MainProcess][INFO] 	Total time spent in enumerator init: 0.938771 (approx)
+[     8.071][MainProcess][INFO] 	Total time spent in enumerator: 0.106231 (approx)
+[     8.071][MainProcess][INFO] 		Enumerated 357.711916 programs/s avg. (just enumeration time)
+[     8.071][MainProcess][INFO] 		Enumerated 6.005537 programs/s avg. (overall)
+[     8.071][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.545087 (approx)
+[     8.072][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.026604 (approx)
+[     8.072][MainProcess][INFO] Solution found: [summarise(input0, 'Id = max(Id)', 'Name'), inner_join(line0, input0, 'Id')]
+[     8.072][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i006 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i006.csv", col_types = cols("Id" = col_integer(),"Name" = col_character(),"Other_Columns" = col_character()))
+df_i006 <- copy_to(con, df_i006)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o006.csv", col_types = cols("Id" = col_integer(),"Name" = col_character(),"Other_Columns" = col_character()))
+
+df37 <- df_i006 %>% group_by(Name) %>% summarise(Id = max(Id)) %>% ungroup()
+df38 <- inner_join(df37, df_i006, by=c('Id'), suffix = c('', '.other'), na_matches='never')
+out <- df38 %>% select(Id, Name, Other_Columns)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Id,
+       Name,
+       Other_Columns
+FROM
+  (SELECT LHS.Name AS Name,
+          LHS.Id AS Id,
+          RHS.Name AS Name_other,
+          Other_Columns
+   FROM
+     (SELECT Name,
+             MAX(Id) AS Id
+      FROM df_i006
+      GROUP BY Name) AS LHS
+   INNER JOIN df_i006 AS RHS ON (LHS.Id = RHS.Id))

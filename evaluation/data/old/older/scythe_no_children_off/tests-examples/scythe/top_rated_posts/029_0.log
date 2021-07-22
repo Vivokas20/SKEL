@@ -1,0 +1,55 @@
+[     1.586][MainProcess][INFO] Parsing specification...
+[     1.589][MainProcess][INFO] File read
+[     1.590][MainProcess][DEBUG] Reading input files...
+[     1.596][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i029.csv: ['string', 'string']
+[     1.600][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o029.csv: ['string', 'string']
+[     1.600][MainProcess][INFO] Parsing sketch...
+[     1.600][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     1.629][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 21, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 130, 'unite': 4, 'summarise': 16, 'mutate': 4}
+[     1.629][MainProcess][DEBUG] {'natural_join': 0.0053475935828877, 'natural_join3': 0.0053475935828877, 'natural_join4': 0.0053475935828877, 'inner_join': 0.11229946524064172, 'anti_join': 0.0213903743315508, 'left_join': 0.0053475935828877, 'union': 0.0053475935828877, 'intersect': 0.0106951871657754, 'semi_join': 0.0053475935828877, 'cross_join': 0.6951871657754011, 'unite': 0.0213903743315508, 'summarise': 0.0855614973262032, 'mutate': 0.0213903743315508}
+[     1.629][MainProcess][DEBUG] {'natural_join': 0.005347593582887701, 'natural_join3': 0.005347593582887701, 'natural_join4': 0.005347593582887701, 'inner_join': 0.11229946524064173, 'anti_join': 0.021390374331550804, 'left_join': 0.005347593582887701, 'union': 0.005347593582887701, 'intersect': 0.010695187165775402, 'semi_join': 0.005347593582887701, 'cross_join': 0.6951871657754012, 'unite': 0.021390374331550804, 'summarise': 0.08556149732620322, 'mutate': 0.021390374331550804}
+[     1.629][MainProcess][INFO] Building synthesizer...
+[     1.630][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[175]),Child(['??'], type=SummariseCondition, var=[171, 172, 173, 174]),Child(['??'], type=Cols, var=[16, 17, 18, 19]),Child([None], type=None, var=[0])])]
+[     1.653][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 41 constraints
+[     1.655][MainProcess][DEBUG] Enumeration time: 0.02609848976135254
+[     1.729][MainProcess][DEBUG] Synthesis time: 0.07387185096740723
+[     1.729][MainProcess][INFO] Solution found: [summarise(input0, "concatPerson = string_agg(Person, ' ')", 'TicketID')]
+[     1.730][MainProcess][DEBUG] Solution found using process 0
+[     1.730][MainProcess][INFO] Statistics:
+[     1.730][MainProcess][INFO] 	Attempted programs: 6 (approx)
+[     1.730][MainProcess][INFO] 		Rejected: 5 (approx)
+[     1.730][MainProcess][INFO] 		Failed: 0 (approx)
+[     1.730][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     1.730][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     1.730][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     1.730][MainProcess][INFO] 	Total time spent in enumerator init: 0.026098 (approx)
+[     1.730][MainProcess][INFO] 	Total time spent in enumerator: 0.004194 (approx)
+[     1.730][MainProcess][INFO] 		Enumerated 1430.526603 programs/s avg. (just enumeration time)
+[     1.730][MainProcess][INFO] 		Enumerated 4.785475 programs/s avg. (overall)
+[     1.731][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.066700 (approx)
+[     1.731][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.002501 (approx)
+[     1.731][MainProcess][INFO] Solution found: [summarise(input0, "concatPerson = string_agg(Person, ' ')", 'TicketID')]
+[     1.731][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i029 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i029.csv", col_types = cols("TicketID" = col_character(),"Person" = col_character()))
+df_i029 <- copy_to(con, df_i029)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o029.csv", col_types = cols("TicketID" = col_character(),"concatPerson" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df7 <- df_i029 %>% group_by(TicketID) %>% summarise(concatPerson = string_agg(Person, ' ')) %>% ungroup()
+out <- df7 %>% select(TicketID, concatPerson)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `TicketID`,
+       `concatPerson`
+FROM
+  (SELECT `TicketID`,
+          string_agg(`Person`, ' ') AS concatPerson
+   FROM df_i029
+   GROUP BY TicketID)

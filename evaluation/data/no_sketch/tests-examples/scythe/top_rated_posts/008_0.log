@@ -1,0 +1,51 @@
+[     4.822][MainProcess][INFO] Parsing specification...
+[     4.828][MainProcess][INFO] File read
+[     4.829][MainProcess][DEBUG] Reading input files...
+[     4.845][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i008_1.csv: ['int64', 'string', 'string']
+[     4.852][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i008_2.csv: ['string', 'int64', 'int64', 'string']
+[     4.858][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o008.csv: ['string', 'int64', 'string']
+[     4.911][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 604, 'anti_join': 88, 'left_join': 4, 'union': 4, 'intersect': 24, 'semi_join': 4, 'cross_join': 8, 'summarise': 44, 'mutate': 2}
+[     4.912][MainProcess][DEBUG] {'natural_join': 0.0049382716049382715, 'natural_join3': 0.009876543209876543, 'natural_join4': 0.019753086419753086, 'inner_join': 0.745679012345679, 'anti_join': 0.10864197530864197, 'left_join': 0.0049382716049382715, 'union': 0.0049382716049382715, 'intersect': 0.02962962962962963, 'semi_join': 0.0049382716049382715, 'cross_join': 0.009876543209876543, 'summarise': 0.05432098765432099, 'mutate': 0.0024691358024691358}
+[     4.912][MainProcess][DEBUG] {'natural_join': 0.004938271604938271, 'natural_join3': 0.009876543209876541, 'natural_join4': 0.019753086419753083, 'inner_join': 0.7456790123456789, 'anti_join': 0.10864197530864195, 'left_join': 0.004938271604938271, 'union': 0.004938271604938271, 'intersect': 0.029629629629629624, 'semi_join': 0.004938271604938271, 'cross_join': 0.009876543209876541, 'summarise': 0.054320987654320974, 'mutate': 0.0024691358024691353}
+[     4.912][MainProcess][INFO] Building synthesizer...
+[     5.138][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 92 constraints
+[     5.157][MainProcess][DEBUG] There is no solution for current loc (1).
+[     5.157][MainProcess][DEBUG] Enumeration time: 0.24526095390319824
+[     5.158][MainProcess][DEBUG] Synthesis time: 0.00046253204345703125
+[     5.158][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     5.552][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 213 constraints
+[     5.588][MainProcess][DEBUG] Enumeration time: 0.42934226989746094
+[    12.737][MainProcess][DEBUG] Synthesis time: 7.1485888957977295
+[    12.737][MainProcess][INFO] Solution found: [inner_join(input1, input0, 'OrderID'), summarise(line0, 'all$first', 'Quantity')]
+[    12.741][MainProcess][DEBUG] Solution found using process 0
+[    12.741][MainProcess][INFO] Statistics:
+[    12.741][MainProcess][INFO] 	Attempted programs: 47 (approx)
+[    12.741][MainProcess][INFO] 		Rejected: 46 (approx)
+[    12.741][MainProcess][INFO] 		Failed: 0 (approx)
+[    12.741][MainProcess][INFO] 		Empty outputs: 29 (61.7%) (approx)
+[    12.741][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    12.742][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    12.742][MainProcess][INFO] 	Total time spent in enumerator init: 0.674603 (approx)
+[    12.742][MainProcess][INFO] 	Total time spent in enumerator: 0.117607 (approx)
+[    12.742][MainProcess][INFO] 		Enumerated 399.635680 programs/s avg. (just enumeration time)
+[    12.742][MainProcess][INFO] 		Enumerated 4.117157 programs/s avg. (overall)
+[    12.742][MainProcess][INFO] 	Total time spent in evaluation & testing: 6.998484 (approx)
+[    12.742][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.031351 (approx)
+[    12.742][MainProcess][INFO] Solution found: [inner_join(input1, input0, 'OrderID'), summarise(line0, 'all$first', 'Quantity')]
+[    12.742][MainProcess][INFO] Solution size: 2
+[    14.887][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i008_1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i008_1.csv", col_types = cols("OrderID" = col_integer(),"OrderGUID" = col_character(),"OrderNumber" = col_character()))
+df_i008_1 <- copy_to(con, df_i008_1)
+df_i008_2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i008_2.csv", col_types = cols("LineItemGUID" = col_character(),"OrderID" = col_integer(),"Quantity" = col_integer(),"Description" = col_character()))
+df_i008_2 <- copy_to(con, df_i008_2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o008.csv", col_types = cols("OrderNumber" = col_character(),"Quantity" = col_integer(),"Description" = col_character()))
+
+df58 <- inner_join(df_i008_2, df_i008_1, by=c('OrderID'), suffix = c('', '.other'), na_matches='never')
+df59 <- df58 %>% group_by(Quantity) %>% summarise_all(first) %>% ungroup()
+out <- df59 %>% select(OrderNumber, Quantity, Description) %>% arrange(OrderNumber)
+
+Failed to generate SQL query

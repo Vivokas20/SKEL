@@ -1,0 +1,50 @@
+[     2.292][MainProcess][INFO] Parsing specification...
+[     2.297][MainProcess][INFO] File read
+[     2.298][MainProcess][DEBUG] Reading input files...
+[     2.305][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i050.csv: ['int64', 'int64', 'int64', 'int64']
+[     2.310][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o050.csv: ['int64', 'int64', 'int64', 'int64', 'int64']
+[     3.108][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 210, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 26268, 'filter': 1116, 'summarise': 77, 'mutate': 7}
+[     3.109][MainProcess][DEBUG] {'natural_join': 3.610238636773891e-05, 'natural_join3': 3.610238636773891e-05, 'natural_join4': 3.610238636773891e-05, 'inner_join': 0.0075815011372251705, 'anti_join': 0.000397126250045128, 'left_join': 3.610238636773891e-05, 'union': 3.610238636773891e-05, 'intersect': 0.00014440954547095564, 'semi_join': 3.610238636773891e-05, 'cross_join': 0.9483374851077656, 'filter': 0.04029026318639662, 'summarise': 0.0027798837503158957, 'mutate': 0.00025271670457417233}
+[     3.110][MainProcess][DEBUG] {'natural_join': 3.610238636773891e-05, 'natural_join3': 3.610238636773891e-05, 'natural_join4': 3.610238636773891e-05, 'inner_join': 0.0075815011372251705, 'anti_join': 0.000397126250045128, 'left_join': 3.610238636773891e-05, 'union': 3.610238636773891e-05, 'intersect': 0.00014440954547095564, 'semi_join': 3.610238636773891e-05, 'cross_join': 0.9483374851077656, 'filter': 0.04029026318639662, 'summarise': 0.0027798837503158957, 'mutate': 0.00025271670457417233}
+[     3.110][MainProcess][INFO] Building synthesizer...
+[    22.024][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 97 constraints
+[    24.580][MainProcess][DEBUG] Enumeration time: 21.47031855583191
+[    24.669][MainProcess][DEBUG] Synthesis time: 0.08840727806091309
+[    24.669][MainProcess][INFO] Solution found: [mutate(input0, 'pmin_ = pmin(Col1,Col2,Col3)')]
+[    24.741][MainProcess][DEBUG] Solution found using process 0
+[    24.742][MainProcess][INFO] Statistics:
+[    24.742][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[    24.742][MainProcess][INFO] 		Rejected: 0 (approx)
+[    24.742][MainProcess][INFO] 		Failed: 0 (approx)
+[    24.742][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[    24.742][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    24.742][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    24.742][MainProcess][INFO] 	Total time spent in enumerator init: 21.470319 (approx)
+[    24.742][MainProcess][INFO] 	Total time spent in enumerator: 0.029401 (approx)
+[    24.742][MainProcess][INFO] 		Enumerated 34.012375 programs/s avg. (just enumeration time)
+[    24.742][MainProcess][INFO] 		Enumerated 0.041478 programs/s avg. (overall)
+[    24.742][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.057085 (approx)
+[    24.743][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[    24.743][MainProcess][INFO] Solution found: [mutate(input0, 'pmin_ = pmin(Col1,Col2,Col3)')]
+[    24.743][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i050 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i050.csv", col_types = cols("ID" = col_integer(),"Col1" = col_integer(),"Col2" = col_integer(),"Col3" = col_integer()))
+df_i050 <- copy_to(con, df_i050)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o050.csv", col_types = cols("ID" = col_integer(),"Col1" = col_integer(),"Col2" = col_integer(),"Col3" = col_integer(),"TheMin" = col_integer()))
+
+df2 <- df_i050 %>% mutate(pmin_ = pmin(Col1,Col2,Col3))
+out <- df2 %>% select(ID, Col1, Col2, Col3, TheMin = pmin_) %>% arrange(ID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ID,
+       Col1,
+       Col2,
+       Col3,
+       MIN(Col1, Col2, Col3) AS TheMin
+FROM df_i050
+ORDER BY ID

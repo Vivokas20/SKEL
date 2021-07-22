@@ -1,0 +1,79 @@
+[     6.134][MainProcess][INFO] Parsing specification...
+[     6.156][MainProcess][INFO] File read
+[     6.158][MainProcess][DEBUG] Reading input files...
+[     6.180][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/016_2.csv: ['string', 'datetime64[ns]']
+[     6.189][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/016_o.csv: ['string', 'datetime64[ns]', 'int64']
+[     6.189][MainProcess][INFO] Parsing sketch...
+[     6.190][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child([0], type=Table, var=[]),Child(['maxReportDt = max(ReportDt)'], type=SummariseCondition, var=[]),Child(['CustomerId'], type=Cols, var=[])])
+[     6.190][MainProcess][DEBUG] Sketch creation: Line(T2, root=['summarise'], var=[], children=[Child([0], type=Table, var=[]),Child(['n = n()'], type=SummariseCondition, var=[]),Child(['CustomerId'], type=Cols, var=[])])
+[     6.190][MainProcess][DEBUG] Sketch creation: Line(T3, root=['natural_join3'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[]),Child([1], type=Line, var=[])])
+[     6.190][MainProcess][DEBUG] Sketch creation: Line(T4, root=[None], var=[], children=[])
+[     6.309][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 9, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 1548, 'filter': 456, 'summarise': 8, 'mutate': 2}
+[     6.309][MainProcess][DEBUG] {'natural_join': 0.0004914004914004914, 'natural_join3': 0.0004914004914004914, 'natural_join4': 0.0004914004914004914, 'inner_join': 0.004422604422604423, 'anti_join': 0.0019656019656019656, 'left_join': 0.0004914004914004914, 'union': 0.0004914004914004914, 'intersect': 0.0009828009828009828, 'semi_join': 0.0004914004914004914, 'cross_join': 0.7606879606879607, 'filter': 0.22407862407862408, 'summarise': 0.003931203931203931, 'mutate': 0.0009828009828009828}
+[     6.309][MainProcess][DEBUG] {'natural_join': 0.0004914004914004914, 'natural_join3': 0.0004914004914004914, 'natural_join4': 0.0004914004914004914, 'inner_join': 0.004422604422604423, 'anti_join': 0.0019656019656019656, 'left_join': 0.0004914004914004914, 'union': 0.0004914004914004914, 'intersect': 0.0009828009828009828, 'semi_join': 0.0004914004914004914, 'cross_join': 0.7606879606879607, 'filter': 0.22407862407862408, 'summarise': 0.003931203931203931, 'mutate': 0.0009828009828009828}
+[     6.309][MainProcess][INFO] Building synthesizer...
+[     6.311][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child([0], type=Table, var=[2035]),Child(['maxReportDt = max(ReportDt)'], type=SummariseCondition, var=[2033]),Child(['CustomerId'], type=Cols, var=[17]),Child([None], type=None, var=[0])]), Line(T2, root=['summarise'], var=[12], children=[Child([0], type=Table, var=[2035]),Child(['n = n()'], type=SummariseCondition, var=[2034]),Child(['CustomerId'], type=Cols, var=[17]),Child([None], type=None, var=[0])]), Line(T3, root=['natural_join3'], var=[2], children=[Child([0], type=Table, var=[2035]),Child([0], type=Line, var=[2037]),Child([1], type=Line, var=[2038]),Child([None], type=None, var=[0])]), Line(T4, root=[None], var=[], children=[])]
+[     8.903][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 360 constraints
+[     9.572][MainProcess][DEBUG] Enumeration time: 3.262291431427002
+[     9.658][MainProcess][DEBUG] Synthesis time: 0.08571124076843262
+[     9.658][MainProcess][INFO] Solution found: [summarise(input0, 'maxReportDt = max(ReportDt)', 'CustomerId'), summarise(input0, 'n = n()', 'CustomerId'), natural_join3(input0, line0, line1), filter(line2, "n < 1 | maxReportDt > mdy('10/19/2016')")]
+[     9.667][MainProcess][DEBUG] Solution found using process 0
+[     9.667][MainProcess][INFO] Statistics:
+[     9.667][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     9.668][MainProcess][INFO] 		Rejected: 0 (approx)
+[     9.668][MainProcess][INFO] 		Failed: 0 (approx)
+[     9.668][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     9.668][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     9.668][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     9.668][MainProcess][INFO] 	Total time spent in enumerator init: 3.262291 (approx)
+[     9.668][MainProcess][INFO] 	Total time spent in enumerator: 0.003659 (approx)
+[     9.668][MainProcess][INFO] 		Enumerated 273.280167 programs/s avg. (just enumeration time)
+[     9.668][MainProcess][INFO] 		Enumerated 0.125065 programs/s avg. (overall)
+[     9.668][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.076846 (approx)
+[     9.668][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     9.668][MainProcess][INFO] Solution found: [summarise(input0, 'maxReportDt = max(ReportDt)', 'CustomerId'), summarise(input0, 'n = n()', 'CustomerId'), natural_join3(input0, line0, line1), filter(line2, "n < 1 | maxReportDt > mdy('10/19/2016')")]
+[     9.668][MainProcess][INFO] Solution size: 4
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_016_2 <- read_csv("tests-examples/scythe/recent_posts/tables/016_2.csv", col_types = cols("CustomerId" = col_character(),"ReportDt" = col_character()))
+df_016_2$ReportDt <- mdy(df_016_2$ReportDt)
+df_016_2 <- copy_to(con, df_016_2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/016_o.csv", col_types = cols("c1" = col_character(),"c2" = col_character(),"c3" = col_integer()))
+expected_output$c2 <- mdy(expected_output$c2)
+
+df5 <- df_016_2 %>% group_by(CustomerId) %>% summarise(maxReportDt = max(ReportDt)) %>% ungroup()
+df6 <- df_016_2 %>% group_by(CustomerId) %>% summarise(n = n()) %>% ungroup()
+df7 <- inner_join(df_016_2, df5, na_matches="never") %>% inner_join(df6, na_matches="never")
+df8 <- df7 %>% filter(n < 1 | maxReportDt > mdy('10/19/2016'))
+out <- df8 %>% select(c1 = CustomerId, c2 = maxReportDt, c3 = n) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `CustomerId` AS `c1`,
+                `maxReportDt` AS `c2`,
+                `n` AS `c3`
+FROM
+  (SELECT `LHS`.`CustomerId` AS `CustomerId`,
+          `ReportDt`,
+          `maxReportDt`,
+          `n`
+   FROM
+     (SELECT `LHS`.`CustomerId` AS `CustomerId`,
+             `ReportDt`,
+             `maxReportDt`
+      FROM `df_016_2` AS `LHS`
+      INNER JOIN
+        (SELECT `CustomerId`,
+                MAX(`ReportDt`) AS `maxReportDt`
+         FROM `df_016_2`
+         GROUP BY `CustomerId`) AS `RHS` ON (`LHS`.`CustomerId` = `RHS`.`CustomerId`)) AS `LHS`
+   INNER JOIN
+     (SELECT `CustomerId`,
+             COUNT(*) AS `n`
+      FROM `df_016_2`
+      GROUP BY `CustomerId`) AS `RHS` ON (`LHS`.`CustomerId` = `RHS`.`CustomerId`))
+WHERE (`n` < 1.0
+       OR `maxReportDt` > mdy('10/19/2016'))

@@ -1,0 +1,77 @@
+[     2.376][MainProcess][INFO] Parsing specification...
+[     2.384][MainProcess][INFO] File read
+[     2.385][MainProcess][DEBUG] Reading input files...
+[     2.395][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16-1.txt: ['string', 'string']
+[     2.401][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16-2.txt: ['string', 'string']
+[     2.407][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16-3.txt: ['string', 'string']
+[     2.413][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16.out: ['string']
+[     2.461][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 738, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 18, 'filter': 6}
+[     2.461][MainProcess][DEBUG] {'natural_join': 0.008645533141210375, 'natural_join3': 0.025936599423631124, 'natural_join4': 0.07780979827089338, 'inner_join': 0.7089337175792507, 'anti_join': 0.09510086455331412, 'left_join': 0.008645533141210375, 'union': 0.008645533141210375, 'intersect': 0.0345821325648415, 'semi_join': 0.008645533141210375, 'cross_join': 0.01729106628242075, 'filter': 0.005763688760806916}
+[     2.461][MainProcess][DEBUG] {'natural_join': 0.008645533141210374, 'natural_join3': 0.025936599423631117, 'natural_join4': 0.07780979827089336, 'inner_join': 0.7089337175792506, 'anti_join': 0.0951008645533141, 'left_join': 0.008645533141210374, 'union': 0.008645533141210374, 'intersect': 0.034582132564841495, 'semi_join': 0.008645533141210374, 'cross_join': 0.017291066282420747, 'filter': 0.005763688760806915}
+[     2.462][MainProcess][INFO] Building synthesizer...
+[     2.613][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 87 constraints
+[     2.624][MainProcess][DEBUG] There is no solution for current loc (1).
+[     2.624][MainProcess][DEBUG] Enumeration time: 0.16212797164916992
+[     2.624][MainProcess][DEBUG] Synthesis time: 0.00040721893310546875
+[     2.624][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     2.895][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 201 constraints
+[     2.915][MainProcess][DEBUG] Enumeration time: 0.29002857208251953
+[     3.175][MainProcess][DEBUG] Synthesis time: 0.2602806091308594
+[     3.176][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     3.605][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 345 constraints
+[     3.635][MainProcess][DEBUG] Enumeration time: 0.4590420722961426
+[    27.515][MainProcess][DEBUG] Synthesis time: 23.879099130630493
+[    27.515][MainProcess][INFO] Solution found: [filter(input2, "S_name != 'AWS'"), left_join(line0, input0), anti_join(input1, line1, 'P_id')]
+[    27.524][MainProcess][DEBUG] Solution found using process 0
+[    27.524][MainProcess][INFO] Statistics:
+[    27.524][MainProcess][INFO] 	Attempted programs: 1129 (approx)
+[    27.524][MainProcess][INFO] 		Rejected: 1128 (approx)
+[    27.524][MainProcess][INFO] 		Failed: 0 (approx)
+[    27.524][MainProcess][INFO] 		Empty outputs: 717 (63.5%) (approx)
+[    27.524][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    27.524][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    27.524][MainProcess][INFO] 	Total time spent in enumerator init: 0.911199 (approx)
+[    27.524][MainProcess][INFO] 	Total time spent in enumerator: 5.686717 (approx)
+[    27.525][MainProcess][INFO] 		Enumerated 198.532842 programs/s avg. (just enumeration time)
+[    27.525][MainProcess][INFO] 		Enumerated 42.078232 programs/s avg. (overall)
+[    27.525][MainProcess][INFO] 	Total time spent in evaluation & testing: 17.440311 (approx)
+[    27.525][MainProcess][INFO] 	Total time spent blocking cubes/programs: 1.005209 (approx)
+[    27.525][MainProcess][INFO] Solution found: [filter(input2, "S_name != 'AWS'"), left_join(line0, input0), anti_join(input1, line1, 'P_id')]
+[    27.525][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_16_1 <- read_csv("tests-examples/textbook/tables/16-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_16_1 <- copy_to(con, df_16_1)
+df_16_2 <- read_csv("tests-examples/textbook/tables/16-2.txt", col_types = cols("P_id" = col_character(),"P_name" = col_character()))
+df_16_2 <- copy_to(con, df_16_2)
+df_16_3 <- read_csv("tests-examples/textbook/tables/16-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_16_3 <- copy_to(con, df_16_3)
+expected_output <- read_csv("tests-examples/textbook/tables/16.out", col_types = cols("P_name" = col_character()))
+
+df1305 <- df_16_3 %>% filter(S_name != 'AWS')
+df1306 <- left_join(df1305, df_16_1, na_matches="never")
+df1307 <- anti_join(df_16_2, df1306, by=c('P_id'), na_matches="never")
+out <- df1307 %>% select(P_name) %>% arrange(P_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `P_name`
+FROM
+  (SELECT *
+   FROM `df_16_2` AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT `LHS`.`S_key` AS `S_key`,
+                  `S_name`,
+                  `P_id`
+           FROM
+             (SELECT *
+              FROM `df_16_3`
+              WHERE (`S_name` != 'AWS')) AS LHS
+           LEFT JOIN df_16_1 AS RHS ON (LHS.S_key = RHS.S_key)) AS RHS
+        WHERE (LHS.P_id = RHS.P_id) ))
+ORDER BY P_name

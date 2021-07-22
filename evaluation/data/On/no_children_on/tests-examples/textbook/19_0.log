@@ -1,0 +1,79 @@
+[     2.322][MainProcess][INFO] Parsing specification...
+[     2.327][MainProcess][INFO] File read
+[     2.328][MainProcess][DEBUG] Reading input files...
+[     2.337][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19-1.txt: ['string', 'string']
+[     2.342][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19-2.txt: ['string', 'string']
+[     2.348][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19-3.txt: ['string', 'string']
+[     2.353][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19.out: ['string']
+[     2.353][MainProcess][INFO] Parsing sketch...
+[     2.353][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     2.353][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     2.353][MainProcess][DEBUG] Sketch creation: Line(T3, root=['anti_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.353][MainProcess][DEBUG] Sketch creation: Line(T4, root=['left_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     2.402][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 738, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 18, 'filter': 6}
+[     2.402][MainProcess][DEBUG] {'natural_join': 0.008645533141210375, 'natural_join3': 0.025936599423631124, 'natural_join4': 0.07780979827089338, 'inner_join': 0.7089337175792507, 'anti_join': 0.09510086455331412, 'left_join': 0.008645533141210375, 'union': 0.008645533141210375, 'intersect': 0.0345821325648415, 'semi_join': 0.008645533141210375, 'cross_join': 0.01729106628242075, 'filter': 0.005763688760806916}
+[     2.402][MainProcess][DEBUG] {'natural_join': 0.008645533141210374, 'natural_join3': 0.025936599423631117, 'natural_join4': 0.07780979827089336, 'inner_join': 0.7089337175792506, 'anti_join': 0.0951008645533141, 'left_join': 0.008645533141210374, 'union': 0.008645533141210374, 'intersect': 0.034582132564841495, 'semi_join': 0.008645533141210374, 'cross_join': 0.017291066282420747, 'filter': 0.005763688760806915}
+[     2.402][MainProcess][INFO] Building synthesizer...
+[     2.404][MainProcess][DEBUG] [Line(T1, root=['natural_join'], var=[1], children=[Child(['??'], type=Table, var=[113, 114, 115]),Child(['??'], type=Table, var=[113, 114, 115]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[113, 114, 115]),Child(['??'], type=FilterCondition, var=[111, 112]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['anti_join'], var=[5], children=[Child(['??'], type=Table, var=[113, 114, 115]),Child(['??'], type=Table, var=[113, 114, 115]),Child(['??'], type=Cols, var=[16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]),Child([None], type=None, var=[0])]), Line(T4, root=['left_join'], var=[6], children=[Child(['??'], type=Table, var=[113, 114, 115]),Child(['??'], type=Table, var=[113, 114, 115]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.577][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 226 constraints
+[     2.586][MainProcess][DEBUG] Enumeration time: 0.18311333656311035
+[    19.371][MainProcess][DEBUG] Synthesis time: 16.78504467010498
+[    19.371][MainProcess][INFO] Solution found: [natural_join(input0, input1), filter(line0, "color != 'red'"), anti_join(input2, line1, 'S_key'), left_join(line2, input0)]
+[    19.389][MainProcess][DEBUG] Solution found using process 0
+[    19.389][MainProcess][INFO] Statistics:
+[    19.389][MainProcess][INFO] 	Attempted programs: 1371 (approx)
+[    19.389][MainProcess][INFO] 		Rejected: 1370 (approx)
+[    19.389][MainProcess][INFO] 		Failed: 0 (approx)
+[    19.390][MainProcess][INFO] 		Empty outputs: 29 (2.1%) (approx)
+[    19.390][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    19.390][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    19.390][MainProcess][INFO] 	Total time spent in enumerator init: 0.183113 (approx)
+[    19.390][MainProcess][INFO] 	Total time spent in enumerator: 5.267741 (approx)
+[    19.390][MainProcess][INFO] 		Enumerated 260.263379 programs/s avg. (just enumeration time)
+[    19.390][MainProcess][INFO] 		Enumerated 73.128512 programs/s avg. (overall)
+[    19.390][MainProcess][INFO] 	Total time spent in evaluation & testing: 10.078585 (approx)
+[    19.390][MainProcess][INFO] 	Total time spent blocking cubes/programs: 1.431947 (approx)
+[    19.390][MainProcess][INFO] Solution found: [natural_join(input0, input1), filter(line0, "color != 'red'"), anti_join(input2, line1, 'S_key'), left_join(line2, input0)]
+[    19.390][MainProcess][INFO] Solution size: 4
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_19_1 <- read_csv("tests-examples/textbook/tables/19-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_19_1 <- copy_to(con, df_19_1)
+df_19_2 <- read_csv("tests-examples/textbook/tables/19-2.txt", col_types = cols("P_id" = col_character(),"color" = col_character()))
+df_19_2 <- copy_to(con, df_19_2)
+df_19_3 <- read_csv("tests-examples/textbook/tables/19-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_19_3 <- copy_to(con, df_19_3)
+expected_output <- read_csv("tests-examples/textbook/tables/19.out", col_types = cols("S_name" = col_character()))
+
+df925 <- inner_join(df_19_1, df_19_2, na_matches="never")
+df926 <- df925 %>% filter(color != 'red')
+df927 <- anti_join(df_19_3, df926, by=c('S_key'), na_matches="never")
+df928 <- left_join(df927, df_19_1, na_matches="never")
+out <- df928 %>% select(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `S_name`
+FROM
+  (SELECT `LHS`.`S_key` AS `S_key`,
+          `S_name`,
+          `P_id`
+   FROM
+     (SELECT *
+      FROM `df_19_3` AS `LHS`
+      WHERE NOT EXISTS
+          (SELECT 1
+           FROM
+             (SELECT *
+              FROM
+                (SELECT `S_key`,
+                        `LHS`.`P_id` AS `P_id`,
+                        `color`
+                 FROM `df_19_1` AS `LHS`
+                 INNER JOIN `df_19_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`))
+              WHERE (`color` != 'red')) AS RHS
+           WHERE (LHS.S_key = RHS.S_key) )) AS LHS
+   LEFT JOIN df_19_1 AS RHS ON (LHS.S_key = RHS.S_key))

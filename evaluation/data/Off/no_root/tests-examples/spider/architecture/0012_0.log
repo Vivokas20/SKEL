@@ -1,0 +1,50 @@
+[     2.363][MainProcess][INFO] Parsing specification...
+[     2.368][MainProcess][INFO] File read
+[     2.369][MainProcess][DEBUG] Reading input files...
+[     2.378][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/bridge.csv: ['int64', 'int64', 'string', 'string', 'Float64', 'Float64']
+[     2.383][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0012.csv: ['string']
+[     2.383][MainProcess][INFO] Parsing sketch...
+[     2.384][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(["name == 'Kolob Arch' | name == 'Rainbow Bridge'"], type=Unknown, var=[])])
+[     2.420][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 63, 'anti_join': 22, 'left_join': 1, 'union': 1, 'intersect': 6, 'semi_join': 1, 'cross_join': 2, 'filter': 12}
+[     2.421][MainProcess][DEBUG] {'natural_join': 0.009009009009009009, 'natural_join3': 0.009009009009009009, 'natural_join4': 0.009009009009009009, 'inner_join': 0.5675675675675675, 'anti_join': 0.1981981981981982, 'left_join': 0.009009009009009009, 'union': 0.009009009009009009, 'intersect': 0.05405405405405406, 'semi_join': 0.009009009009009009, 'cross_join': 0.018018018018018018, 'filter': 0.10810810810810811}
+[     2.421][MainProcess][DEBUG] {'natural_join': 0.009009009009009009, 'natural_join3': 0.009009009009009009, 'natural_join4': 0.009009009009009009, 'inner_join': 0.5675675675675675, 'anti_join': 0.1981981981981982, 'left_join': 0.009009009009009009, 'union': 0.009009009009009009, 'intersect': 0.05405405405405406, 'semi_join': 0.009009009009009009, 'cross_join': 0.018018018018018018, 'filter': 0.10810810810810811}
+[     2.421][MainProcess][INFO] Building synthesizer...
+[     2.422][MainProcess][DEBUG] [Line(T1, root=['??'], var=[1, 6, 7, 9, 11], children=[Child([0], type=Table, var=[[117], [110]]),Child(["name == 'Kolob Arch' | name == 'Rainbow Bridge'"], type=Unknown, var=[[117], [110]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.466][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 62 constraints
+[     2.470][MainProcess][DEBUG] Enumeration time: 0.049257755279541016
+[     2.508][MainProcess][DEBUG] Synthesis time: 0.0375211238861084
+[     2.508][MainProcess][INFO] Solution found: [filter(input0, "name == 'Kolob Arch' | name == 'Rainbow Bridge'")]
+[     2.509][MainProcess][DEBUG] Solution found using process 0
+[     2.509][MainProcess][INFO] Statistics:
+[     2.509][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.509][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.509][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.509][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.509][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.509][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.509][MainProcess][INFO] 	Total time spent in enumerator init: 0.049258 (approx)
+[     2.509][MainProcess][INFO] 	Total time spent in enumerator: 0.000655 (approx)
+[     2.509][MainProcess][INFO] 		Enumerated 1526.867128 programs/s avg. (just enumeration time)
+[     2.510][MainProcess][INFO] 		Enumerated 0.550209 programs/s avg. (overall)
+[     2.510][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.035049 (approx)
+[     2.510][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.510][MainProcess][INFO] Solution found: [filter(input0, "name == 'Kolob Arch' | name == 'Rainbow Bridge'")]
+[     2.510][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_bridge <- read_csv("tests-examples/spider/architecture/tables/bridge.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"name" = col_character(),"location" = col_character(),"length_meters" = col_double(),"length_feet" = col_double()))
+df_bridge <- copy_to(con, df_bridge)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0012.csv", col_types = cols("location" = col_character()))
+
+df2 <- df_bridge %>% filter(name == 'Kolob Arch' | name == 'Rainbow Bridge')
+out <- df2 %>% select(location)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `location`
+FROM `df_bridge`
+WHERE (`name` = 'Kolob Arch'
+       OR `name` = 'Rainbow Bridge')

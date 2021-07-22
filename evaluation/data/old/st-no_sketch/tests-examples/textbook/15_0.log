@@ -1,0 +1,87 @@
+[     2.355][MainProcess][INFO] Parsing specification...
+[     2.361][MainProcess][INFO] File read
+[     2.362][MainProcess][DEBUG] Reading input files...
+[     2.371][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15-1.txt: ['string', 'string']
+[     2.377][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15-2.txt: ['string', 'string']
+[     2.383][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15-3.txt: ['string', 'string']
+[     2.388][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/15.out: ['string']
+[     2.438][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 846, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 288, 'filter': 36, 'summarise': 33, 'mutate': 3}
+[     2.439][MainProcess][DEBUG] {'natural_join': 0.006060606060606061, 'natural_join3': 0.01818181818181818, 'natural_join4': 0.05454545454545454, 'inner_join': 0.5696969696969697, 'anti_join': 0.06666666666666667, 'left_join': 0.006060606060606061, 'union': 0.006060606060606061, 'intersect': 0.024242424242424242, 'semi_join': 0.006060606060606061, 'cross_join': 0.19393939393939394, 'filter': 0.024242424242424242, 'summarise': 0.022222222222222223, 'mutate': 0.00202020202020202}
+[     2.439][MainProcess][DEBUG] {'natural_join': 0.006060606060606059, 'natural_join3': 0.018181818181818177, 'natural_join4': 0.05454545454545453, 'inner_join': 0.5696969696969696, 'anti_join': 0.06666666666666665, 'left_join': 0.006060606060606059, 'union': 0.006060606060606059, 'intersect': 0.024242424242424235, 'semi_join': 0.006060606060606059, 'cross_join': 0.19393939393939388, 'filter': 0.024242424242424235, 'summarise': 0.02222222222222222, 'mutate': 0.0020202020202020198}
+[     2.439][MainProcess][INFO] Building synthesizer...
+[     2.828][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 220 constraints
+[     2.899][MainProcess][DEBUG] There is no solution for current loc (2).
+[     2.899][MainProcess][DEBUG] Enumeration time: 0.46051716804504395
+[     2.900][MainProcess][DEBUG] Synthesis time: 0.0003800392150878906
+[     2.900][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     3.475][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 375 constraints
+[     3.610][MainProcess][DEBUG] Enumeration time: 0.7098696231842041
+[     4.881][MainProcess][DEBUG] Synthesis time: 1.2694151401519775
+[     4.882][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), summarise(line0, 'n = n()', 'S_name,color'), filter(line1, "color == 'red' & n == max(n)")]
+[     4.886][MainProcess][DEBUG] Solution found using process 0
+[     4.886][MainProcess][INFO] Statistics:
+[     4.886][MainProcess][INFO] 	Attempted programs: 35 (approx)
+[     4.886][MainProcess][INFO] 		Rejected: 34 (approx)
+[     4.886][MainProcess][INFO] 		Failed: 0 (approx)
+[     4.886][MainProcess][INFO] 		Empty outputs: 12 (34.3%) (approx)
+[     4.886][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     4.886][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     4.886][MainProcess][INFO] 	Total time spent in enumerator init: 1.170387 (approx)
+[     4.887][MainProcess][INFO] 	Total time spent in enumerator: 0.108615 (approx)
+[     4.887][MainProcess][INFO] 		Enumerated 322.240041 programs/s avg. (just enumeration time)
+[     4.887][MainProcess][INFO] 		Enumerated 8.335920 programs/s avg. (overall)
+[     4.887][MainProcess][INFO] 	Total time spent in evaluation & testing: 1.121886 (approx)
+[     4.887][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.037690 (approx)
+[     4.887][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), summarise(line0, 'n = n()', 'S_name,color'), filter(line1, "color == 'red' & n == max(n)")]
+[     4.887][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_15_1 <- read_csv("tests-examples/textbook/tables/15-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_15_1 <- copy_to(con, df_15_1)
+df_15_2 <- read_csv("tests-examples/textbook/tables/15-2.txt", col_types = cols("P_id" = col_character(),"color" = col_character()))
+df_15_2 <- copy_to(con, df_15_2)
+df_15_3 <- read_csv("tests-examples/textbook/tables/15-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_15_3 <- copy_to(con, df_15_3)
+expected_output <- read_csv("tests-examples/textbook/tables/15.out", col_types = cols("S_name" = col_character()))
+
+df56 <- inner_join(df_15_1, df_15_2, na_matches="never") %>% inner_join(df_15_3, na_matches="never")
+df57 <- df56 %>% group_by(S_name,color) %>% summarise(n = n()) %>% ungroup()
+df58 <- df57 %>% filter(color == 'red' & n == max(n))
+out <- df58 %>% select(S_name) %>% arrange(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `S_name`
+FROM
+  (SELECT `S_name`,
+          `color`,
+          `n`
+   FROM
+     (SELECT `S_name`,
+             `color`,
+             `n`,
+             MAX(`n`) OVER () AS `q01`
+      FROM
+        (SELECT `S_name`,
+                `color`,
+                COUNT(*) AS `n`
+         FROM
+           (SELECT `LHS`.`S_key` AS `S_key`,
+                   `P_id`,
+                   `color`,
+                   `S_name`
+            FROM
+              (SELECT `S_key`,
+                      `LHS`.`P_id` AS `P_id`,
+                      `color`
+               FROM `df_15_1` AS `LHS`
+               INNER JOIN `df_15_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+            INNER JOIN `df_15_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`))
+         GROUP BY `S_name`,
+                  `color`))
+   WHERE (`color` = 'red'
+          AND n = q01))
+ORDER BY S_name

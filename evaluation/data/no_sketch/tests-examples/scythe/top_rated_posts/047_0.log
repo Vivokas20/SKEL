@@ -1,0 +1,15 @@
+[     2.287][MainProcess][INFO] Parsing specification...
+[     2.291][MainProcess][INFO] File read
+[     2.292][MainProcess][DEBUG] Reading input files...
+[     2.300][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i047.csv: ['int64', 'int64', 'int64', 'string']
+[     2.305][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o047.csv: ['int64', 'int64', 'int64', 'string']
+[     2.365][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 94, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 22, 'mutate': 2}
+[     2.365][MainProcess][DEBUG] {'natural_join': 0.0007968127490039841, 'natural_join3': 0.0007968127490039841, 'natural_join4': 0.0007968127490039841, 'inner_join': 0.0749003984063745, 'anti_join': 0.008764940239043825, 'left_join': 0.0007968127490039841, 'union': 0.0007968127490039841, 'intersect': 0.0031872509960159364, 'semi_join': 0.0007968127490039841, 'cross_join': 0.8844621513944223, 'filter': 0.004780876494023904, 'summarise': 0.01752988047808765, 'mutate': 0.0015936254980079682}
+[     2.365][MainProcess][DEBUG] {'natural_join': 0.0007968127490039841, 'natural_join3': 0.0007968127490039841, 'natural_join4': 0.0007968127490039841, 'inner_join': 0.0749003984063745, 'anti_join': 0.008764940239043825, 'left_join': 0.0007968127490039841, 'union': 0.0007968127490039841, 'intersect': 0.0031872509960159364, 'semi_join': 0.0007968127490039841, 'cross_join': 0.8844621513944223, 'filter': 0.004780876494023904, 'summarise': 0.01752988047808765, 'mutate': 0.0015936254980079682}
+[     2.365][MainProcess][INFO] Building synthesizer...
+[     3.287][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 97 constraints
+[     3.378][MainProcess][DEBUG] Enumeration time: 1.012810468673706
+[     5.931][MainProcess][DEBUG] Synthesis time: 2.5528836250305176
+[     5.932][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     7.752][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 225 constraints
+[     7.928][MainProcess][DEBUG] Enumeration time: 1.9965219497680664

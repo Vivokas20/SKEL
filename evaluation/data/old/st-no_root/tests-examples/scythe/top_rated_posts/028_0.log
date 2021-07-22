@@ -1,0 +1,56 @@
+[     5.314][MainProcess][INFO] Parsing specification...
+[     5.320][MainProcess][INFO] File read
+[     5.321][MainProcess][DEBUG] Reading input files...
+[     5.332][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i028_2.csv: ['string', 'int64', 'string']
+[     5.339][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o028.csv: ['string', 'string']
+[     5.339][MainProcess][INFO] Parsing sketch...
+[     5.340][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(["concatDesc = string_agg(Desc, ' ')"], type=Unknown, var=[]),Child(['PID'], type=Unknown, var=[])])
+[     5.392][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 30, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 130, 'unite': 9, 'summarise': 28, 'mutate': 4}
+[     5.392][MainProcess][DEBUG] {'natural_join': 0.004608294930875576, 'natural_join3': 0.004608294930875576, 'natural_join4': 0.004608294930875576, 'inner_join': 0.1382488479262673, 'anti_join': 0.03225806451612903, 'left_join': 0.004608294930875576, 'union': 0.004608294930875576, 'intersect': 0.013824884792626729, 'semi_join': 0.004608294930875576, 'cross_join': 0.5990783410138248, 'unite': 0.041474654377880185, 'summarise': 0.12903225806451613, 'mutate': 0.018433179723502304}
+[     5.392][MainProcess][DEBUG] {'natural_join': 0.004608294930875576, 'natural_join3': 0.004608294930875576, 'natural_join4': 0.004608294930875576, 'inner_join': 0.1382488479262673, 'anti_join': 0.03225806451612903, 'left_join': 0.004608294930875576, 'union': 0.004608294930875576, 'intersect': 0.013824884792626729, 'semi_join': 0.004608294930875576, 'cross_join': 0.5990783410138248, 'unite': 0.041474654377880185, 'summarise': 0.12903225806451613, 'mutate': 0.018433179723502304}
+[     5.392][MainProcess][INFO] Building synthesizer...
+[     5.394][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 11, 12], children=[Child([0], type=Table, var=[[188], [185], [15, 19, 49]]),Child(["concatDesc = string_agg(Desc, ' ')"], type=Unknown, var=[[188], [185], [15, 19, 49]]),Child(['PID'], type=Unknown, var=[[188], [185], [15, 19, 49]]),Child([None], type=None, var=[0])])]
+[     5.531][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 93 constraints
+[     5.543][MainProcess][DEBUG] Enumeration time: 0.15095067024230957
+[     5.599][MainProcess][DEBUG] Synthesis time: 0.055068016052246094
+[     5.599][MainProcess][INFO] Solution found: [summarise(input0, "concatDesc = string_agg(Desc, ' ')", 'PID')]
+[     5.600][MainProcess][DEBUG] Solution found using process 0
+[     5.600][MainProcess][INFO] Statistics:
+[     5.600][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     5.600][MainProcess][INFO] 		Rejected: 0 (approx)
+[     5.600][MainProcess][INFO] 		Failed: 0 (approx)
+[     5.600][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     5.600][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     5.601][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     5.601][MainProcess][INFO] 	Total time spent in enumerator init: 0.150951 (approx)
+[     5.601][MainProcess][INFO] 	Total time spent in enumerator: 0.000855 (approx)
+[     5.601][MainProcess][INFO] 		Enumerated 1169.306942 programs/s avg. (just enumeration time)
+[     5.601][MainProcess][INFO] 		Enumerated 0.250347 programs/s avg. (overall)
+[     5.601][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.052124 (approx)
+[     5.601][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     5.601][MainProcess][INFO] Solution found: [summarise(input0, "concatDesc = string_agg(Desc, ' ')", 'PID')]
+[     5.601][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i028_2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i028_2.csv", col_types = cols("PID" = col_character(),"SEQ" = col_integer(),"Desc" = col_character()))
+df_i028_2 <- copy_to(con, df_i028_2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o028.csv", col_types = cols("PID" = col_character(),"concatDesc" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df2 <- df_i028_2 %>% group_by(PID) %>% summarise(concatDesc = string_agg(Desc, ' ')) %>% ungroup()
+out <- df2 %>% select(PID, concatDesc) %>% arrange(PID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `PID`,
+       `concatDesc`
+FROM
+  (SELECT `PID`,
+          string_agg(`Desc`, ' ') AS concatDesc
+   FROM df_i028_2
+   GROUP BY PID)
+ORDER BY PID

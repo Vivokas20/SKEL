@@ -1,0 +1,66 @@
+[     2.393][MainProcess][INFO] Parsing specification...
+[     2.399][MainProcess][INFO] File read
+[     2.400][MainProcess][DEBUG] Reading input files...
+[     2.409][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i011_1.csv: ['int64', 'string']
+[     2.415][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i011_2.csv: ['int64', 'int64', 'string']
+[     2.421][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o011.csv: ['int64', 'string', 'string']
+[     2.421][MainProcess][INFO] Parsing sketch...
+[     2.422][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([1], type=Table, var=[]),Child(["concatCity = string_agg(City, ', ')"], type=Unknown, var=[]),Child(['VehicleID'], type=Unknown, var=[])])
+[     2.422][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[])])
+[     2.471][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 240, 'anti_join': 44, 'left_join': 4, 'union': 4, 'intersect': 16, 'semi_join': 4, 'cross_join': 520, 'unite': 32, 'summarise': 88, 'mutate': 8}
+[     2.471][MainProcess][DEBUG] {'natural_join': 0.004048582995951417, 'natural_join3': 0.008097165991902834, 'natural_join4': 0.016194331983805668, 'inner_join': 0.242914979757085, 'anti_join': 0.044534412955465584, 'left_join': 0.004048582995951417, 'union': 0.004048582995951417, 'intersect': 0.016194331983805668, 'semi_join': 0.004048582995951417, 'cross_join': 0.5263157894736842, 'unite': 0.032388663967611336, 'summarise': 0.08906882591093117, 'mutate': 0.008097165991902834}
+[     2.471][MainProcess][DEBUG] {'natural_join': 0.004048582995951418, 'natural_join3': 0.008097165991902836, 'natural_join4': 0.01619433198380567, 'inner_join': 0.24291497975708506, 'anti_join': 0.04453441295546559, 'left_join': 0.004048582995951418, 'union': 0.004048582995951418, 'intersect': 0.01619433198380567, 'semi_join': 0.004048582995951418, 'cross_join': 0.5263157894736843, 'unite': 0.03238866396761134, 'summarise': 0.08906882591093118, 'mutate': 0.008097165991902836}
+[     2.471][MainProcess][INFO] Building synthesizer...
+[     2.473][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 11, 12], children=[Child([1], type=Table, var=[[224], [222], [17, 22, 82]]),Child(["concatCity = string_agg(City, ', ')"], type=Unknown, var=[[224], [222], [17, 22, 82]]),Child(['VehicleID'], type=Unknown, var=[[224], [222], [17, 22, 82]]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[1, 6, 7, 9, 13], children=[Child([0], type=Table, var=[[223], [226]]),Child([0], type=Line, var=[[223], [226]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.585][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 150 constraints
+[     2.593][MainProcess][DEBUG] Enumeration time: 0.12131547927856445
+[     2.706][MainProcess][DEBUG] Synthesis time: 0.11276602745056152
+[     2.706][MainProcess][INFO] Solution found: [summarise(input1, "concatCity = string_agg(City, ', ')", 'VehicleID'), left_join(line0, input0)]
+[     2.707][MainProcess][DEBUG] Solution found using process 0
+[     2.707][MainProcess][INFO] Statistics:
+[     2.707][MainProcess][INFO] 	Attempted programs: 5 (approx)
+[     2.707][MainProcess][INFO] 		Rejected: 4 (approx)
+[     2.707][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.707][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.708][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.708][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.708][MainProcess][INFO] 	Total time spent in enumerator init: 0.121315 (approx)
+[     2.708][MainProcess][INFO] 	Total time spent in enumerator: 0.008386 (approx)
+[     2.708][MainProcess][INFO] 		Enumerated 596.205259 programs/s avg. (just enumeration time)
+[     2.708][MainProcess][INFO] 		Enumerated 2.501347 programs/s avg. (overall)
+[     2.708][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.098462 (approx)
+[     2.708][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.004935 (approx)
+[     2.708][MainProcess][INFO] Solution found: [summarise(input1, "concatCity = string_agg(City, ', ')", 'VehicleID'), left_join(line0, input0)]
+[     2.708][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i011_1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i011_1.csv", col_types = cols("VehicleID" = col_integer(),"Name" = col_character()))
+df_i011_1 <- copy_to(con, df_i011_1)
+df_i011_2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i011_2.csv", col_types = cols("LocationID" = col_integer(),"VehicleID" = col_integer(),"City" = col_character()))
+df_i011_2 <- copy_to(con, df_i011_2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o011.csv", col_types = cols("VehicleID" = col_integer(),"Name" = col_character(),"concatCity" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df7 <- df_i011_2 %>% group_by(VehicleID) %>% summarise(concatCity = string_agg(City, ', ')) %>% ungroup()
+df8 <- left_join(df7, df_i011_1, na_matches="never")
+out <- df8 %>% select(VehicleID, Name, concatCity)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `VehicleID`,
+       `Name`,
+       `concatCity`
+FROM
+  (SELECT `LHS`.`VehicleID` AS `VehicleID`,
+          `concatCity`,
+          `Name`
+   FROM
+     (SELECT `VehicleID`,
+             string_agg(`City`, ', ') AS concatCity
+      FROM df_i011_2
+      GROUP BY VehicleID) AS LHS
+   LEFT JOIN df_i011_1 AS RHS ON (LHS.VehicleID = RHS.VehicleID))

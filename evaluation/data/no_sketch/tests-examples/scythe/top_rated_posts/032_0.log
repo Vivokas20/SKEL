@@ -1,0 +1,21 @@
+[     2.279][MainProcess][INFO] Parsing specification...
+[     2.285][MainProcess][INFO] File read
+[     2.285][MainProcess][DEBUG] Reading input files...
+[     2.295][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i032.csv: ['string', 'string', 'int64']
+[     2.300][MainProcess][WARNING] Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!
+[     2.300][MainProcess][WARNING] Replacing column "Count.other" in table tests-examples/scythe/top_rated_posts/tables/o032.csv with Count_other
+[     2.301][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o032.csv: ['string', 'int64', 'int64']
+[     2.353][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 10, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 2, 'filter': 12}
+[     2.353][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.353][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.353][MainProcess][INFO] Building synthesizer...
+[     2.448][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 86 constraints
+[     2.454][MainProcess][DEBUG] Enumeration time: 0.10110330581665039
+[     2.824][MainProcess][DEBUG] Synthesis time: 0.3690972328186035
+[     2.824][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     3.001][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 200 constraints
+[     3.012][MainProcess][DEBUG] Enumeration time: 0.18836355209350586
+[   126.146][MainProcess][DEBUG] Synthesis time: 123.1328866481781
+[   126.146][MainProcess][INFO] Increasing the number of lines of code to 3.
+[   126.429][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 344 constraints
+[   126.448][MainProcess][DEBUG] Enumeration time: 0.302126407623291

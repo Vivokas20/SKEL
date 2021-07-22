@@ -1,0 +1,64 @@
+[     2.863][MainProcess][INFO] Parsing specification...
+[     2.868][MainProcess][INFO] File read
+[     2.868][MainProcess][DEBUG] Reading input files...
+[     2.876][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i019.csv: ['int64', 'int64']
+[     2.881][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o019.csv: ['int64', 'int64', 'int64']
+[     2.920][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 21, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 6, 'summarise': 4, 'mutate': 1}
+[     2.920][MainProcess][DEBUG] {'natural_join': 0.022727272727272728, 'natural_join3': 0.022727272727272728, 'natural_join4': 0.022727272727272728, 'inner_join': 0.4772727272727273, 'anti_join': 0.09090909090909091, 'left_join': 0.022727272727272728, 'union': 0.022727272727272728, 'intersect': 0.045454545454545456, 'semi_join': 0.022727272727272728, 'cross_join': 0.13636363636363635, 'summarise': 0.09090909090909091, 'mutate': 0.022727272727272728}
+[     2.921][MainProcess][DEBUG] {'natural_join': 0.02272727272727273, 'natural_join3': 0.02272727272727273, 'natural_join4': 0.02272727272727273, 'inner_join': 0.47727272727272735, 'anti_join': 0.09090909090909093, 'left_join': 0.02272727272727273, 'union': 0.02272727272727273, 'intersect': 0.04545454545454546, 'semi_join': 0.02272727272727273, 'cross_join': 0.13636363636363638, 'summarise': 0.09090909090909093, 'mutate': 0.02272727272727273}
+[     2.921][MainProcess][INFO] Building synthesizer...
+[     3.008][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 91 constraints
+[     3.015][MainProcess][DEBUG] Enumeration time: 0.09434914588928223
+[     3.338][MainProcess][DEBUG] Synthesis time: 0.32239818572998047
+[     3.338][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     3.492][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 212 constraints
+[     3.503][MainProcess][DEBUG] Enumeration time: 0.1649932861328125
+[     3.853][MainProcess][DEBUG] Synthesis time: 0.349851131439209
+[     3.854][MainProcess][INFO] Solution found: [inner_join(input0, input0, 'age'), summarise(line0, 'n = n()', 'age,id')]
+[     3.855][MainProcess][DEBUG] Solution found using process 0
+[     3.855][MainProcess][INFO] Statistics:
+[     3.855][MainProcess][INFO] 	Attempted programs: 20 (approx)
+[     3.855][MainProcess][INFO] 		Rejected: 19 (approx)
+[     3.856][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.856][MainProcess][INFO] 		Empty outputs: 2 (10.0%) (approx)
+[     3.856][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.856][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.856][MainProcess][INFO] 	Total time spent in enumerator init: 0.259342 (approx)
+[     3.856][MainProcess][INFO] 	Total time spent in enumerator: 0.034621 (approx)
+[     3.856][MainProcess][INFO] 		Enumerated 577.692016 programs/s avg. (just enumeration time)
+[     3.856][MainProcess][INFO] 		Enumerated 6.522414 programs/s avg. (overall)
+[     3.856][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.621636 (approx)
+[     3.856][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.014894 (approx)
+[     3.856][MainProcess][INFO] Solution found: [inner_join(input0, input0, 'age'), summarise(line0, 'n = n()', 'age,id')]
+[     3.856][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i019 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i019.csv", col_types = cols("id" = col_integer(),"age" = col_integer()))
+df_i019 <- copy_to(con, df_i019)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o019.csv", col_types = cols("id" = col_integer(),"age" = col_integer(),"n" = col_integer()))
+
+df26 <- inner_join(df_i019, df_i019, by=c('age'), suffix = c('', '.other'), na_matches='never')
+df27 <- df26 %>% group_by(age,id) %>% summarise(n = n()) %>% ungroup()
+out <- df27 %>% select(id, age, n) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       age,
+       n
+FROM
+  (SELECT age,
+          id,
+          COUNT(*) AS n
+   FROM
+     (SELECT LHS.id AS id,
+             LHS.age AS age,
+             RHS.id AS id_other
+      FROM df_i019 AS LHS
+      INNER JOIN df_i019 AS RHS ON (LHS.age = RHS.age))
+   GROUP BY age,
+            id)
+ORDER BY id

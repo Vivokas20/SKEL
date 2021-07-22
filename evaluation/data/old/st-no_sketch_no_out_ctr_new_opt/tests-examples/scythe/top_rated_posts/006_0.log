@@ -1,0 +1,63 @@
+[     5.941][MainProcess][INFO] Parsing specification...
+[     5.949][MainProcess][INFO] File read
+[     5.951][MainProcess][DEBUG] Reading input files...
+[     5.968][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i006.csv: ['int64', 'string', 'string']
+[     5.975][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o006.csv: ['int64', 'string', 'string']
+[     6.054][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 22, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 14, 'mutate': 2}
+[     6.055][MainProcess][DEBUG] {'natural_join': 0.0008547008547008547, 'natural_join3': 0.0008547008547008547, 'natural_join4': 0.0008547008547008547, 'inner_join': 0.018803418803418803, 'anti_join': 0.005982905982905983, 'left_join': 0.0008547008547008547, 'union': 0.0008547008547008547, 'intersect': 0.002564102564102564, 'semi_join': 0.0008547008547008547, 'cross_join': 0.9487179487179487, 'filter': 0.005128205128205128, 'summarise': 0.011965811965811967, 'mutate': 0.0017094017094017094}
+[     6.055][MainProcess][DEBUG] {'natural_join': 0.0008547008547008548, 'natural_join3': 0.0008547008547008548, 'natural_join4': 0.0008547008547008548, 'inner_join': 0.018803418803418806, 'anti_join': 0.005982905982905984, 'left_join': 0.0008547008547008548, 'union': 0.0008547008547008548, 'intersect': 0.0025641025641025645, 'semi_join': 0.0008547008547008548, 'cross_join': 0.9487179487179488, 'filter': 0.005128205128205129, 'summarise': 0.011965811965811968, 'mutate': 0.0017094017094017096}
+[     6.055][MainProcess][INFO] Building synthesizer...
+[     6.914][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 92 constraints
+[     7.017][MainProcess][DEBUG] Enumeration time: 0.9615170955657959
+[     7.907][MainProcess][DEBUG] Synthesis time: 0.8901650905609131
+[     7.907][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     9.555][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 215 constraints
+[     9.721][MainProcess][DEBUG] Enumeration time: 1.813962697982788
+[    65.978][MainProcess][DEBUG] Synthesis time: 56.253390073776245
+[    65.978][MainProcess][INFO] Solution found: [summarise(input0, 'Id = max(Id)', 'Name'), inner_join(input0, line0, 'Id')]
+[    65.984][MainProcess][DEBUG] Solution found using process 0
+[    65.984][MainProcess][INFO] Statistics:
+[    65.984][MainProcess][INFO] 	Attempted programs: 148 (approx)
+[    65.985][MainProcess][INFO] 		Rejected: 147 (approx)
+[    65.985][MainProcess][INFO] 		Failed: 0 (approx)
+[    65.985][MainProcess][INFO] 		Empty outputs: 29 (19.6%) (approx)
+[    65.985][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    65.985][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    65.985][MainProcess][INFO] 	Total time spent in enumerator init: 2.775480 (approx)
+[    65.985][MainProcess][INFO] 	Total time spent in enumerator: 0.737234 (approx)
+[    65.985][MainProcess][INFO] 		Enumerated 200.750471 programs/s avg. (just enumeration time)
+[    65.985][MainProcess][INFO] 		Enumerated 2.299607 programs/s avg. (overall)
+[    65.985][MainProcess][INFO] 	Total time spent in evaluation & testing: 56.300202 (approx)
+[    65.985][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.104466 (approx)
+[    65.985][MainProcess][INFO] Solution found: [summarise(input0, 'Id = max(Id)', 'Name'), inner_join(input0, line0, 'Id')]
+[    65.986][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i006 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i006.csv", col_types = cols("Id" = col_integer(),"Name" = col_character(),"Other_Columns" = col_character()))
+df_i006 <- copy_to(con, df_i006)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o006.csv", col_types = cols("Id" = col_integer(),"Name" = col_character(),"Other_Columns" = col_character()))
+
+df167 <- df_i006 %>% group_by(Name) %>% summarise(Id = max(Id)) %>% ungroup()
+df168 <- inner_join(df_i006, df167, by=c('Id'), suffix = c('', '.other'), na_matches='never')
+out <- df168 %>% select(Id, Name, Other_Columns) %>% arrange(Id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Id,
+       Name,
+       Other_Columns
+FROM
+  (SELECT LHS.Id AS Id,
+          LHS.Name AS Name,
+          Other_Columns,
+          RHS.Name AS Name_other
+   FROM df_i006 AS LHS
+   INNER JOIN
+     (SELECT Name,
+             MAX(Id) AS Id
+      FROM df_i006
+      GROUP BY Name) AS RHS ON (LHS.Id = RHS.Id))
+ORDER BY Id

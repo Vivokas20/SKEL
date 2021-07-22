@@ -1,0 +1,61 @@
+[     2.333][MainProcess][INFO] Parsing specification...
+[     2.340][MainProcess][INFO] File read
+[     2.341][MainProcess][DEBUG] Reading input files...
+[     2.350][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i019.csv: ['int64', 'int64']
+[     2.355][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o019.csv: ['int64', 'int64', 'int64']
+[     2.356][MainProcess][INFO] Parsing sketch...
+[     2.356][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.356][MainProcess][DEBUG] Sketch creation: Line(T2, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     2.395][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 21, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 6, 'summarise': 4, 'mutate': 1}
+[     2.395][MainProcess][DEBUG] {'natural_join': 0.022727272727272728, 'natural_join3': 0.022727272727272728, 'natural_join4': 0.022727272727272728, 'inner_join': 0.4772727272727273, 'anti_join': 0.09090909090909091, 'left_join': 0.022727272727272728, 'union': 0.022727272727272728, 'intersect': 0.045454545454545456, 'semi_join': 0.022727272727272728, 'cross_join': 0.13636363636363635, 'summarise': 0.09090909090909091, 'mutate': 0.022727272727272728}
+[     2.395][MainProcess][DEBUG] {'natural_join': 0.02272727272727273, 'natural_join3': 0.02272727272727273, 'natural_join4': 0.02272727272727273, 'inner_join': 0.47727272727272735, 'anti_join': 0.09090909090909093, 'left_join': 0.02272727272727273, 'union': 0.02272727272727273, 'intersect': 0.04545454545454546, 'semi_join': 0.02272727272727273, 'cross_join': 0.13636363636363638, 'summarise': 0.09090909090909093, 'mutate': 0.02272727272727273}
+[     2.395][MainProcess][INFO] Building synthesizer...
+[     2.397][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])]), Line(T2, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[]),Child([None], type=None, var=[0])])]
+[     2.503][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 101 constraints
+[     2.510][MainProcess][DEBUG] Enumeration time: 0.11509013175964355
+[     2.946][MainProcess][DEBUG] Synthesis time: 0.43518733978271484
+[     2.946][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'age'), inner_join(input0, line0, 'age')]
+[     2.947][MainProcess][DEBUG] Solution found using process 0
+[     2.947][MainProcess][INFO] Statistics:
+[     2.947][MainProcess][INFO] 	Attempted programs: 19 (approx)
+[     2.947][MainProcess][INFO] 		Rejected: 18 (approx)
+[     2.947][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.947][MainProcess][INFO] 		Empty outputs: 12 (63.2%) (approx)
+[     2.947][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.948][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.948][MainProcess][INFO] 	Total time spent in enumerator init: 0.115090 (approx)
+[     2.948][MainProcess][INFO] 	Total time spent in enumerator: 0.030642 (approx)
+[     2.948][MainProcess][INFO] 		Enumerated 620.072954 programs/s avg. (just enumeration time)
+[     2.948][MainProcess][INFO] 		Enumerated 8.258902 programs/s avg. (overall)
+[     2.948][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.389399 (approx)
+[     2.948][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.014340 (approx)
+[     2.948][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'age'), inner_join(input0, line0, 'age')]
+[     2.948][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i019 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i019.csv", col_types = cols("id" = col_integer(),"age" = col_integer()))
+df_i019 <- copy_to(con, df_i019)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o019.csv", col_types = cols("id" = col_integer(),"age" = col_integer(),"n" = col_integer()))
+
+df22 <- df_i019 %>% group_by(age) %>% summarise(n = n()) %>% ungroup()
+df23 <- inner_join(df_i019, df22, by=c('age'), suffix = c('', '.other'), na_matches='never')
+out <- df23 %>% select(id, age, n)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       age,
+       n
+FROM
+  (SELECT id,
+          LHS.age AS age,
+          n
+   FROM df_i019 AS LHS
+   INNER JOIN
+     (SELECT age,
+             COUNT(*) AS n
+      FROM df_i019
+      GROUP BY age) AS RHS ON (LHS.age = RHS.age))

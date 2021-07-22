@@ -1,0 +1,55 @@
+[     4.685][MainProcess][INFO] Parsing specification...
+[     4.692][MainProcess][INFO] File read
+[     4.693][MainProcess][DEBUG] Reading input files...
+[     4.713][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     4.719][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009_o.csv: ['int64', 'string', 'int64']
+[     4.772][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 111, 'anti_join': 16, 'left_join': 1, 'union': 1, 'intersect': 5, 'semi_join': 1, 'cross_join': 6, 'summarise': 16, 'mutate': 1}
+[     4.773][MainProcess][DEBUG] {'natural_join': 0.006211180124223602, 'natural_join3': 0.006211180124223602, 'natural_join4': 0.006211180124223602, 'inner_join': 0.6894409937888198, 'anti_join': 0.09937888198757763, 'left_join': 0.006211180124223602, 'union': 0.006211180124223602, 'intersect': 0.031055900621118012, 'semi_join': 0.006211180124223602, 'cross_join': 0.037267080745341616, 'summarise': 0.09937888198757763, 'mutate': 0.006211180124223602}
+[     4.773][MainProcess][DEBUG] {'natural_join': 0.006211180124223603, 'natural_join3': 0.006211180124223603, 'natural_join4': 0.006211180124223603, 'inner_join': 0.68944099378882, 'anti_join': 0.09937888198757765, 'left_join': 0.006211180124223603, 'union': 0.006211180124223603, 'intersect': 0.031055900621118016, 'semi_join': 0.006211180124223603, 'cross_join': 0.03726708074534162, 'summarise': 0.09937888198757765, 'mutate': 0.006211180124223603}
+[     4.773][MainProcess][INFO] Building synthesizer...
+[     4.961][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 91 constraints
+[     4.976][MainProcess][DEBUG] Enumeration time: 0.20272207260131836
+[     5.227][MainProcess][DEBUG] Synthesis time: 0.2511861324310303
+[     5.227][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'c2,c4')]
+[     5.229][MainProcess][DEBUG] Solution found using process 0
+[     5.229][MainProcess][INFO] Statistics:
+[     5.229][MainProcess][INFO] 	Attempted programs: 16 (approx)
+[     5.229][MainProcess][INFO] 		Rejected: 15 (approx)
+[     5.229][MainProcess][INFO] 		Failed: 0 (approx)
+[     5.229][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     5.229][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     5.229][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     5.229][MainProcess][INFO] 	Total time spent in enumerator init: 0.202722 (approx)
+[     5.229][MainProcess][INFO] 	Total time spent in enumerator: 0.022390 (approx)
+[     5.229][MainProcess][INFO] 		Enumerated 714.608285 programs/s avg. (just enumeration time)
+[     5.229][MainProcess][INFO] 		Enumerated 4.051102 programs/s avg. (overall)
+[     5.230][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.220001 (approx)
+[     5.230][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.008091 (approx)
+[     5.230][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'c2,c4')]
+[     5.230][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_009 <- read_csv("tests-examples/scythe/recent_posts/tables/009.csv", col_types = cols("c1" = col_integer(),"c2" = col_integer(),"c3" = col_character(),"c4" = col_character(),"c5" = col_integer()))
+df_009$c3 <- parse_datetime(df_009$c3)
+df_009 <- copy_to(con, df_009)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/009_o.csv", col_types = cols("c1" = col_integer(),"c2" = col_character(),"c3" = col_integer()))
+
+df17 <- df_009 %>% group_by(c2,c4) %>% summarise(n = n()) %>% ungroup()
+out <- df17 %>% select(c1 = c2, c2 = c4, c3 = n) %>% arrange(c1)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT c2 AS c1,
+       c4 AS c2,
+       n AS c3
+FROM
+  (SELECT c2,
+          c4,
+          COUNT(*) AS n
+   FROM df_009
+   GROUP BY c2,
+            c4)
+ORDER BY c1

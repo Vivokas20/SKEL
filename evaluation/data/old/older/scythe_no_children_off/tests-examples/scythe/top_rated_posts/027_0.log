@@ -1,0 +1,76 @@
+[     1.526][MainProcess][INFO] Parsing specification...
+[     1.529][MainProcess][INFO] File read
+[     1.530][MainProcess][WARNING] Specified sketch (sketch_no_children) not in specification file
+[     1.530][MainProcess][DEBUG] Reading input files...
+[     1.537][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i027.csv: ['string', 'string', 'Float64']
+[     1.542][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o027.csv: ['string', 'string', 'Float64']
+[     1.584][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 22, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 14, 'mutate': 2}
+[     1.584][MainProcess][DEBUG] {'natural_join': 0.0008547008547008547, 'natural_join3': 0.0008547008547008547, 'natural_join4': 0.0008547008547008547, 'inner_join': 0.018803418803418803, 'anti_join': 0.005982905982905983, 'left_join': 0.0008547008547008547, 'union': 0.0008547008547008547, 'intersect': 0.002564102564102564, 'semi_join': 0.0008547008547008547, 'cross_join': 0.9487179487179487, 'filter': 0.005128205128205128, 'summarise': 0.011965811965811967, 'mutate': 0.0017094017094017094}
+[     1.584][MainProcess][DEBUG] {'natural_join': 0.0008547008547008548, 'natural_join3': 0.0008547008547008548, 'natural_join4': 0.0008547008547008548, 'inner_join': 0.018803418803418806, 'anti_join': 0.005982905982905984, 'left_join': 0.0008547008547008548, 'union': 0.0008547008547008548, 'intersect': 0.0025641025641025645, 'semi_join': 0.0008547008547008548, 'cross_join': 0.9487179487179488, 'filter': 0.005128205128205129, 'summarise': 0.011965811965811968, 'mutate': 0.0017094017094017096}
+[     1.584][MainProcess][INFO] Building synthesizer...
+[     2.142][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 93 constraints
+[     2.211][MainProcess][DEBUG] Enumeration time: 0.6265625953674316
+[     2.829][MainProcess][DEBUG] Synthesis time: 0.6179683208465576
+[     2.829][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     3.970][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 216 constraints
+[     4.108][MainProcess][DEBUG] Enumeration time: 1.2786896228790283
+[    56.977][MainProcess][DEBUG] Synthesis time: 52.8664972782135
+[    56.977][MainProcess][INFO] Solution found: [mutate(input0, 'maxavg = max(avg)'), cross_join(line0, line0, 'avg < avg.other & avg < maxavg.other')]
+[    56.983][MainProcess][DEBUG] Solution found using process 0
+[    56.984][MainProcess][INFO] Statistics:
+[    56.984][MainProcess][INFO] 	Attempted programs: 210 (approx)
+[    56.984][MainProcess][INFO] 		Rejected: 209 (approx)
+[    56.984][MainProcess][INFO] 		Failed: 0 (approx)
+[    56.984][MainProcess][INFO] 		Empty outputs: 113 (53.8%) (approx)
+[    56.984][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    56.984][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    56.984][MainProcess][INFO] 	Total time spent in enumerator init: 1.905252 (approx)
+[    56.984][MainProcess][INFO] 	Total time spent in enumerator: 0.779347 (approx)
+[    56.984][MainProcess][INFO] 		Enumerated 269.456207 programs/s avg. (just enumeration time)
+[    56.984][MainProcess][INFO] 		Enumerated 3.713770 programs/s avg. (overall)
+[    56.984][MainProcess][INFO] 	Total time spent in evaluation & testing: 52.606311 (approx)
+[    56.984][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.097098 (approx)
+[    56.984][MainProcess][INFO] Solution found: [mutate(input0, 'maxavg = max(avg)'), cross_join(line0, line0, 'avg < avg.other & avg < maxavg.other')]
+[    56.984][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i027 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i027.csv", col_types = cols("cname" = col_character(),"wmname" = col_character(),"avg" = col_double()))
+df_i027 <- copy_to(con, df_i027)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o027.csv", col_types = cols("cname" = col_character(),"wmname" = col_character(),"maxavg" = col_double()))
+
+df217 <- df_i027 %>% mutate(maxavg = max(avg))
+df218 <- full_join(df217, df217, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(avg < avg.other & avg < maxavg.other)
+out <- df218 %>% select(cname = cname.other, wmname = wmname.other, maxavg = avg.other) %>% distinct() %>% arrange(cname)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT cname_other AS cname,
+                wmname_other AS wmname,
+                avg_other AS maxavg
+FROM
+  (SELECT LHS.cname AS cname,
+          LHS.wmname AS wmname,
+          LHS.avg AS AVG,
+          LHS.maxavg AS maxavg,
+          RHS.cname AS cname_other,
+          RHS.wmname AS wmname_other,
+          RHS.avg AS avg_other,
+          RHS.maxavg AS maxavg_other
+   FROM
+     (SELECT cname,
+             wmname,
+             AVG,
+             MAX(AVG) OVER () AS maxavg
+      FROM df_i027) AS LHS
+   CROSS JOIN
+     (SELECT cname,
+             wmname,
+             AVG,
+             MAX(AVG) OVER () AS maxavg
+      FROM df_i027) AS RHS)
+WHERE (AVG < avg_other
+       AND AVG < maxavg_other)
+ORDER BY cname

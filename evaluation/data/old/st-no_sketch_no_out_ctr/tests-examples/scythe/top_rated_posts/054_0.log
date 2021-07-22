@@ -1,0 +1,49 @@
+[     6.300][MainProcess][INFO] Parsing specification...
+[     6.305][MainProcess][INFO] File read
+[     6.306][MainProcess][DEBUG] Reading input files...
+[     6.319][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i054.csv: ['datetime64[ns]', 'int64']
+[     6.326][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o054.csv: ['datetime64[ns]', 'int64']
+[     6.426][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 1548, 'filter': 6, 'summarise': 4, 'mutate': 1}
+[     6.426][MainProcess][DEBUG] {'natural_join': 0.0006337135614702154, 'natural_join3': 0.0006337135614702154, 'natural_join4': 0.0006337135614702154, 'inner_join': 0.004435994930291508, 'anti_join': 0.0025348542458808617, 'left_join': 0.0006337135614702154, 'union': 0.0006337135614702154, 'intersect': 0.0012674271229404308, 'semi_join': 0.0006337135614702154, 'cross_join': 0.9809885931558935, 'filter': 0.0038022813688212928, 'summarise': 0.0025348542458808617, 'mutate': 0.0006337135614702154}
+[     6.426][MainProcess][DEBUG] {'natural_join': 0.0006337135614702154, 'natural_join3': 0.0006337135614702154, 'natural_join4': 0.0006337135614702154, 'inner_join': 0.004435994930291508, 'anti_join': 0.0025348542458808617, 'left_join': 0.0006337135614702154, 'union': 0.0006337135614702154, 'intersect': 0.0012674271229404308, 'semi_join': 0.0006337135614702154, 'cross_join': 0.9809885931558935, 'filter': 0.0038022813688212928, 'summarise': 0.0025348542458808617, 'mutate': 0.0006337135614702154}
+[     6.427][MainProcess][INFO] Building synthesizer...
+[     7.626][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 92 constraints
+[     7.738][MainProcess][DEBUG] Enumeration time: 1.3115911483764648
+[     7.849][MainProcess][DEBUG] Synthesis time: 0.11076831817626953
+[     7.849][MainProcess][INFO] Solution found: [mutate(input0, 'cumsumcount = cumsum(count)')]
+[     7.852][MainProcess][DEBUG] Solution found using process 0
+[     7.853][MainProcess][INFO] Statistics:
+[     7.853][MainProcess][INFO] 	Attempted programs: 5 (approx)
+[     7.853][MainProcess][INFO] 		Rejected: 4 (approx)
+[     7.853][MainProcess][INFO] 		Failed: 0 (approx)
+[     7.853][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     7.853][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     7.853][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     7.853][MainProcess][INFO] 	Total time spent in enumerator init: 1.311591 (approx)
+[     7.853][MainProcess][INFO] 	Total time spent in enumerator: 0.013584 (approx)
+[     7.853][MainProcess][INFO] 		Enumerated 368.076383 programs/s avg. (just enumeration time)
+[     7.853][MainProcess][INFO] 		Enumerated 0.813018 programs/s avg. (overall)
+[     7.853][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.093515 (approx)
+[     7.853][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.002952 (approx)
+[     7.853][MainProcess][INFO] Solution found: [mutate(input0, 'cumsumcount = cumsum(count)')]
+[     7.854][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i054 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i054.csv", col_types = cols("created_at" = col_character(),"count" = col_integer()))
+df_i054$created_at <- mdy(df_i054$created_at)
+df_i054 <- copy_to(con, df_i054)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o054.csv", col_types = cols("created_at" = col_character(),"count" = col_integer()))
+expected_output$created_at <- mdy(expected_output$created_at)
+
+df6 <- df_i054 %>% mutate(cumsumcount = cumsum(count))
+out <- df6 %>% select(created_at, count = cumsumcount) %>% arrange(created_at)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT created_at,
+       SUM(COUNT) OVER (ROWS UNBOUNDED PRECEDING) AS COUNT
+FROM df_i054
+ORDER BY created_at

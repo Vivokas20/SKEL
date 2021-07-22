@@ -1,0 +1,67 @@
+[     2.370][MainProcess][INFO] Parsing specification...
+[     2.375][MainProcess][INFO] File read
+[     2.376][MainProcess][DEBUG] Reading input files...
+[     2.386][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/architect.csv: ['int64', 'string', 'string', 'string']
+[     2.391][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/bridge.csv: ['int64', 'int64', 'string', 'string', 'Float64', 'Float64']
+[     2.396][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0017.csv: ['string']
+[     2.397][MainProcess][INFO] Parsing sketch...
+[     2.397][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     2.397][MainProcess][DEBUG] Sketch creation: Line(T2, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     2.440][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 944, 'anti_join': 148, 'left_join': 4, 'union': 4, 'intersect': 32, 'semi_join': 4, 'cross_join': 128, 'filter': 4}
+[     2.440][MainProcess][DEBUG] {'natural_join': 0.0030864197530864196, 'natural_join3': 0.006172839506172839, 'natural_join4': 0.012345679012345678, 'inner_join': 0.7283950617283951, 'anti_join': 0.11419753086419752, 'left_join': 0.0030864197530864196, 'union': 0.0030864197530864196, 'intersect': 0.024691358024691357, 'semi_join': 0.0030864197530864196, 'cross_join': 0.09876543209876543, 'filter': 0.0030864197530864196}
+[     2.440][MainProcess][DEBUG] {'natural_join': 0.0030864197530864196, 'natural_join3': 0.006172839506172839, 'natural_join4': 0.012345679012345678, 'inner_join': 0.7283950617283951, 'anti_join': 0.11419753086419752, 'left_join': 0.0030864197530864196, 'union': 0.0030864197530864196, 'intersect': 0.024691358024691357, 'semi_join': 0.0030864197530864196, 'cross_join': 0.09876543209876543, 'filter': 0.0030864197530864196}
+[     2.440][MainProcess][INFO] Building synthesizer...
+[     2.441][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[]),Child([None], type=None, var=[0])])]
+[     2.723][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 98 constraints
+[     2.754][MainProcess][DEBUG] Enumeration time: 0.313417911529541
+[     3.322][MainProcess][DEBUG] Synthesis time: 0.5684058666229248
+[     3.322][MainProcess][INFO] Solution found: [filter(input0, "nationality == 'American'"), inner_join(line0, input1, 'id = architect_id')]
+[     3.324][MainProcess][DEBUG] Solution found using process 0
+[     3.324][MainProcess][INFO] Statistics:
+[     3.324][MainProcess][INFO] 	Attempted programs: 45 (approx)
+[     3.324][MainProcess][INFO] 		Rejected: 44 (approx)
+[     3.324][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.324][MainProcess][INFO] 		Empty outputs: 39 (86.7%) (approx)
+[     3.324][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.324][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.325][MainProcess][INFO] 	Total time spent in enumerator init: 0.313418 (approx)
+[     3.325][MainProcess][INFO] 	Total time spent in enumerator: 0.079986 (approx)
+[     3.325][MainProcess][INFO] 		Enumerated 562.597784 programs/s avg. (just enumeration time)
+[     3.325][MainProcess][INFO] 		Enumerated 17.067400 programs/s avg. (overall)
+[     3.325][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.460536 (approx)
+[     3.325][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.026767 (approx)
+[     3.325][MainProcess][INFO] Solution found: [filter(input0, "nationality == 'American'"), inner_join(line0, input1, 'id = architect_id')]
+[     3.325][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_architect <- read_csv("tests-examples/spider/architecture/tables/architect.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"nationality" = col_character(),"gender" = col_character()))
+df_architect <- copy_to(con, df_architect)
+df_bridge <- read_csv("tests-examples/spider/architecture/tables/bridge.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"name" = col_character(),"location" = col_character(),"length_meters" = col_double(),"length_feet" = col_double()))
+df_bridge <- copy_to(con, df_bridge)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0017.csv", col_types = cols("name" = col_character()))
+
+df40 <- df_architect %>% filter(nationality == 'American')
+df41 <- inner_join(df40, df_bridge, by=c('id' = 'architect_id'), suffix = c('', '.other'), na_matches='never') %>% mutate(architect_id = id)
+out <- df41 %>% select(name = name.other)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `name_other` AS `name`
+FROM
+  (SELECT `LHS`.`id` AS `id`,
+          `LHS`.`name` AS `name`,
+          `nationality`,
+          `gender`,
+          `RHS`.`id` AS `id_other`,
+          `RHS`.`name` AS `name_other`,
+          `location`,
+          `length_meters`,
+          `length_feet`
+   FROM
+     (SELECT *
+      FROM `df_architect`
+      WHERE (`nationality` = 'American')) AS LHS
+   INNER JOIN df_bridge AS RHS ON (LHS.id = RHS.architect_id))

@@ -1,0 +1,71 @@
+[     5.967][MainProcess][INFO] Parsing specification...
+[     5.976][MainProcess][INFO] File read
+[     5.978][MainProcess][DEBUG] Reading input files...
+[     5.992][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/028.csv: ['int64', 'string']
+[     5.997][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/028_o.csv: ['int64', 'int64']
+[     5.997][MainProcess][INFO] Parsing sketch...
+[     5.998][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     5.998][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     5.998][MainProcess][DEBUG] Sketch creation: Line(T3, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     5.998][MainProcess][DEBUG] Sketch creation: Line(T4, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     6.083][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 1256, 'filter': 234, 'summarise': 4, 'mutate': 1}
+[     6.083][MainProcess][DEBUG] {'natural_join': 0.0006605019815059445, 'natural_join3': 0.0006605019815059445, 'natural_join4': 0.0006605019815059445, 'inner_join': 0.004623513870541612, 'anti_join': 0.002642007926023778, 'left_join': 0.0006605019815059445, 'union': 0.0006605019815059445, 'intersect': 0.001321003963011889, 'semi_join': 0.0006605019815059445, 'cross_join': 0.8295904887714664, 'filter': 0.154557463672391, 'summarise': 0.002642007926023778, 'mutate': 0.0006605019815059445}
+[     6.083][MainProcess][DEBUG] {'natural_join': 0.0006605019815059445, 'natural_join3': 0.0006605019815059445, 'natural_join4': 0.0006605019815059445, 'inner_join': 0.004623513870541612, 'anti_join': 0.002642007926023778, 'left_join': 0.0006605019815059445, 'union': 0.0006605019815059445, 'intersect': 0.001321003963011889, 'semi_join': 0.0006605019815059445, 'cross_join': 0.8295904887714664, 'filter': 0.154557463672391, 'summarise': 0.002642007926023778, 'mutate': 0.0006605019815059445}
+[     6.083][MainProcess][INFO] Building synthesizer...
+[     6.085][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[]),Child([None], type=None, var=[0])]), Line(T4, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])])]
+[     8.274][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 238 constraints
+[     8.512][MainProcess][DEBUG] Enumeration time: 2.428825855255127
+[    18.788][MainProcess][DEBUG] Synthesis time: 10.275394678115845
+[    18.788][MainProcess][INFO] Solution found: [filter(input0, 'Member == 1'), filter(input0, 'Member > 1'), inner_join(line1, line0, 'Element'), summarise(line2, 'n = n()', 'Member')]
+[    18.801][MainProcess][DEBUG] Solution found using process 0
+[    18.801][MainProcess][INFO] Statistics:
+[    18.801][MainProcess][INFO] 	Attempted programs: 865 (approx)
+[    18.801][MainProcess][INFO] 		Rejected: 864 (approx)
+[    18.802][MainProcess][INFO] 		Failed: 0 (approx)
+[    18.802][MainProcess][INFO] 		Empty outputs: 66 (7.6%) (approx)
+[    18.802][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    18.802][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    18.802][MainProcess][INFO] 	Total time spent in enumerator init: 2.428826 (approx)
+[    18.802][MainProcess][INFO] 	Total time spent in enumerator: 3.475958 (approx)
+[    18.802][MainProcess][INFO] 		Enumerated 248.852268 programs/s avg. (just enumeration time)
+[    18.802][MainProcess][INFO] 		Enumerated 50.452883 programs/s avg. (overall)
+[    18.802][MainProcess][INFO] 	Total time spent in evaluation & testing: 5.857496 (approx)
+[    18.802][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.937014 (approx)
+[    18.802][MainProcess][INFO] Solution found: [filter(input0, 'Member == 1'), filter(input0, 'Member > 1'), inner_join(line1, line0, 'Element'), summarise(line2, 'n = n()', 'Member')]
+[    18.802][MainProcess][INFO] Solution size: 4
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_028 <- read_csv("tests-examples/scythe/recent_posts/tables/028.csv", col_types = cols("Member" = col_integer(),"Element" = col_character()))
+df_028 <- copy_to(con, df_028)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/028_o.csv", col_types = cols("c1" = col_integer(),"c2" = col_integer()))
+
+df673 <- df_028 %>% filter(Member == 1)
+df674 <- df_028 %>% filter(Member > 1)
+df675 <- inner_join(df674, df673, by=c('Element'), suffix = c('', '.other'), na_matches='never')
+df676 <- df675 %>% group_by(Member) %>% summarise(n = n()) %>% ungroup()
+out <- df676 %>% select(c1 = Member, c2 = n) %>% arrange(c2)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Member AS c1,
+       n AS c2
+FROM
+  (SELECT Member,
+          COUNT(*) AS n
+   FROM
+     (SELECT LHS.Member AS Member,
+             LHS.Element AS Element,
+             RHS.Member AS Member_other
+      FROM
+        (SELECT *
+         FROM df_028
+         WHERE (Member > 1.0)) AS LHS
+      INNER JOIN
+        (SELECT *
+         FROM df_028
+         WHERE (Member = 1.0)) AS RHS ON (LHS.Element = RHS.Element))
+   GROUP BY Member)
+ORDER BY c2

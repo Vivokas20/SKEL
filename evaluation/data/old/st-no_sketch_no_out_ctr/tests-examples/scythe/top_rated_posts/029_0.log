@@ -1,0 +1,53 @@
+[     2.233][MainProcess][INFO] Parsing specification...
+[     2.238][MainProcess][INFO] File read
+[     2.239][MainProcess][DEBUG] Reading input files...
+[     2.248][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i029.csv: ['string', 'string']
+[     2.254][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o029.csv: ['string', 'string']
+[     2.296][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 21, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 130, 'unite': 4, 'summarise': 16, 'mutate': 4}
+[     2.296][MainProcess][DEBUG] {'natural_join': 0.0053475935828877, 'natural_join3': 0.0053475935828877, 'natural_join4': 0.0053475935828877, 'inner_join': 0.11229946524064172, 'anti_join': 0.0213903743315508, 'left_join': 0.0053475935828877, 'union': 0.0053475935828877, 'intersect': 0.0106951871657754, 'semi_join': 0.0053475935828877, 'cross_join': 0.6951871657754011, 'unite': 0.0213903743315508, 'summarise': 0.0855614973262032, 'mutate': 0.0213903743315508}
+[     2.296][MainProcess][DEBUG] {'natural_join': 0.005347593582887701, 'natural_join3': 0.005347593582887701, 'natural_join4': 0.005347593582887701, 'inner_join': 0.11229946524064173, 'anti_join': 0.021390374331550804, 'left_join': 0.005347593582887701, 'union': 0.005347593582887701, 'intersect': 0.010695187165775402, 'semi_join': 0.005347593582887701, 'cross_join': 0.6951871657754012, 'unite': 0.021390374331550804, 'summarise': 0.08556149732620322, 'mutate': 0.021390374331550804}
+[     2.296][MainProcess][INFO] Building synthesizer...
+[     2.490][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 92 constraints
+[     2.505][MainProcess][DEBUG] Enumeration time: 0.2091820240020752
+[     2.629][MainProcess][DEBUG] Synthesis time: 0.12394309043884277
+[     2.630][MainProcess][INFO] Solution found: [summarise(input0, "concatPerson = string_agg(Person, ' ')", 'TicketID')]
+[     2.631][MainProcess][DEBUG] Solution found using process 0
+[     2.631][MainProcess][INFO] Statistics:
+[     2.631][MainProcess][INFO] 	Attempted programs: 8 (approx)
+[     2.631][MainProcess][INFO] 		Rejected: 7 (approx)
+[     2.631][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.631][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.631][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.631][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.631][MainProcess][INFO] 	Total time spent in enumerator init: 0.209182 (approx)
+[     2.632][MainProcess][INFO] 	Total time spent in enumerator: 0.010857 (approx)
+[     2.632][MainProcess][INFO] 		Enumerated 736.877020 programs/s avg. (just enumeration time)
+[     2.632][MainProcess][INFO] 		Enumerated 4.003299 programs/s avg. (overall)
+[     2.632][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.107955 (approx)
+[     2.632][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.004277 (approx)
+[     2.632][MainProcess][INFO] Solution found: [summarise(input0, "concatPerson = string_agg(Person, ' ')", 'TicketID')]
+[     2.632][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i029 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i029.csv", col_types = cols("TicketID" = col_character(),"Person" = col_character()))
+df_i029 <- copy_to(con, df_i029)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o029.csv", col_types = cols("TicketID" = col_character(),"concatPerson" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df9 <- df_i029 %>% group_by(TicketID) %>% summarise(concatPerson = string_agg(Person, ' ')) %>% ungroup()
+out <- df9 %>% select(TicketID, concatPerson) %>% arrange(TicketID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `TicketID`,
+       `concatPerson`
+FROM
+  (SELECT `TicketID`,
+          string_agg(`Person`, ' ') AS concatPerson
+   FROM df_i029
+   GROUP BY TicketID)
+ORDER BY TicketID

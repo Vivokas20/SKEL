@@ -1,0 +1,97 @@
+[     1.590][MainProcess][INFO] Parsing specification...
+[     1.594][MainProcess][INFO] File read
+[     1.595][MainProcess][DEBUG] Reading input files...
+[     1.600][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.603][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     1.606][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     1.610][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/35.out: ['string']
+[     1.610][MainProcess][INFO] Parsing sketch...
+[     1.610][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child([2], type=Table, var=[])])
+[     1.610][MainProcess][DEBUG] Sketch creation: Line(T2, root=[None], var=[], children=[])
+[     1.610][MainProcess][DEBUG] Sketch creation: Line(T3, root=['anti_join'], var=[], children=[Child([0], type=Line, var=[]),Child([1], type=Line, var=[]),Child(['eid, ename'], type=Cols, var=[])])
+[     1.642][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 54, 'filter': 18}
+[     1.642][MainProcess][DEBUG] {'natural_join': 0.007633587786259542, 'natural_join3': 0.022900763358778626, 'natural_join4': 0.06870229007633588, 'inner_join': 0.6030534351145038, 'anti_join': 0.16793893129770993, 'left_join': 0.007633587786259542, 'union': 0.007633587786259542, 'intersect': 0.04580152671755725, 'semi_join': 0.007633587786259542, 'cross_join': 0.04580152671755725, 'filter': 0.015267175572519083}
+[     1.642][MainProcess][DEBUG] {'natural_join': 0.007633587786259542, 'natural_join3': 0.022900763358778626, 'natural_join4': 0.06870229007633588, 'inner_join': 0.6030534351145038, 'anti_join': 0.16793893129770993, 'left_join': 0.007633587786259542, 'union': 0.007633587786259542, 'intersect': 0.04580152671755725, 'semi_join': 0.007633587786259542, 'cross_join': 0.04580152671755725, 'filter': 0.015267175572519083}
+[     1.642][MainProcess][INFO] Building synthesizer...
+[     1.643][MainProcess][DEBUG] [Line(T1, root=['natural_join3'], var=[2], children=[Child([0], type=Table, var=[131]),Child([1], type=Table, var=[132]),Child([2], type=Table, var=[133]),Child([None], type=None, var=[0])]), Line(T2, root=[None], var=[], children=[]), Line(T3, root=['anti_join'], var=[5], children=[Child([0], type=Line, var=[135]),Child([1], type=Line, var=[136]),Child(['eid, ename'], type=Cols, var=[37]),Child([None], type=None, var=[0])])]
+[     1.791][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 195 constraints
+[     1.804][MainProcess][DEBUG] Enumeration time: 0.16210675239562988
+[     1.960][MainProcess][DEBUG] Synthesis time: 0.15634965896606445
+[     1.961][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, 'crusingrange <= 1000'), anti_join(line0, line1, 'eid,ename')]
+[     1.962][MainProcess][DEBUG] Solution found using process 0
+[     1.962][MainProcess][INFO] Statistics:
+[     1.962][MainProcess][INFO] 	Attempted programs: 10 (approx)
+[     1.962][MainProcess][INFO] 		Rejected: 4 (approx)
+[     1.962][MainProcess][INFO] 		Failed: 5 (approx)
+[     1.962][MainProcess][INFO] 		Empty outputs: 1 (10.0%) (approx)
+[     1.962][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     1.962][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     1.962][MainProcess][INFO] 	Total time spent in enumerator init: 0.162107 (approx)
+[     1.962][MainProcess][INFO] 	Total time spent in enumerator: 0.017536 (approx)
+[     1.962][MainProcess][INFO] 		Enumerated 570.257916 programs/s avg. (just enumeration time)
+[     1.962][MainProcess][INFO] 		Enumerated 6.739505 programs/s avg. (overall)
+[     1.962][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.064616 (approx)
+[     1.962][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.007150 (approx)
+[     1.962][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, 'crusingrange <= 1000'), anti_join(line0, line1, 'eid,ename')]
+[     1.962][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_aircraft <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols("aid" = col_integer(),"aname" = col_character(),"crusingrange" = col_integer()))
+df_aircraft <- copy_to(con, df_aircraft)
+df_certified <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols("eid" = col_integer(),"aid" = col_integer()))
+df_certified <- copy_to(con, df_certified)
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+expected_output <- read_csv("tests-examples/textbook/tables/35.out", col_types = cols("ename" = col_character()))
+
+df22 <- inner_join(df_aircraft, df_certified, na_matches="never") %>% inner_join(df_employees, na_matches="never")
+df23 <- df22 %>% filter(crusingrange <= 1000)
+df24 <- anti_join(df22, df23, by=c('eid','ename'), na_matches="never")
+out <- df24 %>% select(ename) %>% distinct() %>% arrange(ename)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT ename
+FROM
+  (SELECT *
+   FROM
+     (SELECT aid,
+             aname,
+             crusingrange,
+             LHS.eid AS eid,
+             ename,
+             salary
+      FROM
+        (SELECT LHS.aid AS aid,
+                aname,
+                crusingrange,
+                eid
+         FROM df_aircraft AS LHS
+         INNER JOIN df_certified AS RHS ON (LHS.aid = RHS.aid)) AS LHS
+      INNER JOIN df_employees AS RHS ON (LHS.eid = RHS.eid)) AS LHS
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM
+             (SELECT aid,
+                     aname,
+                     crusingrange,
+                     LHS.eid AS eid,
+                     ename,
+                     salary
+              FROM
+                (SELECT LHS.aid AS aid,
+                        aname,
+                        crusingrange,
+                        eid
+                 FROM df_aircraft AS LHS
+                 INNER JOIN df_certified AS RHS ON (LHS.aid = RHS.aid)) AS LHS
+              INNER JOIN df_employees AS RHS ON (LHS.eid = RHS.eid))
+           WHERE (crusingrange <= 1000.0)) AS RHS
+        WHERE (LHS.eid = RHS.eid
+               AND LHS.ename = RHS.ename) ))
+ORDER BY ename

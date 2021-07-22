@@ -1,0 +1,51 @@
+[     2.370][MainProcess][INFO] Parsing specification...
+[     2.374][MainProcess][INFO] File read
+[     2.375][MainProcess][DEBUG] Reading input files...
+[     2.384][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i054.csv: ['datetime64[ns]', 'int64']
+[     2.390][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o054.csv: ['datetime64[ns]', 'int64']
+[     2.390][MainProcess][INFO] Parsing sketch...
+[     2.391][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['cumsumcount = cumsum(count)'], type=Unknown, var=[])])
+[     2.471][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 1548, 'filter': 6, 'summarise': 4, 'mutate': 1}
+[     2.471][MainProcess][DEBUG] {'natural_join': 0.0006337135614702154, 'natural_join3': 0.0006337135614702154, 'natural_join4': 0.0006337135614702154, 'inner_join': 0.004435994930291508, 'anti_join': 0.0025348542458808617, 'left_join': 0.0006337135614702154, 'union': 0.0006337135614702154, 'intersect': 0.0012674271229404308, 'semi_join': 0.0006337135614702154, 'cross_join': 0.9809885931558935, 'filter': 0.0038022813688212928, 'summarise': 0.0025348542458808617, 'mutate': 0.0006337135614702154}
+[     2.472][MainProcess][DEBUG] {'natural_join': 0.0006337135614702154, 'natural_join3': 0.0006337135614702154, 'natural_join4': 0.0006337135614702154, 'inner_join': 0.004435994930291508, 'anti_join': 0.0025348542458808617, 'left_join': 0.0006337135614702154, 'union': 0.0006337135614702154, 'intersect': 0.0012674271229404308, 'semi_join': 0.0006337135614702154, 'cross_join': 0.9809885931558935, 'filter': 0.0038022813688212928, 'summarise': 0.0025348542458808617, 'mutate': 0.0006337135614702154}
+[     2.472][MainProcess][INFO] Building synthesizer...
+[     2.473][MainProcess][DEBUG] [Line(T1, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Table, var=[[1582], [1581]]),Child(['cumsumcount = cumsum(count)'], type=Unknown, var=[[1582], [1581]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.517][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 67 constraints
+[     2.521][MainProcess][DEBUG] Enumeration time: 0.049201250076293945
+[     2.563][MainProcess][DEBUG] Synthesis time: 0.041690826416015625
+[     2.563][MainProcess][INFO] Solution found: [mutate(input0, 'cumsumcount = cumsum(count)')]
+[     2.564][MainProcess][DEBUG] Solution found using process 0
+[     2.564][MainProcess][INFO] Statistics:
+[     2.564][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.564][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.564][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.564][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.564][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.564][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.564][MainProcess][INFO] 	Total time spent in enumerator init: 0.049201 (approx)
+[     2.565][MainProcess][INFO] 	Total time spent in enumerator: 0.000725 (approx)
+[     2.565][MainProcess][INFO] 		Enumerated 1378.798159 programs/s avg. (just enumeration time)
+[     2.565][MainProcess][INFO] 		Enumerated 0.532987 programs/s avg. (overall)
+[     2.565][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.039070 (approx)
+[     2.565][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.565][MainProcess][INFO] Solution found: [mutate(input0, 'cumsumcount = cumsum(count)')]
+[     2.565][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i054 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i054.csv", col_types = cols("created_at" = col_character(),"count" = col_integer()))
+df_i054$created_at <- mdy(df_i054$created_at)
+df_i054 <- copy_to(con, df_i054)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o054.csv", col_types = cols("created_at" = col_character(),"count" = col_integer()))
+expected_output$created_at <- mdy(expected_output$created_at)
+
+df2 <- df_i054 %>% mutate(cumsumcount = cumsum(count))
+out <- df2 %>% select(created_at, count = cumsumcount)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT created_at,
+       SUM(COUNT) OVER (ROWS UNBOUNDED PRECEDING) AS COUNT
+FROM df_i054

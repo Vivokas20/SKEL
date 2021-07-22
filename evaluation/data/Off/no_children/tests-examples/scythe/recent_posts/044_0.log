@@ -1,0 +1,70 @@
+[     2.394][MainProcess][INFO] Parsing specification...
+[     2.399][MainProcess][INFO] File read
+[     2.400][MainProcess][DEBUG] Reading input files...
+[     2.409][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/044_1.csv: ['int64', 'string']
+[     2.414][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/044_2.csv: ['string', 'int64']
+[     2.420][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/044_o.csv: ['int64', 'string']
+[     2.420][MainProcess][INFO] Parsing sketch...
+[     2.420][MainProcess][DEBUG] Sketch creation: Line(T1, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     2.421][MainProcess][DEBUG] Sketch creation: Line(T2, root=['anti_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.458][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 40, 'anti_join': 28, 'left_join': 4, 'union': 4, 'intersect': 12, 'semi_join': 4, 'cross_join': 0}
+[     2.459][MainProcess][DEBUG] {'natural_join': 0.03333333333333333, 'natural_join3': 0.06666666666666667, 'natural_join4': 0.13333333333333333, 'inner_join': 0.3333333333333333, 'anti_join': 0.23333333333333334, 'left_join': 0.03333333333333333, 'union': 0.03333333333333333, 'intersect': 0.1, 'semi_join': 0.03333333333333333, 'cross_join': 0.0}
+[     2.459][MainProcess][DEBUG] {'natural_join': 0.03333333333333333, 'natural_join3': 0.06666666666666667, 'natural_join4': 0.13333333333333333, 'inner_join': 0.3333333333333333, 'anti_join': 0.23333333333333334, 'left_join': 0.03333333333333333, 'union': 0.03333333333333333, 'intersect': 0.1, 'semi_join': 0.03333333333333333, 'cross_join': 0.0}
+[     2.459][MainProcess][INFO] Building synthesizer...
+[     2.460][MainProcess][DEBUG] [Line(T1, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[]),Child([None], type=None, var=[0])]), Line(T2, root=['anti_join'], var=[5], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])])]
+[     2.539][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 93 constraints
+[     2.545][MainProcess][DEBUG] Enumeration time: 0.08637285232543945
+[     2.826][MainProcess][DEBUG] Synthesis time: 0.2811150550842285
+[     2.827][MainProcess][INFO] Solution found: [inner_join(input1, input0, 'OriginalID = OriginalID,Part = Area'), anti_join(input0, line0, '')]
+[     2.828][MainProcess][DEBUG] Solution found using process 0
+[     2.828][MainProcess][INFO] Statistics:
+[     2.828][MainProcess][INFO] 	Attempted programs: 34 (approx)
+[     2.828][MainProcess][INFO] 		Rejected: 33 (approx)
+[     2.828][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.828][MainProcess][INFO] 		Empty outputs: 11 (32.4%) (approx)
+[     2.828][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.828][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.829][MainProcess][INFO] 	Total time spent in enumerator init: 0.086373 (approx)
+[     2.829][MainProcess][INFO] 	Total time spent in enumerator: 0.051450 (approx)
+[     2.829][MainProcess][INFO] 		Enumerated 660.841706 programs/s avg. (just enumeration time)
+[     2.829][MainProcess][INFO] 		Enumerated 15.993128 programs/s avg. (overall)
+[     2.829][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.205372 (approx)
+[     2.829][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.023413 (approx)
+[     2.829][MainProcess][INFO] Solution found: [inner_join(input1, input0, 'OriginalID = OriginalID,Part = Area'), anti_join(input0, line0, '')]
+[     2.829][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_044_1 <- read_csv("tests-examples/scythe/recent_posts/tables/044_1.csv", col_types = cols("OriginalID" = col_integer(),"Area" = col_character()))
+df_044_1 <- copy_to(con, df_044_1)
+df_044_2 <- read_csv("tests-examples/scythe/recent_posts/tables/044_2.csv", col_types = cols("Part" = col_character(),"OriginalID" = col_integer()))
+df_044_2 <- copy_to(con, df_044_2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/044_o.csv", col_types = cols("OriginalID" = col_integer(),"Area" = col_character()))
+
+df28 <- inner_join(df_044_2, df_044_1, by=c('OriginalID' = 'OriginalID','Part' = 'Area'), suffix = c('', '.other'), na_matches='never') %>% mutate(Area = Part)
+df29 <- anti_join(df_044_1, df28, by=c(), na_matches="never")
+out <- df29 %>% select(OriginalID, Area)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT OriginalID,
+       Area
+FROM
+  (SELECT *
+   FROM df_044_1 AS LHS
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT Part,
+                  OriginalID,
+                  Part AS Area
+           FROM
+             (SELECT Part,
+                     LHS.OriginalID AS OriginalID
+              FROM df_044_2 AS LHS
+              INNER JOIN df_044_1 AS RHS ON (LHS.OriginalID = RHS.OriginalID
+                                             AND LHS.Part = RHS.Area))) AS RHS
+        WHERE (LHS.OriginalID = RHS.OriginalID
+               AND LHS.Area = RHS.Area) ))

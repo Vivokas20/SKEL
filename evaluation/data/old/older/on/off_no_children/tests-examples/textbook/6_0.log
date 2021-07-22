@@ -1,0 +1,74 @@
+[     1.668][MainProcess][INFO] Parsing specification...
+[     1.672][MainProcess][INFO] File read
+[     1.673][MainProcess][DEBUG] Reading input files...
+[     1.680][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/6-1.txt: ['string', 'string']
+[     1.684][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/6-2.txt: ['string', 'string']
+[     1.689][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/6-3.txt: ['string', 'string']
+[     1.694][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/6.out: ['string']
+[     1.694][MainProcess][INFO] Parsing sketch...
+[     1.694][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     1.694][MainProcess][DEBUG] Sketch creation: Line(T2, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     1.694][MainProcess][DEBUG] Sketch creation: Line(T3, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     1.730][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 846, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 54, 'filter': 18, 'summarise': 33, 'mutate': 3}
+[     1.730][MainProcess][DEBUG] {'natural_join': 0.0072992700729927005, 'natural_join3': 0.021897810218978103, 'natural_join4': 0.06569343065693431, 'inner_join': 0.6861313868613139, 'anti_join': 0.08029197080291971, 'left_join': 0.0072992700729927005, 'union': 0.0072992700729927005, 'intersect': 0.029197080291970802, 'semi_join': 0.0072992700729927005, 'cross_join': 0.043795620437956206, 'filter': 0.014598540145985401, 'summarise': 0.0267639902676399, 'mutate': 0.0024330900243309003}
+[     1.731][MainProcess][DEBUG] {'natural_join': 0.0072992700729927005, 'natural_join3': 0.021897810218978103, 'natural_join4': 0.06569343065693431, 'inner_join': 0.6861313868613139, 'anti_join': 0.08029197080291971, 'left_join': 0.0072992700729927005, 'union': 0.0072992700729927005, 'intersect': 0.029197080291970802, 'semi_join': 0.0072992700729927005, 'cross_join': 0.043795620437956206, 'filter': 0.014598540145985401, 'summarise': 0.0267639902676399, 'mutate': 0.0024330900243309003}
+[     1.731][MainProcess][INFO] Building synthesizer...
+[     1.732][MainProcess][DEBUG] [Line(T1, root=['natural_join3'], var=[2], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child([None], type=None, var=[0])]), Line(T2, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])]), Line(T3, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     1.991][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 315 constraints
+[     2.008][MainProcess][DEBUG] Enumeration time: 0.27762508392333984
+[     2.404][MainProcess][DEBUG] Synthesis time: 0.39522695541381836
+[     2.404][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), summarise(line0, 'n = n()', 'F_name'), filter(line1, 'n <= 5')]
+[     2.405][MainProcess][DEBUG] Solution found using process 0
+[     2.405][MainProcess][INFO] Statistics:
+[     2.405][MainProcess][INFO] 	Attempted programs: 48 (approx)
+[     2.405][MainProcess][INFO] 		Rejected: 47 (approx)
+[     2.405][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.405][MainProcess][INFO] 		Empty outputs: 11 (22.9%) (approx)
+[     2.405][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.405][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.405][MainProcess][INFO] 	Total time spent in enumerator init: 0.277625 (approx)
+[     2.405][MainProcess][INFO] 	Total time spent in enumerator: 0.072455 (approx)
+[     2.405][MainProcess][INFO] 		Enumerated 662.476446 programs/s avg. (just enumeration time)
+[     2.405][MainProcess][INFO] 		Enumerated 25.934360 programs/s avg. (overall)
+[     2.405][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.293864 (approx)
+[     2.405][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.028034 (approx)
+[     2.405][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), summarise(line0, 'n = n()', 'F_name'), filter(line1, 'n <= 5')]
+[     2.405][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_6_1 <- read_csv("tests-examples/textbook/tables/6-1.txt", col_types = cols("S_key" = col_character(),"C_name" = col_character()))
+df_6_1 <- copy_to(con, df_6_1)
+df_6_2 <- read_csv("tests-examples/textbook/tables/6-2.txt", col_types = cols("C_name" = col_character(),"F_key" = col_character()))
+df_6_2 <- copy_to(con, df_6_2)
+df_6_3 <- read_csv("tests-examples/textbook/tables/6-3.txt", col_types = cols("F_key" = col_character(),"F_name" = col_character()))
+df_6_3 <- copy_to(con, df_6_3)
+expected_output <- read_csv("tests-examples/textbook/tables/6.out", col_types = cols("F_name" = col_character()))
+
+df69 <- inner_join(df_6_1, df_6_2, na_matches="never") %>% inner_join(df_6_3, na_matches="never")
+df70 <- df69 %>% group_by(F_name) %>% summarise(n = n()) %>% ungroup()
+df71 <- df70 %>% filter(n <= 5)
+out <- df71 %>% select(F_name) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT F_name
+FROM
+  (SELECT F_name,
+          COUNT(*) AS n
+   FROM
+     (SELECT S_key,
+             C_name,
+             LHS.F_key AS F_key,
+             F_name
+      FROM
+        (SELECT S_key,
+                LHS.C_name AS C_name,
+                F_key
+         FROM df_6_1 AS LHS
+         INNER JOIN df_6_2 AS RHS ON (LHS.C_name = RHS.C_name)) AS LHS
+      INNER JOIN df_6_3 AS RHS ON (LHS.F_key = RHS.F_key))
+   GROUP BY F_name)
+WHERE (n <= 5.0)

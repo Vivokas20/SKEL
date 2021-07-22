@@ -1,0 +1,29 @@
+[     1.672][MainProcess][INFO] Parsing specification...
+[     1.677][MainProcess][INFO] File read
+[     1.678][MainProcess][DEBUG] Reading input files...
+[     1.683][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.685][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     1.689][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     1.693][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/31.out: ['string']
+[     1.693][MainProcess][INFO] Parsing sketch...
+[     1.693][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child([2], type=Table, var=[])])
+[     1.693][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Line, var=[])])
+[     1.693][MainProcess][DEBUG] Sketch creation: Line(T3, root=['anti_join'], var=[], children=[Child([0], type=Line, var=[]),Child([1], type=Line, var=[]),Child(['crusingrange, salary'], type=Cols, var=[])])
+[     1.726][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 288, 'filter': 96}
+[     1.726][MainProcess][DEBUG] {'natural_join': 0.006036217303822937, 'natural_join3': 0.018108651911468814, 'natural_join4': 0.05432595573440644, 'inner_join': 0.4768611670020121, 'anti_join': 0.13279678068410464, 'left_join': 0.006036217303822937, 'union': 0.006036217303822937, 'intersect': 0.03621730382293763, 'semi_join': 0.006036217303822937, 'cross_join': 0.193158953722334, 'filter': 0.06438631790744467}
+[     1.726][MainProcess][DEBUG] {'natural_join': 0.006036217303822937, 'natural_join3': 0.018108651911468814, 'natural_join4': 0.05432595573440644, 'inner_join': 0.4768611670020121, 'anti_join': 0.13279678068410464, 'left_join': 0.006036217303822937, 'union': 0.006036217303822937, 'intersect': 0.03621730382293763, 'semi_join': 0.006036217303822937, 'cross_join': 0.193158953722334, 'filter': 0.06438631790744467}
+[     1.726][MainProcess][INFO] Building synthesizer...
+Traceback (most recent call last):
+  File "sequential.py", line 84, in <module>
+    main()
+  File "sequential.py", line 60, in main
+    squares_enumerator.main(args, specification, 0, configs[0], queue)
+  File "/home/vbernardo/SKEL/squares/squares_enumerator.py", line 65, in main
+    enumerator = BitEnumerator(spec, specification, loc=loc)
+  File "/home/vbernardo/SKEL/squares/tyrell/enumerator/bitenum.py", line 183, in __init__
+    self.sketch.fill_vars(self.spec, self.line_productions)
+  File "/home/vbernardo/SKEL/squares/dsl/sketch.py", line 576, in fill_vars
+    child = line.get_child(c)
+  File "/home/vbernardo/SKEL/squares/dsl/sketch.py", line 113, in get_child
+    return self.children[n]
+IndexError: list index out of range

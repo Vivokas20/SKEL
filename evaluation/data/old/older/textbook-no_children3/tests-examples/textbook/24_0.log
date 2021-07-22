@@ -1,0 +1,19 @@
+[     3.645][MainProcess][INFO] Parsing specification...
+[     3.651][MainProcess][INFO] File read
+[     3.652][MainProcess][DEBUG] Reading input files...
+[     3.662][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     3.669][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     3.674][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     3.679][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/24.out: ['string']
+[     3.680][MainProcess][INFO] Parsing sketch...
+[     3.680][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     3.680][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     3.729][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 54, 'filter': 18}
+[     3.729][MainProcess][DEBUG] {'natural_join': 0.007633587786259542, 'natural_join3': 0.022900763358778626, 'natural_join4': 0.06870229007633588, 'inner_join': 0.6030534351145038, 'anti_join': 0.16793893129770993, 'left_join': 0.007633587786259542, 'union': 0.007633587786259542, 'intersect': 0.04580152671755725, 'semi_join': 0.007633587786259542, 'cross_join': 0.04580152671755725, 'filter': 0.015267175572519083}
+[     3.729][MainProcess][DEBUG] {'natural_join': 0.007633587786259542, 'natural_join3': 0.022900763358778626, 'natural_join4': 0.06870229007633588, 'inner_join': 0.6030534351145038, 'anti_join': 0.16793893129770993, 'left_join': 0.007633587786259542, 'union': 0.007633587786259542, 'intersect': 0.04580152671755725, 'semi_join': 0.007633587786259542, 'cross_join': 0.04580152671755725, 'filter': 0.015267175572519083}
+[     3.729][MainProcess][INFO] Building synthesizer...
+[     3.731][MainProcess][DEBUG] {1: Line(T1, root=['natural_join3'], var=[2], children=[Child(['??'], type=Table, var=[131, 132, 133]),Child(['??'], type=Table, var=[131, 132, 133]),Child(['??'], type=Table, var=[131, 132, 133]),Child([None], type=None, var=[0])]), 2: Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[131, 132, 133]),Child(['??'], type=FilterCondition, var=[125, 126, 127, 128, 129, 130]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])}
+[     3.794][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 80 constraints
+[     3.798][MainProcess][DEBUG] Enumeration time: 0.06810331344604492
+[     3.948][MainProcess][DEBUG] Synthesis time: 0.15079259872436523
+[     3.949][MainProcess][ERROR] Process 0 reached the maximum number of lines (2). Giving up...

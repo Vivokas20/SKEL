@@ -1,0 +1,71 @@
+[     2.390][MainProcess][INFO] Parsing specification...
+[     2.397][MainProcess][INFO] File read
+[     2.398][MainProcess][DEBUG] Reading input files...
+[     2.409][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/019.csv: ['int64', 'Float64', 'datetime64[ns]']
+[     2.417][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/019_o.csv: ['int64', 'Float64', 'datetime64[ns]']
+[     2.417][MainProcess][INFO] Parsing sketch...
+[     2.417][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['Balance > 0'], type=Unknown, var=[])])
+[     2.418][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Line, var=[]),Child(['maxBalance = max(Balance)'], type=Unknown, var=[])])
+[     2.418][MainProcess][DEBUG] Sketch creation: Line(T3, root=['??'], var=[], children=[Child([1], type=Line, var=[]),Child([0], type=Table, var=[]),Child(['Balance >= maxBalance & Date < Date.other'], type=Unknown, var=[])])
+[     2.612][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 26, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 4740, 'filter': 456, 'summarise': 21, 'mutate': 3}
+[     2.612][MainProcess][DEBUG] {'natural_join': 0.00019004180919802356, 'natural_join3': 0.00019004180919802356, 'natural_join4': 0.00019004180919802356, 'inner_join': 0.0049410870391486126, 'anti_join': 0.0013302926643861649, 'left_join': 0.00019004180919802356, 'union': 0.00019004180919802356, 'intersect': 0.0005701254275940707, 'semi_join': 0.00019004180919802356, 'cross_join': 0.9007981755986317, 'filter': 0.08665906499429875, 'summarise': 0.003990877993158495, 'mutate': 0.0005701254275940707}
+[     2.612][MainProcess][DEBUG] {'natural_join': 0.00019004180919802356, 'natural_join3': 0.00019004180919802356, 'natural_join4': 0.00019004180919802356, 'inner_join': 0.0049410870391486126, 'anti_join': 0.0013302926643861649, 'left_join': 0.00019004180919802356, 'union': 0.00019004180919802356, 'intersect': 0.0005701254275940707, 'semi_join': 0.00019004180919802356, 'cross_join': 0.9007981755986317, 'filter': 0.08665906499429875, 'summarise': 0.003990877993158495, 'mutate': 0.0005701254275940707}
+[     2.612][MainProcess][INFO] Building synthesizer...
+[     2.615][MainProcess][DEBUG] [Line(T1, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Table, var=[[5249], [4795]]),Child(['Balance > 0'], type=Unknown, var=[[5249], [4795]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Line, var=[[5251], [5247]]),Child(['maxBalance = max(Balance)'], type=Unknown, var=[[5251], [5247]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([1], type=Line, var=[[5252], [5249], [454]]),Child([0], type=Table, var=[[5252], [5249], [454]]),Child(['Balance >= maxBalance & Date < Date.other'], type=Unknown, var=[[5252], [5249], [454]]),Child([None], type=None, var=[0])])]
+[     3.193][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 237 constraints
+[     3.263][MainProcess][DEBUG] Enumeration time: 0.6507618427276611
+[     3.349][MainProcess][DEBUG] Synthesis time: 0.08621692657470703
+[     3.350][MainProcess][INFO] Solution found: [filter(input0, 'Balance > 0'), mutate(line0, 'maxBalance = max(Balance)'), cross_join(line1, input0, 'Balance >= maxBalance & Date < Date.other')]
+[     3.357][MainProcess][DEBUG] Solution found using process 0
+[     3.357][MainProcess][INFO] Statistics:
+[     3.357][MainProcess][INFO] 	Attempted programs: 2 (approx)
+[     3.357][MainProcess][INFO] 		Rejected: 1 (approx)
+[     3.357][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.357][MainProcess][INFO] 		Empty outputs: 1 (50.0%) (approx)
+[     3.357][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.357][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.357][MainProcess][INFO] 	Total time spent in enumerator init: 0.650762 (approx)
+[     3.358][MainProcess][INFO] 	Total time spent in enumerator: 0.007302 (approx)
+[     3.358][MainProcess][INFO] 		Enumerated 273.904787 programs/s avg. (just enumeration time)
+[     3.358][MainProcess][INFO] 		Enumerated 0.752401 programs/s avg. (overall)
+[     3.358][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.073589 (approx)
+[     3.358][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.003231 (approx)
+[     3.358][MainProcess][INFO] Solution found: [filter(input0, 'Balance > 0'), mutate(line0, 'maxBalance = max(Balance)'), cross_join(line1, input0, 'Balance >= maxBalance & Date < Date.other')]
+[     3.358][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_019 <- read_csv("tests-examples/scythe/recent_posts/tables/019.csv", col_types = cols("CustomerID" = col_integer(),"Balance" = col_double(),"Date" = col_character()))
+df_019$Date <- mdy(df_019$Date)
+df_019 <- copy_to(con, df_019)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/019_o.csv", col_types = cols("CustomerID" = col_integer(),"Balance" = col_double(),"Date" = col_character()))
+expected_output$Date <- mdy(expected_output$Date)
+
+df5 <- df_019 %>% filter(Balance > 0)
+df6 <- df5 %>% mutate(maxBalance = max(Balance))
+df7 <- full_join(df6, df_019, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(Balance >= maxBalance & Date < Date.other)
+out <- df7 %>% select(CustomerID, Balance = Balance.other, Date = Date.other)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT CustomerID,
+       Balance_other AS Balance,
+       Date_other AS Date
+FROM
+  (SELECT LHS.CustomerID AS CustomerID,
+          LHS.Balance AS Balance,
+          LHS.Date AS Date,
+          maxBalance,
+          RHS.CustomerID AS CustomerID_other,
+          RHS.Balance AS Balance_other,
+          RHS.Date AS Date_other
+   FROM
+     (SELECT CustomerID,
+             Balance, Date, MAX(Balance) OVER () AS maxBalance
+      FROM df_019
+      WHERE (Balance > 0.0)) AS LHS
+   CROSS JOIN df_019 AS RHS)
+WHERE (Balance >= maxBalance
+       AND Date < Date_other)

@@ -1,0 +1,43 @@
+[     3.929][MainProcess][INFO] Parsing specification...
+[     3.963][MainProcess][INFO] File read
+[     3.964][MainProcess][DEBUG] Reading input files...
+[     4.001][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i020.csv: ['string', 'string']
+[     4.014][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o020.csv: ['string', 'string', 'int64']
+[     4.059][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 32, 'summarise': 4, 'mutate': 1}
+[     4.059][MainProcess][DEBUG] {'natural_join': 0.017857142857142856, 'natural_join3': 0.017857142857142856, 'natural_join4': 0.017857142857142856, 'inner_join': 0.125, 'anti_join': 0.07142857142857142, 'left_join': 0.017857142857142856, 'union': 0.017857142857142856, 'intersect': 0.03571428571428571, 'semi_join': 0.017857142857142856, 'cross_join': 0.5714285714285714, 'summarise': 0.07142857142857142, 'mutate': 0.017857142857142856}
+[     4.059][MainProcess][DEBUG] {'natural_join': 0.01785714285714286, 'natural_join3': 0.01785714285714286, 'natural_join4': 0.01785714285714286, 'inner_join': 0.12500000000000003, 'anti_join': 0.07142857142857144, 'left_join': 0.01785714285714286, 'union': 0.01785714285714286, 'intersect': 0.03571428571428572, 'semi_join': 0.01785714285714286, 'cross_join': 0.5714285714285715, 'summarise': 0.07142857142857144, 'mutate': 0.01785714285714286}
+[     4.059][MainProcess][INFO] Building synthesizer...
+[     4.211][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 203 constraints
+[     4.224][MainProcess][DEBUG] Enumeration time: 0.16455078125
+[     4.267][MainProcess][DEBUG] Synthesis time: 0.04274940490722656
+[     4.267][MainProcess][INFO] Solution found: [mutate(input0, "str_countDESCRIPTION = str_count(DESCRIPTION, 'value')"), inner_join(line0, line0, 'DESCRIPTION')]
+[     4.268][MainProcess][DEBUG] Solution found using process 0
+[     4.268][MainProcess][INFO] Statistics:
+[     4.268][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     4.268][MainProcess][INFO] 		Rejected: 0 (approx)
+[     4.268][MainProcess][INFO] 		Failed: 0 (approx)
+[     4.268][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     4.268][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     4.268][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     4.268][MainProcess][INFO] 	Total time spent in enumerator init: 0.164551 (approx)
+[     4.268][MainProcess][INFO] 	Total time spent in enumerator: 0.001256 (approx)
+[     4.268][MainProcess][INFO] 		Enumerated 796.185270 programs/s avg. (just enumeration time)
+[     4.268][MainProcess][INFO] 		Enumerated 0.328642 programs/s avg. (overall)
+[     4.268][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.039441 (approx)
+[     4.268][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     4.268][MainProcess][INFO] Solution found: [mutate(input0, "str_countDESCRIPTION = str_count(DESCRIPTION, 'value')"), inner_join(line0, line0, 'DESCRIPTION')]
+[     4.268][MainProcess][INFO] Solution size: 2
+[     4.557][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i020 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i020.csv", col_types = cols("TITLE" = col_character(),"DESCRIPTION" = col_character()))
+df_i020 <- copy_to(con, df_i020)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o020.csv", col_types = cols("TITLE" = col_character(),"DESCRIPTION" = col_character(),"COUNT" = col_integer()))
+
+df3 <- df_i020 %>% mutate(str_countDESCRIPTION = str_count(DESCRIPTION, 'value'))
+df4 <- inner_join(df3, df3, by=c('DESCRIPTION'), suffix = c('', '.other'), na_matches='never')
+out <- df4 %>% select(TITLE, DESCRIPTION, COUNT = str_countDESCRIPTION) %>% arrange(TITLE)
+
+Failed to generate SQL query

@@ -1,0 +1,84 @@
+[     3.777][MainProcess][INFO] Parsing specification...
+[     3.782][MainProcess][INFO] File read
+[     3.783][MainProcess][DEBUG] Reading input files...
+[     3.791][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16-1.txt: ['string', 'string']
+[     3.795][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16-2.txt: ['string', 'string']
+[     3.800][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16-3.txt: ['string', 'string']
+[     3.803][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/16.out: ['string']
+[     3.844][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 846, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 288, 'filter': 6, 'summarise': 33, 'mutate': 3}
+[     3.844][MainProcess][DEBUG] {'natural_join': 0.006185567010309278, 'natural_join3': 0.018556701030927835, 'natural_join4': 0.05567010309278351, 'inner_join': 0.5814432989690722, 'anti_join': 0.06804123711340206, 'left_join': 0.006185567010309278, 'union': 0.006185567010309278, 'intersect': 0.024742268041237112, 'semi_join': 0.006185567010309278, 'cross_join': 0.1979381443298969, 'filter': 0.004123711340206186, 'summarise': 0.02268041237113402, 'mutate': 0.002061855670103093}
+[     3.844][MainProcess][DEBUG] {'natural_join': 0.006185567010309278, 'natural_join3': 0.018556701030927835, 'natural_join4': 0.05567010309278351, 'inner_join': 0.5814432989690722, 'anti_join': 0.06804123711340206, 'left_join': 0.006185567010309278, 'union': 0.006185567010309278, 'intersect': 0.024742268041237112, 'semi_join': 0.006185567010309278, 'cross_join': 0.1979381443298969, 'filter': 0.004123711340206186, 'summarise': 0.02268041237113402, 'mutate': 0.002061855670103093}
+[     3.844][MainProcess][INFO] Building synthesizer...
+[     4.087][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 222 constraints
+[     4.136][MainProcess][DEBUG] There is no solution for current loc (2).
+[     4.136][MainProcess][DEBUG] Enumeration time: 0.292339563369751
+[     4.137][MainProcess][DEBUG] Synthesis time: 0.0003941059112548828
+[     4.137][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     4.514][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 383 constraints
+[     4.557][MainProcess][DEBUG] Enumeration time: 0.4196629524230957
+[     8.834][MainProcess][DEBUG] Synthesis time: 4.276037931442261
+[     8.834][MainProcess][INFO] Increasing the number of lines of code to 4.
+[     9.360][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 579 constraints
+[     9.407][MainProcess][DEBUG] Enumeration time: 0.5728230476379395
+[     9.801][MainProcess][DEBUG] Synthesis time: 0.3916962146759033
+[     9.801][MainProcess][INFO] Solution found: [inner_join(input2, input0, 'S_key'), summarise(line0, 'n = n()', 'P_id,S_name'), filter(line1, "S_name != 'AWS'"), anti_join(input1, line2, '')]
+[     9.804][MainProcess][DEBUG] Solution found using process 0
+[     9.804][MainProcess][INFO] Statistics:
+[     9.804][MainProcess][INFO] 	Attempted programs: 367 (approx)
+[     9.804][MainProcess][INFO] 		Rejected: 243 (approx)
+[     9.804][MainProcess][INFO] 		Failed: 123 (approx)
+[     9.804][MainProcess][INFO] 		Empty outputs: 8 (2.2%) (approx)
+[     9.804][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     9.804][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     9.804][MainProcess][INFO] 	Total time spent in enumerator init: 1.284826 (approx)
+[     9.804][MainProcess][INFO] 	Total time spent in enumerator: 1.092311 (approx)
+[     9.804][MainProcess][INFO] 		Enumerated 335.985000 programs/s avg. (just enumeration time)
+[     9.804][MainProcess][INFO] 		Enumerated 42.670593 programs/s avg. (overall)
+[     9.804][MainProcess][INFO] 	Total time spent in evaluation & testing: 2.767749 (approx)
+[     9.804][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.224232 (approx)
+[     9.804][MainProcess][INFO] Solution found: [inner_join(input2, input0, 'S_key'), summarise(line0, 'n = n()', 'P_id,S_name'), filter(line1, "S_name != 'AWS'"), anti_join(input1, line2, '')]
+[     9.804][MainProcess][INFO] Solution size: 4
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_16_1 <- read_csv("tests-examples/textbook/tables/16-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_16_1 <- copy_to(con, df_16_1)
+df_16_2 <- read_csv("tests-examples/textbook/tables/16-2.txt", col_types = cols("P_id" = col_character(),"P_name" = col_character()))
+df_16_2 <- copy_to(con, df_16_2)
+df_16_3 <- read_csv("tests-examples/textbook/tables/16-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_16_3 <- copy_to(con, df_16_3)
+expected_output <- read_csv("tests-examples/textbook/tables/16.out", col_types = cols("P_name" = col_character()))
+
+df467 <- inner_join(df_16_3, df_16_1, by=c('S_key'), suffix = c('', '.other'), na_matches='never')
+df468 <- df467 %>% group_by(P_id,S_name) %>% summarise(n = n()) %>% ungroup()
+df469 <- df468 %>% filter(S_name != 'AWS')
+df470 <- anti_join(df_16_2, df469, by=c(), na_matches="never")
+out <- df470 %>% select(P_name) %>% arrange(P_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `P_name`
+FROM
+  (SELECT *
+   FROM `df_16_2` AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM
+             (SELECT `P_id`,
+                     `S_name`,
+                     COUNT() AS `n`
+              FROM
+                (SELECT `LHS`.`S_key` AS `S_key`,
+                        `LHS`.`S_name` AS `S_name`,
+                        `RHS`.`P_id` AS `P_id`
+                 FROM `df_16_3` AS `LHS`
+                 INNER JOIN `df_16_1` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`))
+              GROUP BY `P_id`,
+                       `S_name`)
+           WHERE (`S_name` != 'AWS')) AS RHS
+        WHERE (LHS.P_id = RHS.P_id) ))
+ORDER BY P_name

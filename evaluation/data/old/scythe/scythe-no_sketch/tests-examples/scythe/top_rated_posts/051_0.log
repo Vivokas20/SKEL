@@ -1,0 +1,73 @@
+[     3.834][MainProcess][INFO] Parsing specification...
+[     3.838][MainProcess][INFO] File read
+[     3.839][MainProcess][DEBUG] Reading input files...
+[     3.849][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i051.csv: ['int64', 'string', 'datetime64[ns]']
+[     3.855][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o051.csv: ['int64', 'string', 'datetime64[ns]']
+[     3.921][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 12, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 7, 'mutate': 1}
+[     3.921][MainProcess][DEBUG] {'natural_join': 0.0008680555555555555, 'natural_join3': 0.0008680555555555555, 'natural_join4': 0.0008680555555555555, 'inner_join': 0.010416666666666666, 'anti_join': 0.006076388888888889, 'left_join': 0.0008680555555555555, 'union': 0.0008680555555555555, 'intersect': 0.0026041666666666665, 'semi_join': 0.0008680555555555555, 'cross_join': 0.9635416666666666, 'filter': 0.005208333333333333, 'summarise': 0.006076388888888889, 'mutate': 0.0008680555555555555}
+[     3.921][MainProcess][DEBUG] {'natural_join': 0.0008680555555555555, 'natural_join3': 0.0008680555555555555, 'natural_join4': 0.0008680555555555555, 'inner_join': 0.010416666666666666, 'anti_join': 0.006076388888888889, 'left_join': 0.0008680555555555555, 'union': 0.0008680555555555555, 'intersect': 0.0026041666666666665, 'semi_join': 0.0008680555555555555, 'cross_join': 0.9635416666666666, 'filter': 0.005208333333333333, 'summarise': 0.006076388888888889, 'mutate': 0.0008680555555555555}
+[     3.922][MainProcess][INFO] Building synthesizer...
+[     4.475][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 93 constraints
+[     4.541][MainProcess][DEBUG] Enumeration time: 0.6195662021636963
+[     5.120][MainProcess][DEBUG] Synthesis time: 0.5787312984466553
+[     5.120][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     6.257][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 216 constraints
+[     6.389][MainProcess][DEBUG] Enumeration time: 1.2684619426727295
+[    63.689][MainProcess][DEBUG] Synthesis time: 57.29841637611389
+[    63.689][MainProcess][INFO] Solution found: [mutate(input0, 'maxdate = max(date)'), cross_join(line0, line0, 'date < maxdate & date.other == maxdate.other')]
+[    63.697][MainProcess][DEBUG] Solution found using process 0
+[    63.697][MainProcess][INFO] Statistics:
+[    63.697][MainProcess][INFO] 	Attempted programs: 149 (approx)
+[    63.697][MainProcess][INFO] 		Rejected: 148 (approx)
+[    63.697][MainProcess][INFO] 		Failed: 0 (approx)
+[    63.697][MainProcess][INFO] 		Empty outputs: 42 (28.2%) (approx)
+[    63.697][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    63.697][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    63.697][MainProcess][INFO] 	Total time spent in enumerator init: 1.888028 (approx)
+[    63.697][MainProcess][INFO] 	Total time spent in enumerator: 0.577739 (approx)
+[    63.697][MainProcess][INFO] 		Enumerated 257.901712 programs/s avg. (just enumeration time)
+[    63.697][MainProcess][INFO] 		Enumerated 2.379576 programs/s avg. (overall)
+[    63.697][MainProcess][INFO] 	Total time spent in evaluation & testing: 57.224396 (approx)
+[    63.697][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.073089 (approx)
+[    63.697][MainProcess][INFO] Solution found: [mutate(input0, 'maxdate = max(date)'), cross_join(line0, line0, 'date < maxdate & date.other == maxdate.other')]
+[    63.697][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i051 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i051.csv", col_types = cols("id" = col_integer(),"category" = col_character(),"date" = col_character()))
+df_i051$date <- ymd(df_i051$date)
+df_i051 <- copy_to(con, df_i051)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o051.csv", col_types = cols("id" = col_integer(),"category" = col_character(),"date" = col_character()))
+expected_output$date <- ymd(expected_output$date)
+
+df158 <- df_i051 %>% mutate(maxdate = max(date))
+df159 <- full_join(df158, df158, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(date < maxdate & date.other == maxdate.other)
+out <- df159 %>% select(id = id.other, category = category.other, date = maxdate) %>% distinct() %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT id_other AS id,
+                category_other AS category,
+                maxdate AS date
+FROM
+  (SELECT LHS.id AS id,
+          LHS.category AS category,
+          LHS.date AS date,
+          LHS.maxdate AS maxdate,
+          RHS.id AS id_other,
+          RHS.category AS category_other,
+          RHS.date AS date_other,
+          RHS.maxdate AS maxdate_other
+   FROM
+     (SELECT id,
+             category, date, MAX(date) OVER () AS maxdate
+      FROM df_i051) AS LHS
+   CROSS JOIN
+     (SELECT id,
+             category, date, MAX(date) OVER () AS maxdate
+      FROM df_i051) AS RHS)
+WHERE (date < maxdate
+       AND date_other = maxdate_other)
+ORDER BY id

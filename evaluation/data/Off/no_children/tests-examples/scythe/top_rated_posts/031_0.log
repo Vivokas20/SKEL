@@ -1,0 +1,58 @@
+[     2.440][MainProcess][INFO] Parsing specification...
+[     2.451][MainProcess][INFO] File read
+[     2.453][MainProcess][DEBUG] Reading input files...
+[     2.464][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i031.csv: ['int64', 'string', 'int64']
+[     2.471][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o031.csv: ['int64', 'int64', 'string']
+[     2.471][MainProcess][INFO] Parsing sketch...
+[     2.471][MainProcess][DEBUG] Sketch creation: Line(T1, root=['mutate'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[])])
+[     2.471][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     2.514][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 30, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 32, 'filter': 2, 'summarise': 7, 'mutate': 1}
+[     2.515][MainProcess][DEBUG] {'natural_join': 0.011363636363636364, 'natural_join3': 0.011363636363636364, 'natural_join4': 0.011363636363636364, 'inner_join': 0.3409090909090909, 'anti_join': 0.07954545454545454, 'left_join': 0.011363636363636364, 'union': 0.011363636363636364, 'intersect': 0.03409090909090909, 'semi_join': 0.011363636363636364, 'cross_join': 0.36363636363636365, 'filter': 0.022727272727272728, 'summarise': 0.07954545454545454, 'mutate': 0.011363636363636364}
+[     2.515][MainProcess][DEBUG] {'natural_join': 0.011363636363636364, 'natural_join3': 0.011363636363636364, 'natural_join4': 0.011363636363636364, 'inner_join': 0.3409090909090909, 'anti_join': 0.07954545454545454, 'left_join': 0.011363636363636364, 'union': 0.011363636363636364, 'intersect': 0.03409090909090909, 'semi_join': 0.011363636363636364, 'cross_join': 0.36363636363636365, 'filter': 0.022727272727272728, 'summarise': 0.07954545454545454, 'mutate': 0.011363636363636364}
+[     2.515][MainProcess][INFO] Building synthesizer...
+[     2.516][MainProcess][DEBUG] [Line(T1, root=['mutate'], var=[13], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.631][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 105 constraints
+[     2.638][MainProcess][DEBUG] Enumeration time: 0.12270641326904297
+[     2.699][MainProcess][DEBUG] Synthesis time: 0.06107211112976074
+[     2.699][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, "name == 'Beta'")]
+[     2.700][MainProcess][DEBUG] Solution found using process 0
+[     2.700][MainProcess][INFO] Statistics:
+[     2.700][MainProcess][INFO] 	Attempted programs: 2 (approx)
+[     2.700][MainProcess][INFO] 		Rejected: 1 (approx)
+[     2.700][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.701][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.701][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.701][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.701][MainProcess][INFO] 	Total time spent in enumerator init: 0.122706 (approx)
+[     2.701][MainProcess][INFO] 	Total time spent in enumerator: 0.003273 (approx)
+[     2.701][MainProcess][INFO] 		Enumerated 611.147312 programs/s avg. (just enumeration time)
+[     2.701][MainProcess][INFO] 		Enumerated 0.989506 programs/s avg. (overall)
+[     2.701][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.053714 (approx)
+[     2.701][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.003205 (approx)
+[     2.701][MainProcess][INFO] Solution found: [mutate(input0, 'row_number_ = row_number()'), filter(line0, "name == 'Beta'")]
+[     2.701][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i031 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i031.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"name_ascii" = col_integer()))
+df_i031 <- copy_to(con, df_i031)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o031.csv", col_types = cols("id" = col_integer(),"position" = col_integer(),"name" = col_character()))
+
+df4 <- df_i031 %>% mutate(row_number_ = row_number())
+df5 <- df4 %>% filter(name == 'Beta')
+out <- df5 %>% select(id, position = row_number_, name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `row_number_` AS `position`,
+       `name`
+FROM
+  (SELECT `id`,
+          `name`,
+          `name_ascii`,
+          ROW_NUMBER() OVER () AS `row_number_`
+   FROM `df_i031`)
+WHERE (`name` = 'Beta')

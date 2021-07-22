@@ -1,0 +1,33 @@
+[     1.629][MainProcess][INFO] Parsing specification...
+[     1.633][MainProcess][INFO] File read
+[     1.633][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     1.633][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     1.634][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     1.635][MainProcess][DEBUG] Reading input files...
+[     1.642][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-1.txt: ['string', 'string']
+[     1.647][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-2.txt: ['string', 'string']
+[     1.651][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-3.txt: ['string', 'string']
+[     1.656][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2-4.txt: ['string', 'string', 'int64']
+[     1.660][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/2.out: ['int64']
+[     1.660][MainProcess][INFO] Parsing sketch...
+[     1.660][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join4'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child([2], type=Table, var=[]),Child([3], type=Table, var=[])])
+[     1.660][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Line, var=[])])
+[     1.660][MainProcess][DEBUG] Sketch creation: Line(T3, root=['summarise'], var=[], children=[Child([1], type=Line, var=[]),Child(['maxage = max(age)'], type=SummariseCondition, var=[]),Child([''], type=Cols, var=[])])
+[     1.732][MainProcess][DEBUG] {'natural_join': 16, 'natural_join3': 64, 'natural_join4': 256, 'inner_join': 5008, 'anti_join': 352, 'left_join': 16, 'union': 16, 'intersect': 96, 'semi_join': 16, 'cross_join': 33280, 'filter': 264, 'summarise': 176, 'mutate': 8}
+[     1.732][MainProcess][DEBUG] {'natural_join': 0.0004043671653861706, 'natural_join3': 0.0016174686615446825, 'natural_join4': 0.00646987464617873, 'inner_join': 0.12656692276587142, 'anti_join': 0.008896077638495753, 'left_join': 0.0004043671653861706, 'union': 0.0004043671653861706, 'intersect': 0.002426202992317024, 'semi_join': 0.0004043671653861706, 'cross_join': 0.841083704003235, 'filter': 0.006672058228871815, 'summarise': 0.004448038819247877, 'mutate': 0.0002021835826930853}
+[     1.732][MainProcess][DEBUG] {'natural_join': 0.0004043671653861706, 'natural_join3': 0.0016174686615446825, 'natural_join4': 0.00646987464617873, 'inner_join': 0.12656692276587142, 'anti_join': 0.008896077638495753, 'left_join': 0.0004043671653861706, 'union': 0.0004043671653861706, 'intersect': 0.002426202992317024, 'semi_join': 0.0004043671653861706, 'cross_join': 0.841083704003235, 'filter': 0.006672058228871815, 'summarise': 0.004448038819247877, 'mutate': 0.0002021835826930853}
+[     1.732][MainProcess][INFO] Building synthesizer...
+Traceback (most recent call last):
+  File "sequential.py", line 84, in <module>
+    main()
+  File "sequential.py", line 60, in main
+    squares_enumerator.main(args, specification, 0, configs[0], queue)
+  File "/home/vbernardo/SKEL/squares/squares_enumerator.py", line 65, in main
+    enumerator = BitEnumerator(spec, specification, loc=loc)
+  File "/home/vbernardo/SKEL/squares/tyrell/enumerator/bitenum.py", line 183, in __init__
+    self.sketch.fill_vars(self.spec, self.line_productions)
+  File "/home/vbernardo/SKEL/squares/dsl/sketch.py", line 576, in fill_vars
+    child = line.get_child(c)
+  File "/home/vbernardo/SKEL/squares/dsl/sketch.py", line 113, in get_child
+    return self.children[n]
+IndexError: list index out of range

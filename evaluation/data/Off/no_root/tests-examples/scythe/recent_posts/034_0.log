@@ -1,0 +1,75 @@
+[     2.539][MainProcess][INFO] Parsing specification...
+[     2.546][MainProcess][INFO] File read
+[     2.547][MainProcess][DEBUG] Reading input files...
+[     2.560][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/034.csv: ['string', 'datetime64[ns]', 'datetime64[ns]']
+[     2.570][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/034_o.csv: ['string', 'datetime64[ns]', 'datetime64[ns]']
+[     2.570][MainProcess][INFO] Parsing sketch...
+[     2.570][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['maxDATE_UPDATE = max(DATE_UPDATE)'], type=Unknown, var=[])])
+[     2.570][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Line, var=[]),Child([0], type=Line, var=[]),Child(['DATE_UPDATE = maxDATE_UPDATE'], type=Unknown, var=[])])
+[     2.663][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 30, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 7, 'mutate': 1}
+[     2.663][MainProcess][DEBUG] {'natural_join': 0.0008547008547008547, 'natural_join3': 0.0008547008547008547, 'natural_join4': 0.0008547008547008547, 'inner_join': 0.02564102564102564, 'anti_join': 0.005982905982905983, 'left_join': 0.0008547008547008547, 'union': 0.0008547008547008547, 'intersect': 0.002564102564102564, 'semi_join': 0.0008547008547008547, 'cross_join': 0.9487179487179487, 'filter': 0.005128205128205128, 'summarise': 0.005982905982905983, 'mutate': 0.0008547008547008547}
+[     2.664][MainProcess][DEBUG] {'natural_join': 0.0008547008547008548, 'natural_join3': 0.0008547008547008548, 'natural_join4': 0.0008547008547008548, 'inner_join': 0.025641025641025644, 'anti_join': 0.005982905982905984, 'left_join': 0.0008547008547008548, 'union': 0.0008547008547008548, 'intersect': 0.0025641025641025645, 'semi_join': 0.0008547008547008548, 'cross_join': 0.9487179487179488, 'filter': 0.005128205128205129, 'summarise': 0.005982905982905984, 'mutate': 0.0008547008547008548}
+[     2.664][MainProcess][INFO] Building synthesizer...
+[     2.666][MainProcess][DEBUG] [Line(T1, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Table, var=[[1171], [1170]]),Child(['maxDATE_UPDATE = max(DATE_UPDATE)'], type=Unknown, var=[[1171], [1170]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Line, var=[[1173], [1173], [47]]),Child([0], type=Line, var=[[1173], [1173], [47]]),Child(['DATE_UPDATE = maxDATE_UPDATE'], type=Unknown, var=[[1173], [1173], [47]]),Child([None], type=None, var=[0])])]
+[     2.751][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 148 constraints
+[     2.758][MainProcess][DEBUG] Enumeration time: 0.09415507316589355
+[     2.813][MainProcess][DEBUG] Synthesis time: 0.05454134941101074
+[     2.813][MainProcess][INFO] Solution found: [mutate(input0, 'maxDATE_UPDATE = max(DATE_UPDATE)'), inner_join(line0, line0, 'DATE_UPDATE = maxDATE_UPDATE')]
+[     2.814][MainProcess][DEBUG] Solution found using process 0
+[     2.814][MainProcess][INFO] Statistics:
+[     2.814][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.814][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.815][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.815][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.815][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.815][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.815][MainProcess][INFO] 	Total time spent in enumerator init: 0.094155 (approx)
+[     2.815][MainProcess][INFO] 	Total time spent in enumerator: 0.001146 (approx)
+[     2.815][MainProcess][INFO] 		Enumerated 872.359401 programs/s avg. (just enumeration time)
+[     2.815][MainProcess][INFO] 		Enumerated 0.505941 programs/s avg. (overall)
+[     2.815][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.050511 (approx)
+[     2.815][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.815][MainProcess][INFO] Solution found: [mutate(input0, 'maxDATE_UPDATE = max(DATE_UPDATE)'), inner_join(line0, line0, 'DATE_UPDATE = maxDATE_UPDATE')]
+[     2.815][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_034 <- read_csv("tests-examples/scythe/recent_posts/tables/034.csv", col_types = cols("MATERIAL" = col_character(),"DISCO_DATE" = col_character(),"DATE_UPDATE" = col_character()))
+df_034$DISCO_DATE <- ymd(df_034$DISCO_DATE)
+df_034$DATE_UPDATE <- ymd(df_034$DATE_UPDATE)
+df_034 <- copy_to(con, df_034)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/034_o.csv", col_types = cols("c1" = col_character(),"c2" = col_character(),"c3" = col_character()))
+expected_output$c2 <- ymd(expected_output$c2)
+expected_output$c3 <- ymd(expected_output$c3)
+
+df3 <- df_034 %>% mutate(maxDATE_UPDATE = max(DATE_UPDATE))
+df4 <- inner_join(df3, df3, by=c('DATE_UPDATE' = 'maxDATE_UPDATE'), suffix = c('', '.other'), na_matches='never') %>% mutate(maxDATE_UPDATE = DATE_UPDATE)
+out <- df4 %>% select(c1 = MATERIAL, c2 = DISCO_DATE, c3 = DATE_UPDATE) %>% distinct()
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT MATERIAL AS c1,
+                DISCO_DATE AS c2,
+                DATE_UPDATE AS c3
+FROM
+  (SELECT LHS.MATERIAL AS MATERIAL,
+          LHS.DISCO_DATE AS DISCO_DATE,
+          LHS.DATE_UPDATE AS DATE_UPDATE,
+          LHS.maxDATE_UPDATE AS maxDATE_UPDATE,
+          RHS.MATERIAL AS MATERIAL_other,
+          RHS.DISCO_DATE AS DISCO_DATE_other,
+          RHS.DATE_UPDATE AS DATE_UPDATE_other
+   FROM
+     (SELECT MATERIAL,
+             DISCO_DATE,
+             DATE_UPDATE,
+             MAX(DATE_UPDATE) OVER () AS maxDATE_UPDATE
+      FROM df_034) AS LHS
+   INNER JOIN
+     (SELECT MATERIAL,
+             DISCO_DATE,
+             DATE_UPDATE,
+             MAX(DATE_UPDATE) OVER () AS maxDATE_UPDATE
+      FROM df_034) AS RHS ON (LHS.DATE_UPDATE = RHS.maxDATE_UPDATE))

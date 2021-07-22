@@ -1,0 +1,64 @@
+[     2.379][MainProcess][INFO] Parsing specification...
+[     2.385][MainProcess][INFO] File read
+[     2.386][MainProcess][DEBUG] Reading input files...
+[     2.395][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/031_1.csv: ['int64', 'string', 'int64']
+[     2.402][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/031_2.csv: ['int64', 'string', 'string']
+[     2.408][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/031_o.csv: ['int64', 'string', 'int64']
+[     2.408][MainProcess][INFO] Parsing sketch...
+[     2.408][MainProcess][DEBUG] Sketch creation: Line(T1, root=['left_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     2.408][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     2.455][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 260, 'anti_join': 64, 'left_join': 4, 'union': 4, 'intersect': 20, 'semi_join': 4, 'cross_join': 520, 'filter': 24}
+[     2.455][MainProcess][DEBUG] {'natural_join': 0.004310344827586207, 'natural_join3': 0.008620689655172414, 'natural_join4': 0.017241379310344827, 'inner_join': 0.2801724137931034, 'anti_join': 0.06896551724137931, 'left_join': 0.004310344827586207, 'union': 0.004310344827586207, 'intersect': 0.021551724137931036, 'semi_join': 0.004310344827586207, 'cross_join': 0.5603448275862069, 'filter': 0.02586206896551724}
+[     2.455][MainProcess][DEBUG] {'natural_join': 0.004310344827586208, 'natural_join3': 0.008620689655172415, 'natural_join4': 0.01724137931034483, 'inner_join': 0.2801724137931035, 'anti_join': 0.06896551724137932, 'left_join': 0.004310344827586208, 'union': 0.004310344827586208, 'intersect': 0.02155172413793104, 'semi_join': 0.004310344827586208, 'cross_join': 0.560344827586207, 'filter': 0.025862068965517244}
+[     2.456][MainProcess][INFO] Building synthesizer...
+[     2.457][MainProcess][DEBUG] [Line(T1, root=['left_join'], var=[6], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.636][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 98 constraints
+[     2.653][MainProcess][DEBUG] Enumeration time: 0.1975877285003662
+[     2.791][MainProcess][DEBUG] Synthesis time: 0.13785314559936523
+[     2.791][MainProcess][INFO] Solution found: [left_join(input1, input0), filter(line0, "type == 'public' & accountID == 'Dave'")]
+[     2.793][MainProcess][DEBUG] Solution found using process 0
+[     2.793][MainProcess][INFO] Statistics:
+[     2.793][MainProcess][INFO] 	Attempted programs: 9 (approx)
+[     2.793][MainProcess][INFO] 		Rejected: 8 (approx)
+[     2.793][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.793][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.793][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.793][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.793][MainProcess][INFO] 	Total time spent in enumerator init: 0.197588 (approx)
+[     2.793][MainProcess][INFO] 	Total time spent in enumerator: 0.015306 (approx)
+[     2.793][MainProcess][INFO] 		Enumerated 587.995701 programs/s avg. (just enumeration time)
+[     2.793][MainProcess][INFO] 		Enumerated 4.310294 programs/s avg. (overall)
+[     2.794][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.114161 (approx)
+[     2.794][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.007282 (approx)
+[     2.794][MainProcess][INFO] Solution found: [left_join(input1, input0), filter(line0, "type == 'public' & accountID == 'Dave'")]
+[     2.794][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_031_1 <- read_csv("tests-examples/scythe/recent_posts/tables/031_1.csv", col_types = cols("channelID" = col_integer(),"accountID" = col_character(),"role" = col_integer()))
+df_031_1 <- copy_to(con, df_031_1)
+df_031_2 <- read_csv("tests-examples/scythe/recent_posts/tables/031_2.csv", col_types = cols("channelID" = col_integer(),"channelName" = col_character(),"type" = col_character()))
+df_031_2 <- copy_to(con, df_031_2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/031_o.csv", col_types = cols("c1" = col_integer(),"c2" = col_character(),"c3" = col_integer()))
+
+df12 <- left_join(df_031_2, df_031_1, na_matches="never")
+df13 <- df12 %>% filter(type == 'public' & accountID == 'Dave')
+out <- df13 %>% select(c1 = channelID, c2 = accountID, c3 = role)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `channelID` AS `c1`,
+       `accountID` AS `c2`,
+       `role` AS `c3`
+FROM
+  (SELECT `LHS`.`channelID` AS `channelID`,
+          `channelName`,
+          `type`,
+          `accountID`,
+          `role`
+   FROM `df_031_2` AS `LHS`
+   LEFT JOIN `df_031_1` AS `RHS` ON (`LHS`.`channelID` = `RHS`.`channelID`))
+WHERE (`type` = 'public'
+       AND `accountID` = 'Dave')

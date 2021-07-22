@@ -1,0 +1,55 @@
+[     2.383][MainProcess][INFO] Parsing specification...
+[     2.388][MainProcess][INFO] File read
+[     2.388][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     2.388][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     2.389][MainProcess][DEBUG] Reading input files...
+[     2.399][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/7-1.txt: ['string', 'string', 'int64']
+[     2.405][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/7.out: ['string', 'int64']
+[     2.405][MainProcess][INFO] Parsing sketch...
+[     2.405][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['meanage = mean(age)'], type=Unknown, var=[]),Child(['level'], type=Unknown, var=[])])
+[     2.447][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 12, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 84, 'filter': 6, 'summarise': 7, 'mutate': 1}
+[     2.447][MainProcess][DEBUG] {'natural_join': 0.007936507936507936, 'natural_join3': 0.007936507936507936, 'natural_join4': 0.007936507936507936, 'inner_join': 0.09523809523809523, 'anti_join': 0.05555555555555555, 'left_join': 0.007936507936507936, 'union': 0.007936507936507936, 'intersect': 0.023809523809523808, 'semi_join': 0.007936507936507936, 'cross_join': 0.6666666666666666, 'filter': 0.047619047619047616, 'summarise': 0.05555555555555555, 'mutate': 0.007936507936507936}
+[     2.447][MainProcess][DEBUG] {'natural_join': 0.007936507936507936, 'natural_join3': 0.007936507936507936, 'natural_join4': 0.007936507936507936, 'inner_join': 0.09523809523809523, 'anti_join': 0.05555555555555555, 'left_join': 0.007936507936507936, 'union': 0.007936507936507936, 'intersect': 0.023809523809523808, 'semi_join': 0.007936507936507936, 'cross_join': 0.6666666666666666, 'filter': 0.047619047619047616, 'summarise': 0.05555555555555555, 'mutate': 0.007936507936507936}
+[     2.447][MainProcess][INFO] Building synthesizer...
+[     2.449][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Table, var=[[127], [126], [16, 20, 32]]),Child(['meanage = mean(age)'], type=Unknown, var=[[127], [126], [16, 20, 32]]),Child(['level'], type=Unknown, var=[[127], [126], [16, 20, 32]]),Child([None], type=None, var=[0])])]
+[     2.503][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 68 constraints
+[     2.508][MainProcess][DEBUG] Enumeration time: 0.06072521209716797
+[     2.556][MainProcess][DEBUG] Synthesis time: 0.04766082763671875
+[     2.556][MainProcess][INFO] Solution found: [summarise(input0, 'meanage = mean(age)', 'level')]
+[     2.557][MainProcess][DEBUG] Solution found using process 0
+[     2.557][MainProcess][INFO] Statistics:
+[     2.557][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.557][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.557][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.557][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.558][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.558][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.558][MainProcess][INFO] 	Total time spent in enumerator init: 0.060725 (approx)
+[     2.558][MainProcess][INFO] 	Total time spent in enumerator: 0.000831 (approx)
+[     2.558][MainProcess][INFO] 		Enumerated 1203.876005 programs/s avg. (just enumeration time)
+[     2.558][MainProcess][INFO] 		Enumerated 0.538194 programs/s avg. (overall)
+[     2.558][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.044981 (approx)
+[     2.558][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.558][MainProcess][INFO] Solution found: [summarise(input0, 'meanage = mean(age)', 'level')]
+[     2.558][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_7_1 <- read_csv("tests-examples/textbook/tables/7-1.txt", col_types = cols("S_key" = col_character(),"level" = col_character(),"age" = col_integer()))
+df_7_1 <- copy_to(con, df_7_1)
+expected_output <- read_csv("tests-examples/textbook/tables/7.out", col_types = cols("level" = col_character(),"meanage" = col_integer()))
+
+df2 <- df_7_1 %>% group_by(level) %>% summarise(meanage = mean(age)) %>% ungroup()
+out <- df2 %>% select(level, meanage)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT LEVEL,
+       meanage
+FROM
+  (SELECT LEVEL,
+          AVG(age) AS meanage
+   FROM df_7_1
+   GROUP BY LEVEL)

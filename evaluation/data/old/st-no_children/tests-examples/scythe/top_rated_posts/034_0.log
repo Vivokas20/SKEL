@@ -1,0 +1,62 @@
+[     2.217][MainProcess][INFO] Parsing specification...
+[     2.223][MainProcess][INFO] File read
+[     2.224][MainProcess][DEBUG] Reading input files...
+[     2.235][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i034.csv: ['int64', 'string', 'timedelta64[ns]']
+[     2.243][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o034.csv: ['int64', 'string', 'timedelta64[ns]']
+[     2.243][MainProcess][INFO] Parsing sketch...
+[     2.243][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.243][MainProcess][DEBUG] Sketch creation: Line(T2, root=['inner_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[])])
+[     2.310][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 12, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'summarise': 7, 'mutate': 1}
+[     2.310][MainProcess][DEBUG] {'natural_join': 0.0008726003490401396, 'natural_join3': 0.0008726003490401396, 'natural_join4': 0.0008726003490401396, 'inner_join': 0.010471204188481676, 'anti_join': 0.006108202443280977, 'left_join': 0.0008726003490401396, 'union': 0.0008726003490401396, 'intersect': 0.002617801047120419, 'semi_join': 0.0008726003490401396, 'cross_join': 0.9685863874345549, 'summarise': 0.006108202443280977, 'mutate': 0.0008726003490401396}
+[     2.310][MainProcess][DEBUG] {'natural_join': 0.0008726003490401396, 'natural_join3': 0.0008726003490401396, 'natural_join4': 0.0008726003490401396, 'inner_join': 0.010471204188481676, 'anti_join': 0.006108202443280977, 'left_join': 0.0008726003490401396, 'union': 0.0008726003490401396, 'intersect': 0.002617801047120419, 'semi_join': 0.0008726003490401396, 'cross_join': 0.9685863874345549, 'summarise': 0.006108202443280977, 'mutate': 0.0008726003490401396}
+[     2.310][MainProcess][INFO] Building synthesizer...
+[     2.312][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])]), Line(T2, root=['inner_join'], var=[4], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=JoinCondition, var=[]),Child([None], type=None, var=[0])])]
+[     3.786][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 178 constraints
+[     3.879][MainProcess][DEBUG] Enumeration time: 1.569148302078247
+[     4.123][MainProcess][DEBUG] Synthesis time: 0.24354052543640137
+[     4.123][MainProcess][INFO] Solution found: [summarise(input0, 'maxTime = max(Time)', 'Train'), inner_join(line0, input0, 'Train = Train,maxTime = Time')]
+[     4.125][MainProcess][DEBUG] Solution found using process 0
+[     4.125][MainProcess][INFO] Statistics:
+[     4.125][MainProcess][INFO] 	Attempted programs: 6 (approx)
+[     4.126][MainProcess][INFO] 		Rejected: 5 (approx)
+[     4.126][MainProcess][INFO] 		Failed: 0 (approx)
+[     4.126][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     4.126][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     4.126][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     4.126][MainProcess][INFO] 	Total time spent in enumerator init: 1.569148 (approx)
+[     4.126][MainProcess][INFO] 	Total time spent in enumerator: 0.017395 (approx)
+[     4.126][MainProcess][INFO] 		Enumerated 344.931043 programs/s avg. (just enumeration time)
+[     4.126][MainProcess][INFO] 		Enumerated 1.712661 programs/s avg. (overall)
+[     4.126][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.218966 (approx)
+[     4.126][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.006297 (approx)
+[     4.126][MainProcess][INFO] Solution found: [summarise(input0, 'maxTime = max(Time)', 'Train'), inner_join(line0, input0, 'Train = Train,maxTime = Time')]
+[     4.126][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i034 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i034.csv", col_types = cols("Train" = col_integer(),"Dest" = col_character(),"Time" = col_time()))
+df_i034 <- copy_to(con, df_i034)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o034.csv", col_types = cols("Train" = col_integer(),"Dest" = col_character(),"Time" = col_time()))
+
+df9 <- df_i034 %>% group_by(Train) %>% summarise(maxTime = max(Time)) %>% ungroup()
+df10 <- inner_join(df9, df_i034, by=c('Train' = 'Train','maxTime' = 'Time'), suffix = c('', '.other'), na_matches='never') %>% mutate(Time = maxTime)
+out <- df10 %>% select(Train, Dest, Time = maxTime)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT Train,
+       Dest,
+       maxTime AS TIME
+FROM
+  (SELECT LHS.Train AS Train,
+          maxTime,
+          Dest
+   FROM
+     (SELECT Train,
+             MAX(TIME) AS maxTime
+      FROM df_i034
+      GROUP BY Train) AS LHS
+   INNER JOIN df_i034 AS RHS ON (LHS.Train = RHS.Train
+                                 AND LHS.maxTime = RHS.Time))

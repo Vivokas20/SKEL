@@ -1,0 +1,51 @@
+[     5.874][MainProcess][INFO] Parsing specification...
+[     5.880][MainProcess][INFO] File read
+[     5.882][MainProcess][DEBUG] Reading input files...
+[     5.895][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/004.csv: ['int64', 'int64', 'int64']
+[     5.899][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/004_o.csv: ['int64', 'int64']
+[     5.899][MainProcess][INFO] Parsing sketch...
+[     5.899][MainProcess][DEBUG] Sketch creation: Line(T1, root=[None], var=[], children=[])
+[     5.899][MainProcess][DEBUG] Sketch creation: Line(T2, root=['summarise'], var=[], children=[Child([0], type=Line, var=[]),Child(['call_ref = max(call_ref)'], type=SummariseCondition, var=[]),Child(['job_num'], type=Cols, var=[])])
+[     5.899][MainProcess][DEBUG] Sketch creation: Line(T3, root=[None], var=[], children=[])
+[     5.899][MainProcess][DEBUG] Sketch creation: Line(T4, root=['union'], var=[], children=[Child([1], type=Line, var=[]),Child([2], type=Line, var=[])])
+[     6.781][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 206, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 26268, 'filter': 3300, 'summarise': 28, 'mutate': 4}
+[     6.782][MainProcess][DEBUG] {'natural_join': 3.3532291596807725e-05, 'natural_join3': 3.3532291596807725e-05, 'natural_join4': 3.3532291596807725e-05, 'inner_join': 0.006907652068942391, 'anti_join': 0.00023472604117765408, 'left_join': 3.3532291596807725e-05, 'union': 3.3532291596807725e-05, 'intersect': 0.00010059687479042318, 'semi_join': 3.3532291596807725e-05, 'cross_join': 0.8808262356649453, 'filter': 0.11065656226946549, 'summarise': 0.0009389041647106163, 'mutate': 0.0001341291663872309}
+[     6.782][MainProcess][DEBUG] {'natural_join': 3.3532291596807725e-05, 'natural_join3': 3.3532291596807725e-05, 'natural_join4': 3.3532291596807725e-05, 'inner_join': 0.006907652068942391, 'anti_join': 0.00023472604117765408, 'left_join': 3.3532291596807725e-05, 'union': 3.3532291596807725e-05, 'intersect': 0.00010059687479042318, 'semi_join': 3.3532291596807725e-05, 'cross_join': 0.8808262356649453, 'filter': 0.11065656226946549, 'summarise': 0.0009389041647106163, 'mutate': 0.0001341291663872309}
+[     6.782][MainProcess][INFO] Building synthesizer...
+[     6.789][MainProcess][DEBUG] [Line(T1, root=[None], var=[], children=[]), Line(T2, root=['summarise'], var=[12], children=[Child([0], type=Line, var=[29804]),Child(['call_ref = max(call_ref)'], type=SummariseCondition, var=[29798]),Child(['job_num'], type=Cols, var=[20]),Child([None], type=None, var=[0])]), Line(T3, root=[None], var=[], children=[]), Line(T4, root=['union'], var=[7], children=[Child([1], type=Line, var=[29805]),Child([2], type=Line, var=[29806]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[    55.675][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 381 constraints
+[    62.674][MainProcess][DEBUG] Enumeration time: 55.891926527023315
+[   406.193][MainProcess][DEBUG] Synthesis time: 343.5184745788574
+[   406.193][MainProcess][INFO] Solution found: [cross_join(input0, input0, 'call_ref == job_num | job_num > job_num.other'), summarise(line0, 'call_ref = max(call_ref)', 'job_num'), filter(input0, 'job_num == 0 & job_num != call_ref'), union(line1, line2)]
+[   406.426][MainProcess][DEBUG] Solution found using process 0
+[   406.426][MainProcess][INFO] Statistics:
+[   406.426][MainProcess][INFO] 	Attempted programs: 3456 (approx)
+[   406.426][MainProcess][INFO] 		Rejected: 3455 (approx)
+[   406.426][MainProcess][INFO] 		Failed: 0 (approx)
+[   406.427][MainProcess][INFO] 		Empty outputs: 689 (19.9%) (approx)
+[   406.427][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[   406.427][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[   406.427][MainProcess][INFO] 	Total time spent in enumerator init: 55.891927 (approx)
+[   406.427][MainProcess][INFO] 	Total time spent in enumerator: 306.543263 (approx)
+[   406.427][MainProcess][INFO] 		Enumerated 11.274102 programs/s avg. (just enumeration time)
+[   406.427][MainProcess][INFO] 		Enumerated 8.538666 programs/s avg. (overall)
+[   406.427][MainProcess][INFO] 	Total time spent in evaluation & testing: 32.946445 (approx)
+[   406.427][MainProcess][INFO] 	Total time spent blocking cubes/programs: 3.993473 (approx)
+[   406.427][MainProcess][INFO] Solution found: [cross_join(input0, input0, 'call_ref == job_num | job_num > job_num.other'), summarise(line0, 'call_ref = max(call_ref)', 'job_num'), filter(input0, 'job_num == 0 & job_num != call_ref'), union(line1, line2)]
+[   406.427][MainProcess][INFO] Solution size: 4
+[   406.808][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_004 <- read_csv("tests-examples/scythe/recent_posts/tables/004.csv", col_types = cols("id" = col_integer(),"call_ref" = col_integer(),"job_num" = col_integer()))
+df_004 <- copy_to(con, df_004)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/004_o.csv", col_types = cols("call_ref" = col_integer(),"job_num" = col_integer()))
+
+df6593 <- full_join(df_004, df_004, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(call_ref == job_num | job_num > job_num.other)
+df6594 <- df6593 %>% group_by(job_num) %>% summarise(call_ref = max(call_ref)) %>% ungroup()
+df6595 <- df_004 %>% filter(job_num == 0 & job_num != call_ref)
+df6596 <- bind_rows(df6594, df6595)
+out <- df6596 %>% select(call_ref, job_num)
+
+Failed to generate SQL query

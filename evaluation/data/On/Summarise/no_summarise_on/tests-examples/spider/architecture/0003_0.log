@@ -1,0 +1,95 @@
+[     2.262][MainProcess][INFO] Parsing specification...
+[     2.285][MainProcess][INFO] File read
+[     2.286][MainProcess][DEBUG] Reading input files...
+[     2.295][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/architect.csv: ['int64', 'string', 'string', 'string']
+[     2.305][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/bridge.csv: ['int64', 'int64', 'string', 'string', 'Float64', 'Float64']
+[     2.321][MainProcess][WARNING] Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!
+[     2.321][MainProcess][WARNING] Replacing column "max(t1.length_meters)" in table tests-examples/spider/architecture/tables/0003.csv with max_t1_length_meters_
+[     2.322][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0003.csv: ['Float64', 'string']
+[     2.322][MainProcess][INFO] Parsing sketch...
+[     2.323][MainProcess][DEBUG] Sketch creation: Line(T1, root=['inner_join'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child(['id = architect_id'], type=JoinCondition, var=[])])
+[     2.323][MainProcess][DEBUG] Sketch creation: Line(T2, root=[None], var=[], children=[])
+[     2.323][MainProcess][DEBUG] Sketch creation: Line(T3, root=['inner_join'], var=[], children=[Child([0], type=Line, var=[]),Child([1], type=Line, var=[]),Child(['length_meters'], type=JoinCondition, var=[])])
+[     2.414][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 1384, 'anti_join': 148, 'left_join': 4, 'union': 4, 'intersect': 32, 'semi_join': 4, 'cross_join': 4440, 'filter': 12, 'summarise': 148, 'mutate': 4}
+[     2.414][MainProcess][DEBUG] {'natural_join': 0.0006443298969072165, 'natural_join3': 0.001288659793814433, 'natural_join4': 0.002577319587628866, 'inner_join': 0.22293814432989692, 'anti_join': 0.02384020618556701, 'left_join': 0.0006443298969072165, 'union': 0.0006443298969072165, 'intersect': 0.005154639175257732, 'semi_join': 0.0006443298969072165, 'cross_join': 0.7152061855670103, 'filter': 0.0019329896907216496, 'summarise': 0.02384020618556701, 'mutate': 0.0006443298969072165}
+[     2.414][MainProcess][DEBUG] {'natural_join': 0.0006443298969072165, 'natural_join3': 0.001288659793814433, 'natural_join4': 0.002577319587628866, 'inner_join': 0.22293814432989692, 'anti_join': 0.02384020618556701, 'left_join': 0.0006443298969072165, 'union': 0.0006443298969072165, 'intersect': 0.005154639175257732, 'semi_join': 0.0006443298969072165, 'cross_join': 0.7152061855670103, 'filter': 0.0019329896907216496, 'summarise': 0.02384020618556701, 'mutate': 0.0006443298969072165}
+[     2.414][MainProcess][INFO] Building synthesizer...
+[     2.416][MainProcess][DEBUG] [Line(T1, root=['inner_join'], var=[4], children=[Child([0], type=Table, var=[1523]),Child([1], type=Table, var=[1524]),Child(['id = architect_id'], type=JoinCondition, var=[359]),Child([None], type=None, var=[0])]), Line(T2, root=[None], var=[], children=[]), Line(T3, root=['inner_join'], var=[4], children=[Child([0], type=Line, var=[1526]),Child([1], type=Line, var=[1527]),Child(['length_meters'], type=JoinCondition, var=[373]),Child([None], type=None, var=[0])])]
+[     3.627][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 240 constraints
+[     3.758][MainProcess][DEBUG] Enumeration time: 1.3435945510864258
+[     5.303][MainProcess][DEBUG] Synthesis time: 1.5446641445159912
+[     5.303][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'id = architect_id'), summarise(input1, 'length_meters = max(length_meters)', ''), inner_join(line0, line1, 'length_meters')]
+[     5.308][MainProcess][DEBUG] Solution found using process 0
+[     5.309][MainProcess][INFO] Statistics:
+[     5.309][MainProcess][INFO] 	Attempted programs: 58 (approx)
+[     5.309][MainProcess][INFO] 		Rejected: 57 (approx)
+[     5.309][MainProcess][INFO] 		Failed: 0 (approx)
+[     5.309][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     5.309][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     5.309][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     5.309][MainProcess][INFO] 	Total time spent in enumerator init: 1.343595 (approx)
+[     5.309][MainProcess][INFO] 	Total time spent in enumerator: 0.247242 (approx)
+[     5.309][MainProcess][INFO] 		Enumerated 234.587773 programs/s avg. (just enumeration time)
+[     5.309][MainProcess][INFO] 		Enumerated 12.468222 programs/s avg. (overall)
+[     5.309][MainProcess][INFO] 	Total time spent in evaluation & testing: 1.238026 (approx)
+[     5.309][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.058047 (approx)
+[     5.309][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'id = architect_id'), summarise(input1, 'length_meters = max(length_meters)', ''), inner_join(line0, line1, 'length_meters')]
+[     5.310][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_architect <- read_csv("tests-examples/spider/architecture/tables/architect.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"nationality" = col_character(),"gender" = col_character()))
+df_architect <- copy_to(con, df_architect)
+df_bridge <- read_csv("tests-examples/spider/architecture/tables/bridge.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"name" = col_character(),"location" = col_character(),"length_meters" = col_double(),"length_feet" = col_double()))
+df_bridge <- copy_to(con, df_bridge)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0003.csv", col_types = cols("max(t1.length_meters)" = col_double(),"name" = col_character()))
+expected_output <- rename(expected_output, max_t1_length_meters_ = "max(t1.length_meters)")
+
+df118 <- inner_join(df_architect, df_bridge, by=c('id' = 'architect_id'), suffix = c('', '.other'), na_matches='never') %>% mutate(architect_id = id)
+df119 <- df_bridge %>% group_by() %>% summarise(length_meters = max(length_meters)) %>% ungroup()
+df120 <- inner_join(df118, df119, by=c('length_meters'), suffix = c('', '.other'), na_matches='never')
+out <- df120 %>% select(max_t1_length_meters_ = length_meters, name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT length_meters AS max_t1_length_meters_,
+       name
+FROM
+  (SELECT id,
+          name,
+          nationality,
+          gender,
+          id_other,
+          name_other,
+          LOCATION,
+          LHS.length_meters AS length_meters,
+          length_feet,
+          architect_id
+   FROM
+     (SELECT id,
+             name,
+             nationality,
+             gender,
+             id_other,
+             name_other,
+             LOCATION,
+             length_meters,
+             length_feet,
+             id AS architect_id
+      FROM
+        (SELECT LHS.id AS id,
+                LHS.name AS name,
+                nationality,
+                gender,
+                RHS.id AS id_other,
+                RHS.name AS name_other,
+                LOCATION,
+                length_meters,
+                length_feet
+         FROM df_architect AS LHS
+         INNER JOIN df_bridge AS RHS ON (LHS.id = RHS.architect_id))) AS LHS
+   INNER JOIN
+     (SELECT MAX(length_meters) AS length_meters
+      FROM df_bridge) AS RHS ON (LHS.length_meters = RHS.length_meters))

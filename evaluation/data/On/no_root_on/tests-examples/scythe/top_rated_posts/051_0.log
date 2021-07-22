@@ -1,0 +1,62 @@
+[     2.238][MainProcess][INFO] Parsing specification...
+[     2.244][MainProcess][INFO] File read
+[     2.245][MainProcess][DEBUG] Reading input files...
+[     2.257][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i051.csv: ['int64', 'string', 'datetime64[ns]']
+[     2.265][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o051.csv: ['int64', 'string', 'datetime64[ns]']
+[     2.265][MainProcess][INFO] Parsing sketch...
+[     2.265][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['maxdate = max(date)'], type=Unknown, var=[]),Child(['category'], type=Unknown, var=[])])
+[     2.265][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[]),Child(['category = category,date = maxdate'], type=Unknown, var=[])])
+[     2.345][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 12, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 7, 'mutate': 1}
+[     2.345][MainProcess][DEBUG] {'natural_join': 0.0008680555555555555, 'natural_join3': 0.0008680555555555555, 'natural_join4': 0.0008680555555555555, 'inner_join': 0.010416666666666666, 'anti_join': 0.006076388888888889, 'left_join': 0.0008680555555555555, 'union': 0.0008680555555555555, 'intersect': 0.0026041666666666665, 'semi_join': 0.0008680555555555555, 'cross_join': 0.9635416666666666, 'filter': 0.005208333333333333, 'summarise': 0.006076388888888889, 'mutate': 0.0008680555555555555}
+[     2.345][MainProcess][DEBUG] {'natural_join': 0.0008680555555555555, 'natural_join3': 0.0008680555555555555, 'natural_join4': 0.0008680555555555555, 'inner_join': 0.010416666666666666, 'anti_join': 0.006076388888888889, 'left_join': 0.0008680555555555555, 'union': 0.0008680555555555555, 'intersect': 0.0026041666666666665, 'semi_join': 0.0008680555555555555, 'cross_join': 0.9635416666666666, 'filter': 0.005208333333333333, 'summarise': 0.006076388888888889, 'mutate': 0.0008680555555555555}
+[     2.345][MainProcess][INFO] Building synthesizer...
+[     2.347][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Table, var=[[1153], [1152], [14, 18, 30]]),Child(['maxdate = max(date)'], type=Unknown, var=[[1153], [1152], [14, 18, 30]]),Child(['category'], type=Unknown, var=[[1153], [1152], [14, 18, 30]]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[2, 4, 5, 8, 10], children=[Child([0], type=Table, var=[[1153], [1155], [26]]),Child([0], type=Line, var=[[1153], [1155], [26]]),Child(['category = category,date = maxdate'], type=Unknown, var=[[1153], [1155], [26]]),Child([None], type=None, var=[0])])]
+[     2.466][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 146 constraints
+[     2.476][MainProcess][DEBUG] Enumeration time: 0.1304314136505127
+[     2.539][MainProcess][DEBUG] Synthesis time: 0.0629570484161377
+[     2.539][MainProcess][INFO] Solution found: [summarise(input0, 'maxdate = max(date)', 'category'), inner_join(input0, line0, 'category = category,date = maxdate')]
+[     2.541][MainProcess][DEBUG] Solution found using process 0
+[     2.541][MainProcess][INFO] Statistics:
+[     2.541][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.541][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.541][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.541][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.541][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.541][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.541][MainProcess][INFO] 	Total time spent in enumerator init: 0.130431 (approx)
+[     2.541][MainProcess][INFO] 	Total time spent in enumerator: 0.001436 (approx)
+[     2.541][MainProcess][INFO] 		Enumerated 696.265604 programs/s avg. (just enumeration time)
+[     2.542][MainProcess][INFO] 		Enumerated 0.521392 programs/s avg. (overall)
+[     2.542][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.058283 (approx)
+[     2.542][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.542][MainProcess][INFO] Solution found: [summarise(input0, 'maxdate = max(date)', 'category'), inner_join(input0, line0, 'category = category,date = maxdate')]
+[     2.542][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i051 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i051.csv", col_types = cols("id" = col_integer(),"category" = col_character(),"date" = col_character()))
+df_i051$date <- ymd(df_i051$date)
+df_i051 <- copy_to(con, df_i051)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o051.csv", col_types = cols("id" = col_integer(),"category" = col_character(),"date" = col_character()))
+expected_output$date <- ymd(expected_output$date)
+
+df3 <- df_i051 %>% group_by(category) %>% summarise(maxdate = max(date)) %>% ungroup()
+df4 <- inner_join(df_i051, df3, by=c('category' = 'category','date' = 'maxdate'), suffix = c('', '.other'), na_matches='never') %>% mutate(maxdate = date)
+out <- df4 %>% select(id, category, date)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       category, date
+FROM
+  (SELECT id,
+          LHS.category AS category, date
+   FROM df_i051 AS LHS
+   INNER JOIN
+     (SELECT category,
+             MAX(date) AS maxdate
+      FROM df_i051
+      GROUP BY category) AS RHS ON (LHS.category = RHS.category
+                                    AND LHS.date = RHS.maxdate))

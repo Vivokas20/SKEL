@@ -1,0 +1,25 @@
+[     5.259][MainProcess][INFO] Parsing specification...
+[     5.289][MainProcess][INFO] File read
+[     5.291][MainProcess][DEBUG] Reading input files...
+[     5.318][MainProcess][WARNING] Using integers larger than 32 bits! Converting column phone_number to string.
+[     5.320][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i010_1.csv: ['datetime64[ns]', 'string', 'object']
+[     5.331][MainProcess][WARNING] Using integers larger than 32 bits! Converting column phone_number to string.
+[     5.332][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i010_2.csv: ['datetime64[ns]', 'datetime64[ns]', 'object']
+[     5.342][MainProcess][WARNING] Using integers larger than 32 bits! Converting column phone_number to string.
+[     5.343][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o010.csv: ['datetime64[ns]', 'datetime64[ns]', 'object']
+[     5.428][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 104, 'anti_join': 44, 'left_join': 4, 'union': 4, 'intersect': 16, 'semi_join': 4, 'cross_join': 0}
+[     5.429][MainProcess][DEBUG] {'natural_join': 0.0196078431372549, 'natural_join3': 0.0392156862745098, 'natural_join4': 0.0784313725490196, 'inner_join': 0.5098039215686274, 'anti_join': 0.21568627450980393, 'left_join': 0.0196078431372549, 'union': 0.0196078431372549, 'intersect': 0.0784313725490196, 'semi_join': 0.0196078431372549, 'cross_join': 0.0}
+[     5.429][MainProcess][DEBUG] {'natural_join': 0.0196078431372549, 'natural_join3': 0.0392156862745098, 'natural_join4': 0.0784313725490196, 'inner_join': 0.5098039215686274, 'anti_join': 0.21568627450980393, 'left_join': 0.0196078431372549, 'union': 0.0196078431372549, 'intersect': 0.0784313725490196, 'semi_join': 0.0196078431372549, 'cross_join': 0.0}
+[     5.429][MainProcess][INFO] Building synthesizer...
+Traceback (most recent call last):
+  File "sequential.py", line 85, in <module>
+    main()
+  File "sequential.py", line 61, in main
+    squares_enumerator.main(args, specification, 0, configs[0], queue)
+  File "/home/vbernardo/SKEL/squares/squares_enumerator.py", line 65, in main
+    enumerator = BitEnumerator(spec, specification, loc=loc)
+  File "/home/vbernardo/SKEL/squares/tyrell/enumerator/bitenum.py", line 234, in __init__
+    self.create_all_children_constraints()
+  File "/home/vbernardo/SKEL/squares/tyrell/enumerator/bitenum.py", line 471, in create_all_children_constraints
+    for leaf_id in r.children[c].all_vars_lhs.get(p.rhs[c]):
+TypeError: 'NoneType' object is not iterable

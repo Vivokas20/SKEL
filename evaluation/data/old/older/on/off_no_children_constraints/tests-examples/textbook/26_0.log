@@ -1,0 +1,18 @@
+[     3.919][MainProcess][INFO] Parsing specification...
+[     3.923][MainProcess][INFO] File read
+[     3.924][MainProcess][DEBUG] Reading input files...
+[     3.931][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     3.940][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/flights.txt: ['int64', 'string', 'string', 'int64', 'datetime64[ns]', 'datetime64[ns]', 'int64']
+[     3.944][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/26.out: ['string']
+[     3.944][MainProcess][INFO] Parsing sketch...
+[     3.944][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     3.944][MainProcess][DEBUG] Sketch creation: Line(T2, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     3.944][MainProcess][DEBUG] Sketch creation: Line(T3, root=['natural_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     3.944][MainProcess][DEBUG] Sketch creation: Line(T4, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     4.139][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 2956, 'anti_join': 224, 'left_join': 4, 'union': 4, 'intersect': 40, 'semi_join': 4, 'cross_join': 26200, 'filter': 3156, 'summarise': 448, 'mutate': 8}
+[     4.139][MainProcess][DEBUG] {'natural_join': 0.00012094823415578132, 'natural_join3': 0.00024189646831156264, 'natural_join4': 0.0004837929366231253, 'inner_join': 0.0893807450411224, 'anti_join': 0.006773101112723754, 'left_join': 0.00012094823415578132, 'union': 0.00012094823415578132, 'intersect': 0.0012094823415578133, 'semi_join': 0.00012094823415578132, 'cross_join': 0.7922109337203677, 'filter': 0.09542815674891146, 'summarise': 0.013546202225447508, 'mutate': 0.00024189646831156264}
+[     4.139][MainProcess][DEBUG] {'natural_join': 0.00012094823415578132, 'natural_join3': 0.00024189646831156264, 'natural_join4': 0.0004837929366231253, 'inner_join': 0.0893807450411224, 'anti_join': 0.006773101112723754, 'left_join': 0.00012094823415578132, 'union': 0.00012094823415578132, 'intersect': 0.0012094823415578133, 'semi_join': 0.00012094823415578132, 'cross_join': 0.7922109337203677, 'filter': 0.09542815674891146, 'summarise': 0.013546202225447508, 'mutate': 0.00024189646831156264}
+[     4.139][MainProcess][INFO] Building synthesizer...
+[     4.141][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])]), Line(T3, root=['natural_join'], var=[1], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T4, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     9.879][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 197 constraints
+[    11.151][MainProcess][DEBUG] Enumeration time: 7.011784315109253

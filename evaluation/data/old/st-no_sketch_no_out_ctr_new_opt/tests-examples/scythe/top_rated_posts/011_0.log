@@ -1,0 +1,71 @@
+[     2.351][MainProcess][INFO] Parsing specification...
+[     2.356][MainProcess][INFO] File read
+[     2.357][MainProcess][DEBUG] Reading input files...
+[     2.366][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i011_1.csv: ['int64', 'string']
+[     2.373][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i011_2.csv: ['int64', 'int64', 'string']
+[     2.379][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o011.csv: ['int64', 'string', 'string']
+[     2.428][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 240, 'anti_join': 44, 'left_join': 4, 'union': 4, 'intersect': 16, 'semi_join': 4, 'cross_join': 520, 'unite': 32, 'summarise': 88, 'mutate': 8}
+[     2.428][MainProcess][DEBUG] {'natural_join': 0.004048582995951417, 'natural_join3': 0.008097165991902834, 'natural_join4': 0.016194331983805668, 'inner_join': 0.242914979757085, 'anti_join': 0.044534412955465584, 'left_join': 0.004048582995951417, 'union': 0.004048582995951417, 'intersect': 0.016194331983805668, 'semi_join': 0.004048582995951417, 'cross_join': 0.5263157894736842, 'unite': 0.032388663967611336, 'summarise': 0.08906882591093117, 'mutate': 0.008097165991902834}
+[     2.428][MainProcess][DEBUG] {'natural_join': 0.004048582995951418, 'natural_join3': 0.008097165991902836, 'natural_join4': 0.01619433198380567, 'inner_join': 0.24291497975708506, 'anti_join': 0.04453441295546559, 'left_join': 0.004048582995951418, 'union': 0.004048582995951418, 'intersect': 0.01619433198380567, 'semi_join': 0.004048582995951418, 'cross_join': 0.5263157894736843, 'unite': 0.03238866396761134, 'summarise': 0.08906882591093118, 'mutate': 0.008097165991902836}
+[     2.429][MainProcess][INFO] Building synthesizer...
+[     2.654][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 93 constraints
+[     2.673][MainProcess][DEBUG] There is no solution for current loc (1).
+[     2.673][MainProcess][DEBUG] Enumeration time: 0.24423646926879883
+[     2.673][MainProcess][DEBUG] Synthesis time: 0.00038695335388183594
+[     2.674][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     3.111][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 216 constraints
+[     3.151][MainProcess][DEBUG] Enumeration time: 0.4776935577392578
+[     3.931][MainProcess][DEBUG] Synthesis time: 0.778998851776123
+[     3.931][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'VehicleID'), summarise(line0, "concatCity = string_agg(City, ', ')", 'Name,VehicleID')]
+[     3.934][MainProcess][DEBUG] Solution found using process 0
+[     3.934][MainProcess][INFO] Statistics:
+[     3.934][MainProcess][INFO] 	Attempted programs: 52 (approx)
+[     3.934][MainProcess][INFO] 		Rejected: 51 (approx)
+[     3.934][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.934][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     3.934][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.934][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.935][MainProcess][INFO] 	Total time spent in enumerator init: 0.721930 (approx)
+[     3.935][MainProcess][INFO] 	Total time spent in enumerator: 0.123106 (approx)
+[     3.935][MainProcess][INFO] 		Enumerated 422.401016 programs/s avg. (just enumeration time)
+[     3.935][MainProcess][INFO] 		Enumerated 16.003567 programs/s avg. (overall)
+[     3.935][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.617572 (approx)
+[     3.935][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.037182 (approx)
+[     3.935][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'VehicleID'), summarise(line0, "concatCity = string_agg(City, ', ')", 'Name,VehicleID')]
+[     3.935][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i011_1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i011_1.csv", col_types = cols("VehicleID" = col_integer(),"Name" = col_character()))
+df_i011_1 <- copy_to(con, df_i011_1)
+df_i011_2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i011_2.csv", col_types = cols("LocationID" = col_integer(),"VehicleID" = col_integer(),"City" = col_character()))
+df_i011_2 <- copy_to(con, df_i011_2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o011.csv", col_types = cols("VehicleID" = col_integer(),"Name" = col_character(),"concatCity" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df58 <- inner_join(df_i011_1, df_i011_2, by=c('VehicleID'), suffix = c('', '.other'), na_matches='never')
+df59 <- df58 %>% group_by(Name,VehicleID) %>% summarise(concatCity = string_agg(City, ', ')) %>% ungroup()
+out <- df59 %>% select(VehicleID, Name, concatCity) %>% arrange(VehicleID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `VehicleID`,
+       `Name`,
+       `concatCity`
+FROM
+  (SELECT `Name`,
+          `VehicleID`,
+          string_agg(`City`, ', ') AS concatCity
+   FROM
+     (SELECT LHS.VehicleID AS VehicleID,
+             Name,
+             LocationID,
+             City
+      FROM df_i011_1 AS LHS
+      INNER JOIN df_i011_2 AS RHS ON (LHS.VehicleID = RHS.VehicleID))
+   GROUP BY Name,
+            VehicleID)
+ORDER BY VehicleID

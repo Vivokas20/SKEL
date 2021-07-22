@@ -1,0 +1,19 @@
+[     2.287][MainProcess][INFO] Parsing specification...
+[     2.293][MainProcess][INFO] File read
+[     2.294][MainProcess][DEBUG] Reading input files...
+[     2.304][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/046.csv: ['string', 'string', 'int64']
+[     2.310][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/046_o.csv: ['string', 'string', 'int64']
+[     2.351][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 10, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 2, 'filter': 12}
+[     2.351][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.351][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.352][MainProcess][INFO] Building synthesizer...
+[     2.438][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 86 constraints
+[     2.443][MainProcess][DEBUG] Enumeration time: 0.09186887741088867
+[     2.784][MainProcess][DEBUG] Synthesis time: 0.3401784896850586
+[     2.784][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     2.945][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 200 constraints
+[     2.956][MainProcess][DEBUG] Enumeration time: 0.17168807983398438
+[   108.017][MainProcess][DEBUG] Synthesis time: 105.0600974559784
+[   108.017][MainProcess][INFO] Increasing the number of lines of code to 3.
+[   108.275][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 344 constraints
+[   108.293][MainProcess][DEBUG] Enumeration time: 0.2756359577178955

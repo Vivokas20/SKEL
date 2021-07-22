@@ -1,0 +1,69 @@
+[     1.629][MainProcess][INFO] Parsing specification...
+[     1.633][MainProcess][INFO] File read
+[     1.634][MainProcess][DEBUG] Reading input files...
+[     1.640][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i048.csv: ['string', 'int64', 'string']
+[     1.645][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o048.csv: ['string', 'int64', 'string']
+[     1.687][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 22, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 14, 'mutate': 2}
+[     1.687][MainProcess][DEBUG] {'natural_join': 0.0008547008547008547, 'natural_join3': 0.0008547008547008547, 'natural_join4': 0.0008547008547008547, 'inner_join': 0.018803418803418803, 'anti_join': 0.005982905982905983, 'left_join': 0.0008547008547008547, 'union': 0.0008547008547008547, 'intersect': 0.002564102564102564, 'semi_join': 0.0008547008547008547, 'cross_join': 0.9487179487179487, 'filter': 0.005128205128205128, 'summarise': 0.011965811965811967, 'mutate': 0.0017094017094017094}
+[     1.687][MainProcess][DEBUG] {'natural_join': 0.0008547008547008548, 'natural_join3': 0.0008547008547008548, 'natural_join4': 0.0008547008547008548, 'inner_join': 0.018803418803418806, 'anti_join': 0.005982905982905984, 'left_join': 0.0008547008547008548, 'union': 0.0008547008547008548, 'intersect': 0.0025641025641025645, 'semi_join': 0.0008547008547008548, 'cross_join': 0.9487179487179488, 'filter': 0.005128205128205129, 'summarise': 0.011965811965811968, 'mutate': 0.0017094017094017096}
+[     1.687][MainProcess][INFO] Building synthesizer...
+[     2.240][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 93 constraints
+[     2.308][MainProcess][DEBUG] Enumeration time: 0.6212384700775146
+[     2.925][MainProcess][DEBUG] Synthesis time: 0.6165177822113037
+[     2.925][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     4.055][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 216 constraints
+[     4.197][MainProcess][DEBUG] Enumeration time: 1.2710373401641846
+[    28.258][MainProcess][DEBUG] Synthesis time: 24.058966875076294
+[    28.258][MainProcess][INFO] Solution found: [mutate(input0, 'minAddressID = min(AddressID)'), cross_join(line0, input0, 'AddressID < AddressID.other | minAddressID > AddressID.other')]
+[    28.264][MainProcess][DEBUG] Solution found using process 0
+[    28.264][MainProcess][INFO] Statistics:
+[    28.264][MainProcess][INFO] 	Attempted programs: 169 (approx)
+[    28.264][MainProcess][INFO] 		Rejected: 168 (approx)
+[    28.264][MainProcess][INFO] 		Failed: 0 (approx)
+[    28.264][MainProcess][INFO] 		Empty outputs: 51 (30.2%) (approx)
+[    28.264][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    28.264][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    28.264][MainProcess][INFO] 	Total time spent in enumerator init: 1.892276 (approx)
+[    28.264][MainProcess][INFO] 	Total time spent in enumerator: 0.629003 (approx)
+[    28.264][MainProcess][INFO] 		Enumerated 268.679347 programs/s avg. (just enumeration time)
+[    28.264][MainProcess][INFO] 		Enumerated 6.082090 programs/s avg. (overall)
+[    28.264][MainProcess][INFO] 	Total time spent in evaluation & testing: 23.967300 (approx)
+[    28.264][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.077739 (approx)
+[    28.264][MainProcess][INFO] Solution found: [mutate(input0, 'minAddressID = min(AddressID)'), cross_join(line0, input0, 'AddressID < AddressID.other | minAddressID > AddressID.other')]
+[    28.264][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i048 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i048.csv", col_types = cols("CName" = col_character(),"AddressID" = col_integer(),"AddressLine" = col_character()))
+df_i048 <- copy_to(con, df_i048)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o048.csv", col_types = cols("CName" = col_character(),"minAddressID" = col_integer(),"AddressLine" = col_character()))
+
+df182 <- df_i048 %>% mutate(minAddressID = min(AddressID))
+df183 <- full_join(df182, df_i048, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(AddressID < AddressID.other | minAddressID > AddressID.other)
+out <- df183 %>% select(CName, minAddressID = AddressID, AddressLine) %>% distinct() %>% arrange(CName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT CName,
+                AddressID AS minAddressID,
+                AddressLine
+FROM
+  (SELECT LHS.CName AS CName,
+          LHS.AddressID AS AddressID,
+          LHS.AddressLine AS AddressLine,
+          minAddressID,
+          RHS.CName AS CName_other,
+          RHS.AddressID AS AddressID_other,
+          RHS.AddressLine AS AddressLine_other
+   FROM
+     (SELECT CName,
+             AddressID,
+             AddressLine,
+             MIN(AddressID) OVER () AS minAddressID
+      FROM df_i048) AS LHS
+   CROSS JOIN df_i048 AS RHS)
+WHERE (AddressID < AddressID_other
+       OR minAddressID > AddressID_other)
+ORDER BY CName

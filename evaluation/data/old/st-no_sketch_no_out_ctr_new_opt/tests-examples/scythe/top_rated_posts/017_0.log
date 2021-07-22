@@ -1,0 +1,48 @@
+[     2.315][MainProcess][INFO] Parsing specification...
+[     2.320][MainProcess][INFO] File read
+[     2.321][MainProcess][DEBUG] Reading input files...
+[     2.330][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i017.csv: ['int64', 'string', 'string']
+[     2.336][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o017.csv: ['int64', 'string', 'string']
+[     2.400][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 22, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 1256, 'filter': 32, 'summarise': 14, 'mutate': 2}
+[     2.400][MainProcess][DEBUG] {'natural_join': 0.0007451564828614009, 'natural_join3': 0.0007451564828614009, 'natural_join4': 0.0007451564828614009, 'inner_join': 0.01639344262295082, 'anti_join': 0.005216095380029807, 'left_join': 0.0007451564828614009, 'union': 0.0007451564828614009, 'intersect': 0.0022354694485842027, 'semi_join': 0.0007451564828614009, 'cross_join': 0.9359165424739195, 'filter': 0.02384500745156483, 'summarise': 0.010432190760059613, 'mutate': 0.0014903129657228018}
+[     2.400][MainProcess][DEBUG] {'natural_join': 0.0007451564828614009, 'natural_join3': 0.0007451564828614009, 'natural_join4': 0.0007451564828614009, 'inner_join': 0.01639344262295082, 'anti_join': 0.005216095380029807, 'left_join': 0.0007451564828614009, 'union': 0.0007451564828614009, 'intersect': 0.0022354694485842027, 'semi_join': 0.0007451564828614009, 'cross_join': 0.9359165424739195, 'filter': 0.02384500745156483, 'summarise': 0.010432190760059613, 'mutate': 0.0014903129657228018}
+[     2.400][MainProcess][INFO] Building synthesizer...
+[     4.406][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 216 constraints
+[     5.090][MainProcess][DEBUG] Enumeration time: 2.688920736312866
+[    11.050][MainProcess][DEBUG] Synthesis time: 5.960119009017944
+[    11.050][MainProcess][INFO] Increasing the number of lines of code to 3.
+[    13.962][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 371 constraints
+[    14.246][MainProcess][DEBUG] Enumeration time: 3.195366382598877
+[    96.111][MainProcess][DEBUG] Synthesis time: 81.8604474067688
+[    96.111][MainProcess][INFO] Solution found: [mutate(input0, 'minID = min(ID)'), filter(line0, "str_detect(SKU, 'FOO-') | minID > ID"), cross_join(line0, line1, 'ID > ID.other & minID <= minID.other')]
+[    96.124][MainProcess][DEBUG] Solution found using process 0
+[    96.124][MainProcess][INFO] Statistics:
+[    96.124][MainProcess][INFO] 	Attempted programs: 335 (approx)
+[    96.124][MainProcess][INFO] 		Rejected: 334 (approx)
+[    96.124][MainProcess][INFO] 		Failed: 0 (approx)
+[    96.124][MainProcess][INFO] 		Empty outputs: 140 (41.8%) (approx)
+[    96.124][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    96.124][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    96.124][MainProcess][INFO] 	Total time spent in enumerator init: 5.884287 (approx)
+[    96.124][MainProcess][INFO] 	Total time spent in enumerator: 2.837317 (approx)
+[    96.124][MainProcess][INFO] 		Enumerated 118.069269 programs/s avg. (just enumeration time)
+[    96.125][MainProcess][INFO] 		Enumerated 3.508942 programs/s avg. (overall)
+[    96.125][MainProcess][INFO] 	Total time spent in evaluation & testing: 84.671525 (approx)
+[    96.125][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.308335 (approx)
+[    96.125][MainProcess][INFO] Solution found: [mutate(input0, 'minID = min(ID)'), filter(line0, "str_detect(SKU, 'FOO-') | minID > ID"), cross_join(line0, line1, 'ID > ID.other & minID <= minID.other')]
+[    96.125][MainProcess][INFO] Solution size: 3
+[    99.697][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i017 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i017.csv", col_types = cols("ID" = col_integer(),"SKU" = col_character(),"PRODUCT" = col_character()))
+df_i017 <- copy_to(con, df_i017)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o017.csv", col_types = cols("ID" = col_integer(),"SKU" = col_character(),"PRODUCT" = col_character()))
+
+df378 <- df_i017 %>% mutate(minID = min(ID))
+df379 <- df378 %>% filter(str_detect(SKU, 'FOO-') | minID > ID)
+df380 <- full_join(df378, df379, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(ID > ID.other & minID <= minID.other)
+out <- df380 %>% select(ID = ID.other, SKU = SKU.other, PRODUCT = PRODUCT.other) %>% distinct() %>% arrange(ID)
+
+Failed to generate SQL query

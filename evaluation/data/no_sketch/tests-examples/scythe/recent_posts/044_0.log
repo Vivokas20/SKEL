@@ -1,0 +1,71 @@
+[     2.332][MainProcess][INFO] Parsing specification...
+[     2.335][MainProcess][INFO] File read
+[     2.336][MainProcess][DEBUG] Reading input files...
+[     2.344][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/044_1.csv: ['int64', 'string']
+[     2.349][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/044_2.csv: ['string', 'int64']
+[     2.353][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/044_o.csv: ['int64', 'string']
+[     2.390][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 40, 'anti_join': 28, 'left_join': 4, 'union': 4, 'intersect': 12, 'semi_join': 4, 'cross_join': 0}
+[     2.390][MainProcess][DEBUG] {'natural_join': 0.03333333333333333, 'natural_join3': 0.06666666666666667, 'natural_join4': 0.13333333333333333, 'inner_join': 0.3333333333333333, 'anti_join': 0.23333333333333334, 'left_join': 0.03333333333333333, 'union': 0.03333333333333333, 'intersect': 0.1, 'semi_join': 0.03333333333333333, 'cross_join': 0.0}
+[     2.390][MainProcess][DEBUG] {'natural_join': 0.03333333333333333, 'natural_join3': 0.06666666666666667, 'natural_join4': 0.13333333333333333, 'inner_join': 0.3333333333333333, 'anti_join': 0.23333333333333334, 'left_join': 0.03333333333333333, 'union': 0.03333333333333333, 'intersect': 0.1, 'semi_join': 0.03333333333333333, 'cross_join': 0.0}
+[     2.390][MainProcess][INFO] Building synthesizer...
+[     2.454][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 78 constraints
+[     2.459][MainProcess][DEBUG] Enumeration time: 0.06881284713745117
+[     3.187][MainProcess][DEBUG] Synthesis time: 0.7276310920715332
+[     3.187][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     3.322][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 184 constraints
+[     3.332][MainProcess][DEBUG] Enumeration time: 0.14476299285888672
+[    14.195][MainProcess][DEBUG] Synthesis time: 10.862239360809326
+[    14.195][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'OriginalID = OriginalID,Area = Part'), anti_join(input0, line0, 'Area,OriginalID')]
+[    14.201][MainProcess][DEBUG] Solution found using process 0
+[    14.201][MainProcess][INFO] Statistics:
+[    14.201][MainProcess][INFO] 	Attempted programs: 346 (approx)
+[    14.201][MainProcess][INFO] 		Rejected: 345 (approx)
+[    14.201][MainProcess][INFO] 		Failed: 0 (approx)
+[    14.201][MainProcess][INFO] 		Empty outputs: 67 (19.4%) (approx)
+[    14.201][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    14.201][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    14.201][MainProcess][INFO] 	Total time spent in enumerator init: 0.213576 (approx)
+[    14.202][MainProcess][INFO] 	Total time spent in enumerator: 0.744634 (approx)
+[    14.202][MainProcess][INFO] 		Enumerated 464.657859 programs/s avg. (just enumeration time)
+[    14.202][MainProcess][INFO] 		Enumerated 25.524302 programs/s avg. (overall)
+[    14.202][MainProcess][INFO] 	Total time spent in evaluation & testing: 10.610764 (approx)
+[    14.202][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.232046 (approx)
+[    14.202][MainProcess][INFO] Solution found: [inner_join(input0, input1, 'OriginalID = OriginalID,Area = Part'), anti_join(input0, line0, 'Area,OriginalID')]
+[    14.202][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_044_1 <- read_csv("tests-examples/scythe/recent_posts/tables/044_1.csv", col_types = cols("OriginalID" = col_integer(),"Area" = col_character()))
+df_044_1 <- copy_to(con, df_044_1)
+df_044_2 <- read_csv("tests-examples/scythe/recent_posts/tables/044_2.csv", col_types = cols("Part" = col_character(),"OriginalID" = col_integer()))
+df_044_2 <- copy_to(con, df_044_2)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/044_o.csv", col_types = cols("OriginalID" = col_integer(),"Area" = col_character()))
+
+df353 <- inner_join(df_044_1, df_044_2, by=c('OriginalID' = 'OriginalID','Area' = 'Part'), suffix = c('', '.other'), na_matches='never') %>% mutate(Part = Area)
+df354 <- anti_join(df_044_1, df353, by=c('Area','OriginalID'), na_matches="never")
+out <- df354 %>% select(OriginalID, Area) %>% arrange(OriginalID)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT OriginalID,
+       Area
+FROM
+  (SELECT *
+   FROM df_044_1 AS LHS
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT OriginalID,
+                  Area,
+                  Area AS Part
+           FROM
+             (SELECT LHS.OriginalID AS OriginalID,
+                     Area
+              FROM df_044_1 AS LHS
+              INNER JOIN df_044_2 AS RHS ON (LHS.OriginalID = RHS.OriginalID
+                                             AND LHS.Area = RHS.Part))) AS RHS
+        WHERE (LHS.Area = RHS.Area
+               AND LHS.OriginalID = RHS.OriginalID) ))
+ORDER BY OriginalID

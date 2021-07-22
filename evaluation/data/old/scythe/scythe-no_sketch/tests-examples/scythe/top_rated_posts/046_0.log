@@ -1,0 +1,72 @@
+[     3.935][MainProcess][INFO] Parsing specification...
+[     3.959][MainProcess][INFO] File read
+[     3.960][MainProcess][DEBUG] Reading input files...
+[     3.980][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i046.csv: ['int64', 'string']
+[     4.016][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o046.csv: ['int64', 'string']
+[     4.056][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 3, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 2, 'filter': 56}
+[     4.056][MainProcess][DEBUG] {'natural_join': 0.0136986301369863, 'natural_join3': 0.0136986301369863, 'natural_join4': 0.0136986301369863, 'inner_join': 0.0410958904109589, 'anti_join': 0.0547945205479452, 'left_join': 0.0136986301369863, 'union': 0.0136986301369863, 'intersect': 0.0273972602739726, 'semi_join': 0.0136986301369863, 'cross_join': 0.0273972602739726, 'filter': 0.7671232876712328}
+[     4.056][MainProcess][DEBUG] {'natural_join': 0.0136986301369863, 'natural_join3': 0.0136986301369863, 'natural_join4': 0.0136986301369863, 'inner_join': 0.0410958904109589, 'anti_join': 0.0547945205479452, 'left_join': 0.0136986301369863, 'union': 0.0136986301369863, 'intersect': 0.0273972602739726, 'semi_join': 0.0136986301369863, 'cross_join': 0.0273972602739726, 'filter': 0.7671232876712328}
+[     4.056][MainProcess][INFO] Building synthesizer...
+[     4.147][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 84 constraints
+[     4.154][MainProcess][DEBUG] There is no solution for current loc (1).
+[     4.154][MainProcess][DEBUG] Enumeration time: 0.09810256958007812
+[     4.155][MainProcess][DEBUG] Synthesis time: 0.0003676414489746094
+[     4.155][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     4.343][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 193 constraints
+[     4.358][MainProcess][DEBUG] Enumeration time: 0.2034134864807129
+[     6.818][MainProcess][DEBUG] Synthesis time: 2.4586775302886963
+[     6.818][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     7.102][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 332 constraints
+[     7.123][MainProcess][DEBUG] Enumeration time: 0.3051595687866211
+[   257.992][MainProcess][DEBUG] Synthesis time: 250.86725544929504
+[   257.992][MainProcess][INFO] Solution found: [filter(input0, "x_field != 'p' & x_field != 'i'"), filter(line0, "x_field != 'f' & x_field != 'a'"), anti_join(input0, line1, 'x_field')]
+[   258.079][MainProcess][DEBUG] Solution found using process 0
+[   258.079][MainProcess][INFO] Statistics:
+[   258.079][MainProcess][INFO] 	Attempted programs: 6395 (approx)
+[   258.079][MainProcess][INFO] 		Rejected: 6394 (approx)
+[   258.079][MainProcess][INFO] 		Failed: 0 (approx)
+[   258.079][MainProcess][INFO] 		Empty outputs: 2535 (39.6%) (approx)
+[   258.079][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[   258.079][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[   258.079][MainProcess][INFO] 	Total time spent in enumerator init: 0.606676 (approx)
+[   258.079][MainProcess][INFO] 	Total time spent in enumerator: 200.659789 (approx)
+[   258.079][MainProcess][INFO] 		Enumerated 31.869863 programs/s avg. (just enumeration time)
+[   258.079][MainProcess][INFO] 		Enumerated 24.897747 programs/s avg. (overall)
+[   258.079][MainProcess][INFO] 	Total time spent in evaluation & testing: 48.709911 (approx)
+[   258.079][MainProcess][INFO] 	Total time spent blocking cubes/programs: 3.922476 (approx)
+[   258.080][MainProcess][INFO] Solution found: [filter(input0, "x_field != 'p' & x_field != 'i'"), filter(line0, "x_field != 'f' & x_field != 'a'"), anti_join(input0, line1, 'x_field')]
+[   258.080][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i046 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i046.csv", col_types = cols("id" = col_integer(),"x_field" = col_character()))
+df_i046 <- copy_to(con, df_i046)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o046.csv", col_types = cols("id" = col_integer(),"x_field" = col_character()))
+
+df7414 <- df_i046 %>% filter(x_field != 'p' & x_field != 'i')
+df7415 <- df7414 %>% filter(x_field != 'f' & x_field != 'a')
+df7416 <- anti_join(df_i046, df7415, by=c('x_field'), na_matches="never")
+out <- df7416 %>% select(id, x_field) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `x_field`
+FROM
+  (SELECT *
+   FROM `df_i046` AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM
+             (SELECT *
+              FROM `df_i046`
+              WHERE (`x_field` != 'p'
+                     AND `x_field` != 'i'))
+           WHERE (`x_field` != 'f'
+                  AND `x_field` != 'a')) AS RHS
+        WHERE (LHS.x_field = RHS.x_field) ))
+ORDER BY id

@@ -1,0 +1,52 @@
+[     2.360][MainProcess][INFO] Parsing specification...
+[     2.366][MainProcess][INFO] File read
+[     2.367][MainProcess][DEBUG] Reading input files...
+[     2.377][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i050.csv: ['int64', 'int64', 'int64', 'int64']
+[     2.392][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o050.csv: ['int64', 'int64', 'int64', 'int64', 'int64']
+[     2.392][MainProcess][INFO] Parsing sketch...
+[     2.392][MainProcess][DEBUG] Sketch creation: Line(T1, root=['mutate'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[])])
+[     3.211][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 210, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 26268, 'filter': 1116, 'summarise': 77, 'mutate': 7}
+[     3.212][MainProcess][DEBUG] {'natural_join': 3.610238636773891e-05, 'natural_join3': 3.610238636773891e-05, 'natural_join4': 3.610238636773891e-05, 'inner_join': 0.0075815011372251705, 'anti_join': 0.000397126250045128, 'left_join': 3.610238636773891e-05, 'union': 3.610238636773891e-05, 'intersect': 0.00014440954547095564, 'semi_join': 3.610238636773891e-05, 'cross_join': 0.9483374851077656, 'filter': 0.04029026318639662, 'summarise': 0.0027798837503158957, 'mutate': 0.00025271670457417233}
+[     3.212][MainProcess][DEBUG] {'natural_join': 3.610238636773891e-05, 'natural_join3': 3.610238636773891e-05, 'natural_join4': 3.610238636773891e-05, 'inner_join': 0.0075815011372251705, 'anti_join': 0.000397126250045128, 'left_join': 3.610238636773891e-05, 'union': 3.610238636773891e-05, 'intersect': 0.00014440954547095564, 'semi_join': 3.610238636773891e-05, 'cross_join': 0.9483374851077656, 'filter': 0.04029026318639662, 'summarise': 0.0027798837503158957, 'mutate': 0.00025271670457417233}
+[     3.212][MainProcess][INFO] Building synthesizer...
+[     3.221][MainProcess][DEBUG] [Line(T1, root=['mutate'], var=[13], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     8.867][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 49 constraints
+[     9.540][MainProcess][DEBUG] Enumeration time: 6.3275675773620605
+[     9.769][MainProcess][DEBUG] Synthesis time: 0.22911930084228516
+[     9.770][MainProcess][INFO] Solution found: [mutate(input0, 'pmin_ = pmin(Col1,Col2,Col3)')]
+[     9.788][MainProcess][DEBUG] Solution found using process 0
+[     9.789][MainProcess][INFO] Statistics:
+[     9.789][MainProcess][INFO] 	Attempted programs: 5 (approx)
+[     9.789][MainProcess][INFO] 		Rejected: 4 (approx)
+[     9.789][MainProcess][INFO] 		Failed: 0 (approx)
+[     9.789][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     9.789][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     9.789][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     9.789][MainProcess][INFO] 	Total time spent in enumerator init: 6.327568 (approx)
+[     9.789][MainProcess][INFO] 	Total time spent in enumerator: 0.048278 (approx)
+[     9.789][MainProcess][INFO] 		Enumerated 103.567153 programs/s avg. (just enumeration time)
+[     9.789][MainProcess][INFO] 		Enumerated 0.549026 programs/s avg. (overall)
+[     9.790][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.177178 (approx)
+[     9.790][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.003007 (approx)
+[     9.790][MainProcess][INFO] Solution found: [mutate(input0, 'pmin_ = pmin(Col1,Col2,Col3)')]
+[     9.790][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i050 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i050.csv", col_types = cols("ID" = col_integer(),"Col1" = col_integer(),"Col2" = col_integer(),"Col3" = col_integer()))
+df_i050 <- copy_to(con, df_i050)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o050.csv", col_types = cols("ID" = col_integer(),"Col1" = col_integer(),"Col2" = col_integer(),"Col3" = col_integer(),"TheMin" = col_integer()))
+
+df6 <- df_i050 %>% mutate(pmin_ = pmin(Col1,Col2,Col3))
+out <- df6 %>% select(ID, Col1, Col2, Col3, TheMin = pmin_)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT ID,
+       Col1,
+       Col2,
+       Col3,
+       MIN(Col1, Col2, Col3) AS TheMin
+FROM df_i050

@@ -1,0 +1,53 @@
+[     3.838][MainProcess][INFO] Parsing specification...
+[     3.843][MainProcess][INFO] File read
+[     3.844][MainProcess][DEBUG] Reading input files...
+[     3.855][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i014.csv: ['int64', 'string']
+[     3.860][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o014.csv: ['int64', 'string']
+[     3.907][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 130, 'unite': 4, 'summarise': 16, 'mutate': 4}
+[     3.908][MainProcess][DEBUG] {'natural_join': 0.005780346820809248, 'natural_join3': 0.005780346820809248, 'natural_join4': 0.005780346820809248, 'inner_join': 0.04046242774566474, 'anti_join': 0.023121387283236993, 'left_join': 0.005780346820809248, 'union': 0.005780346820809248, 'intersect': 0.011560693641618497, 'semi_join': 0.005780346820809248, 'cross_join': 0.7514450867052023, 'unite': 0.023121387283236993, 'summarise': 0.09248554913294797, 'mutate': 0.023121387283236993}
+[     3.908][MainProcess][DEBUG] {'natural_join': 0.005780346820809249, 'natural_join3': 0.005780346820809249, 'natural_join4': 0.005780346820809249, 'inner_join': 0.04046242774566475, 'anti_join': 0.023121387283236997, 'left_join': 0.005780346820809249, 'union': 0.005780346820809249, 'intersect': 0.011560693641618498, 'semi_join': 0.005780346820809249, 'cross_join': 0.7514450867052024, 'unite': 0.023121387283236997, 'summarise': 0.09248554913294799, 'mutate': 0.023121387283236997}
+[     3.908][MainProcess][INFO] Building synthesizer...
+[     4.092][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 97 constraints
+[     4.108][MainProcess][DEBUG] Enumeration time: 0.19980621337890625
+[     4.344][MainProcess][DEBUG] Synthesis time: 0.23566746711730957
+[     4.344][MainProcess][INFO] Solution found: [summarise(input0, "concatstring = string_agg(string, ', ')", 'id')]
+[     4.345][MainProcess][DEBUG] Solution found using process 0
+[     4.345][MainProcess][INFO] Statistics:
+[     4.345][MainProcess][INFO] 	Attempted programs: 20 (approx)
+[     4.345][MainProcess][INFO] 		Rejected: 19 (approx)
+[     4.345][MainProcess][INFO] 		Failed: 0 (approx)
+[     4.345][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     4.345][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     4.345][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     4.345][MainProcess][INFO] 	Total time spent in enumerator init: 0.199806 (approx)
+[     4.346][MainProcess][INFO] 	Total time spent in enumerator: 0.027180 (approx)
+[     4.346][MainProcess][INFO] 		Enumerated 735.829898 programs/s avg. (just enumeration time)
+[     4.346][MainProcess][INFO] 		Enumerated 6.078760 programs/s avg. (overall)
+[     4.346][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.198625 (approx)
+[     4.346][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.009213 (approx)
+[     4.346][MainProcess][INFO] Solution found: [summarise(input0, "concatstring = string_agg(string, ', ')", 'id')]
+[     4.346][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i014 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i014.csv", col_types = cols("id" = col_integer(),"string" = col_character()))
+df_i014 <- copy_to(con, df_i014)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o014.csv", col_types = cols("id" = col_integer(),"concatstring" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df21 <- df_i014 %>% group_by(id) %>% summarise(concatstring = string_agg(string, ', ')) %>% ungroup()
+out <- df21 %>% select(id, concatstring) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `id`,
+       `concatstring`
+FROM
+  (SELECT `id`,
+          string_agg(`string`, ', ') AS concatstring
+   FROM df_i014
+   GROUP BY id)
+ORDER BY id

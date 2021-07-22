@@ -1,0 +1,70 @@
+[     2.357][MainProcess][INFO] Parsing specification...
+[     2.363][MainProcess][INFO] File read
+[     2.364][MainProcess][DEBUG] Reading input files...
+[     2.375][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i032.csv: ['string', 'string', 'int64']
+[     2.381][MainProcess][WARNING] Column names should be valid R identifiers. Trying to fix names. Conflicts may arise!
+[     2.381][MainProcess][WARNING] Replacing column "Count.other" in table tests-examples/scythe/top_rated_posts/tables/o032.csv with Count_other
+[     2.382][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o032.csv: ['string', 'int64', 'int64']
+[     2.382][MainProcess][INFO] Parsing sketch...
+[     2.382][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(["Status == 'Active'"], type=Unknown, var=[])])
+[     2.382][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(["Status == 'Inactive'"], type=Unknown, var=[])])
+[     2.383][MainProcess][DEBUG] Sketch creation: Line(T3, root=['??'], var=[], children=[Child([0], type=Line, var=[]),Child([1], type=Line, var=[]),Child(['Section'], type=Unknown, var=[])])
+[     2.434][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 10, 'anti_join': 7, 'left_join': 1, 'union': 1, 'intersect': 3, 'semi_join': 1, 'cross_join': 2, 'filter': 12}
+[     2.434][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.434][MainProcess][DEBUG] {'natural_join': 0.025, 'natural_join3': 0.025, 'natural_join4': 0.025, 'inner_join': 0.25, 'anti_join': 0.175, 'left_join': 0.025, 'union': 0.025, 'intersect': 0.075, 'semi_join': 0.025, 'cross_join': 0.05, 'filter': 0.3}
+[     2.434][MainProcess][INFO] Building synthesizer...
+[     2.436][MainProcess][DEBUG] [Line(T1, root=['??'], var=[1, 6, 7, 9, 11], children=[Child([0], type=Table, var=[[46], [34]]),Child(["Status == 'Active'"], type=Unknown, var=[[46], [34]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[1, 6, 7, 9, 11], children=[Child([0], type=Table, var=[[46], [36]]),Child(["Status == 'Inactive'"], type=Unknown, var=[[46], [36]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T3, root=['??'], var=[2, 4, 5, 8, 10], children=[Child([0], type=Line, var=[[48], [49], [13, 17, 27]]),Child([1], type=Line, var=[[48], [49], [13, 17, 27]]),Child(['Section'], type=Unknown, var=[[48], [49], [13, 17, 27]]),Child([None], type=None, var=[0])])]
+[     2.695][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 330 constraints
+[     2.708][MainProcess][DEBUG] Enumeration time: 0.2734198570251465
+[     2.818][MainProcess][DEBUG] Synthesis time: 0.10993432998657227
+[     2.818][MainProcess][INFO] Solution found: [filter(input0, "Status == 'Active'"), filter(input0, "Status == 'Inactive'"), inner_join(line0, line1, 'Section')]
+[     2.819][MainProcess][DEBUG] Solution found using process 0
+[     2.819][MainProcess][INFO] Statistics:
+[     2.819][MainProcess][INFO] 	Attempted programs: 6 (approx)
+[     2.819][MainProcess][INFO] 		Rejected: 5 (approx)
+[     2.819][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.819][MainProcess][INFO] 		Empty outputs: 2 (33.3%) (approx)
+[     2.819][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.819][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.820][MainProcess][INFO] 	Total time spent in enumerator init: 0.273420 (approx)
+[     2.820][MainProcess][INFO] 	Total time spent in enumerator: 0.012427 (approx)
+[     2.820][MainProcess][INFO] 		Enumerated 482.816108 programs/s avg. (just enumeration time)
+[     2.820][MainProcess][INFO] 		Enumerated 2.723699 programs/s avg. (overall)
+[     2.820][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.089270 (approx)
+[     2.820][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.007041 (approx)
+[     2.820][MainProcess][INFO] Solution found: [filter(input0, "Status == 'Active'"), filter(input0, "Status == 'Inactive'"), inner_join(line0, line1, 'Section')]
+[     2.820][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i032 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i032.csv", col_types = cols("Section" = col_character(),"Status" = col_character(),"Count" = col_integer()))
+df_i032 <- copy_to(con, df_i032)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o032.csv", col_types = cols("Section" = col_character(),"Count" = col_integer(),"Count.other" = col_integer()))
+expected_output <- rename(expected_output, Count_other = "Count.other")
+
+df9 <- df_i032 %>% filter(Status == 'Active')
+df10 <- df_i032 %>% filter(Status == 'Inactive')
+df11 <- inner_join(df9, df10, by=c('Section'), suffix = c('', '.other'), na_matches='never')
+out <- df11 %>% select(Section, Count, Count_other = Count.other)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `Section`,
+       `Count`,
+       `Count_other` AS `Count_other`
+FROM
+  (SELECT `LHS`.`Section` AS `Section`,
+          `LHS`.`Status` AS `Status`,
+          `LHS`.`Count` AS `Count`,
+          `RHS`.`Status` AS `Status_other`,
+          `RHS`.`Count` AS `Count_other`
+   FROM
+     (SELECT *
+      FROM `df_i032`
+      WHERE (`Status` = 'Active')) AS `LHS`
+   INNER JOIN
+     (SELECT *
+      FROM `df_i032`
+      WHERE (`Status` = 'Inactive')) AS RHS ON (LHS.Section = RHS.Section))

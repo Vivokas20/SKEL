@@ -1,0 +1,58 @@
+[     2.307][MainProcess][INFO] Parsing specification...
+[     2.312][MainProcess][INFO] File read
+[     2.313][MainProcess][DEBUG] Reading input files...
+[     2.323][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i055.csv: ['int64', 'string', 'string', 'string']
+[     2.330][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o055.csv: ['string', 'string', 'string']
+[     2.330][MainProcess][INFO] Parsing sketch...
+[     2.330][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.374][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 94, 'anti_join': 11, 'left_join': 1, 'union': 1, 'intersect': 4, 'semi_join': 1, 'cross_join': 130, 'unite': 16, 'summarise': 44, 'mutate': 4}
+[     2.374][MainProcess][DEBUG] {'natural_join': 0.003236245954692557, 'natural_join3': 0.003236245954692557, 'natural_join4': 0.003236245954692557, 'inner_join': 0.3042071197411003, 'anti_join': 0.03559870550161812, 'left_join': 0.003236245954692557, 'union': 0.003236245954692557, 'intersect': 0.012944983818770227, 'semi_join': 0.003236245954692557, 'cross_join': 0.42071197411003236, 'unite': 0.05177993527508091, 'summarise': 0.1423948220064725, 'mutate': 0.012944983818770227}
+[     2.375][MainProcess][DEBUG] {'natural_join': 0.003236245954692557, 'natural_join3': 0.003236245954692557, 'natural_join4': 0.003236245954692557, 'inner_join': 0.3042071197411003, 'anti_join': 0.03559870550161812, 'left_join': 0.003236245954692557, 'union': 0.003236245954692557, 'intersect': 0.012944983818770227, 'semi_join': 0.003236245954692557, 'cross_join': 0.42071197411003236, 'unite': 0.05177993527508091, 'summarise': 0.1423948220064725, 'mutate': 0.012944983818770227}
+[     2.375][MainProcess][INFO] Building synthesizer...
+[     2.376][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=SummariseCondition, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])])]
+[     2.605][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 80 constraints
+[     2.617][MainProcess][DEBUG] Enumeration time: 0.24213409423828125
+[     2.984][MainProcess][DEBUG] Synthesis time: 0.3671531677246094
+[     2.984][MainProcess][INFO] Solution found: [summarise(input0, "concatPageURL = string_agg(PageURL, ' ')", 'Activity,User')]
+[     2.986][MainProcess][DEBUG] Solution found using process 0
+[     2.986][MainProcess][INFO] Statistics:
+[     2.986][MainProcess][INFO] 	Attempted programs: 33 (approx)
+[     2.986][MainProcess][INFO] 		Rejected: 32 (approx)
+[     2.986][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.986][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.986][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.986][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.986][MainProcess][INFO] 	Total time spent in enumerator init: 0.242134 (approx)
+[     2.986][MainProcess][INFO] 	Total time spent in enumerator: 0.036895 (approx)
+[     2.986][MainProcess][INFO] 		Enumerated 894.435030 programs/s avg. (just enumeration time)
+[     2.986][MainProcess][INFO] 		Enumerated 14.333704 programs/s avg. (overall)
+[     2.987][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.315920 (approx)
+[     2.987][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.013636 (approx)
+[     2.987][MainProcess][INFO] Solution found: [summarise(input0, "concatPageURL = string_agg(PageURL, ' ')", 'Activity,User')]
+[     2.987][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i055 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i055.csv", col_types = cols("ID" = col_integer(),"User" = col_character(),"Activity" = col_character(),"PageURL" = col_character()))
+df_i055 <- copy_to(con, df_i055)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o055.csv", col_types = cols("User" = col_character(),"Activity" = col_character(),"concatPageURL" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df34 <- df_i055 %>% group_by(Activity,User) %>% summarise(concatPageURL = string_agg(PageURL, ' ')) %>% ungroup()
+out <- df34 %>% select(User, Activity, concatPageURL)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `User`,
+       `Activity`,
+       `concatPageURL`
+FROM
+  (SELECT `Activity`,
+          `User`,
+          string_agg(`PageURL`, ' ') AS concatPageURL
+   FROM df_i055
+   GROUP BY Activity,
+            USER)

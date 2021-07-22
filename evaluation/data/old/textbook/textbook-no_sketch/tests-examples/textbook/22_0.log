@@ -1,0 +1,25 @@
+[     3.086][MainProcess][INFO] Parsing specification...
+[     3.090][MainProcess][INFO] File read
+[     3.090][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     3.090][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     3.090][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     3.091][MainProcess][DEBUG] Reading input files...
+[     3.098][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22-1.txt: ['string', 'string']
+[     3.102][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22-2.txt: ['string', 'string']
+[     3.106][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22-3.txt: ['string', 'string']
+[     3.110][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22.out: ['string', 'int64']
+[     3.147][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 846, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 288, 'filter': 6, 'summarise': 33, 'mutate': 3}
+[     3.147][MainProcess][DEBUG] {'natural_join': 0.006185567010309278, 'natural_join3': 0.018556701030927835, 'natural_join4': 0.05567010309278351, 'inner_join': 0.5814432989690722, 'anti_join': 0.06804123711340206, 'left_join': 0.006185567010309278, 'union': 0.006185567010309278, 'intersect': 0.024742268041237112, 'semi_join': 0.006185567010309278, 'cross_join': 0.1979381443298969, 'filter': 0.004123711340206186, 'summarise': 0.02268041237113402, 'mutate': 0.002061855670103093}
+[     3.147][MainProcess][DEBUG] {'natural_join': 0.006185567010309278, 'natural_join3': 0.018556701030927835, 'natural_join4': 0.05567010309278351, 'inner_join': 0.5814432989690722, 'anti_join': 0.06804123711340206, 'left_join': 0.006185567010309278, 'union': 0.006185567010309278, 'intersect': 0.024742268041237112, 'semi_join': 0.006185567010309278, 'cross_join': 0.1979381443298969, 'filter': 0.004123711340206186, 'summarise': 0.02268041237113402, 'mutate': 0.002061855670103093}
+[     3.147][MainProcess][INFO] Building synthesizer...
+[     3.399][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 222 constraints
+[     3.430][MainProcess][DEBUG] There is no solution for current loc (2).
+[     3.430][MainProcess][DEBUG] Enumeration time: 0.28220391273498535
+[     3.430][MainProcess][DEBUG] Synthesis time: 0.0004324913024902344
+[     3.430][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     3.824][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 383 constraints
+[     3.930][MainProcess][DEBUG] Enumeration time: 0.4995391368865967
+[     7.265][MainProcess][DEBUG] Synthesis time: 3.333832263946533
+[     7.265][MainProcess][INFO] Increasing the number of lines of code to 4.
+[     7.813][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 579 constraints
+[     7.863][MainProcess][DEBUG] Enumeration time: 0.5980579853057861

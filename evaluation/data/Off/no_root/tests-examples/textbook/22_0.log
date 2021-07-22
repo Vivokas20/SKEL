@@ -1,0 +1,101 @@
+[     2.437][MainProcess][INFO] Parsing specification...
+[     2.444][MainProcess][INFO] File read
+[     2.444][MainProcess][WARNING] "attrs" field is deprecated. Please use "columns"
+[     2.444][MainProcess][WARNING] "aggrs" field is deprecated. Please use "functions"
+[     2.444][MainProcess][WARNING] "const" field is deprecated. Please use "constants"
+[     2.445][MainProcess][DEBUG] Reading input files...
+[     2.454][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22-1.txt: ['string', 'string']
+[     2.459][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22-2.txt: ['string', 'string']
+[     2.465][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22-3.txt: ['string', 'string']
+[     2.471][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/22.out: ['string', 'int64']
+[     2.471][MainProcess][INFO] Parsing sketch...
+[     2.471][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[])])
+[     2.471][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Line, var=[]),Child(['n = n()'], type=Unknown, var=[]),Child(['S_key'], type=Unknown, var=[])])
+[     2.471][MainProcess][DEBUG] Sketch creation: Line(T3, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([2], type=Table, var=[]),Child([1], type=Line, var=[])])
+[     2.471][MainProcess][DEBUG] Sketch creation: Line(T4, root=['??'], var=[], children=[Child([0], type=Line, var=[]),Child(["color != 'green'"], type=Unknown, var=[])])
+[     2.471][MainProcess][DEBUG] Sketch creation: Line(T5, root=['??'], var=[], children=[Child([2], type=Line, var=[]),Child([3], type=Line, var=[]),Child(['S_key'], type=Unknown, var=[])])
+[     2.520][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 846, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 288, 'filter': 6, 'summarise': 33, 'mutate': 3}
+[     2.520][MainProcess][DEBUG] {'natural_join': 0.006185567010309278, 'natural_join3': 0.018556701030927835, 'natural_join4': 0.05567010309278351, 'inner_join': 0.5814432989690722, 'anti_join': 0.06804123711340206, 'left_join': 0.006185567010309278, 'union': 0.006185567010309278, 'intersect': 0.024742268041237112, 'semi_join': 0.006185567010309278, 'cross_join': 0.1979381443298969, 'filter': 0.004123711340206186, 'summarise': 0.02268041237113402, 'mutate': 0.002061855670103093}
+[     2.520][MainProcess][DEBUG] {'natural_join': 0.006185567010309278, 'natural_join3': 0.018556701030927835, 'natural_join4': 0.05567010309278351, 'inner_join': 0.5814432989690722, 'anti_join': 0.06804123711340206, 'left_join': 0.006185567010309278, 'union': 0.006185567010309278, 'intersect': 0.024742268041237112, 'semi_join': 0.006185567010309278, 'cross_join': 0.1979381443298969, 'filter': 0.004123711340206186, 'summarise': 0.02268041237113402, 'mutate': 0.002061855670103093}
+[     2.520][MainProcess][INFO] Building synthesizer...
+[     2.522][MainProcess][DEBUG] [Line(T1, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Table, var=[[158], [159]]),Child([1], type=Table, var=[[158], [159]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Line, var=[[162], [157], [15, 20, 114]]),Child(['n = n()'], type=Unknown, var=[[162], [157], [15, 20, 114]]),Child(['S_key'], type=Unknown, var=[[162], [157], [15, 20, 114]]),Child([None], type=None, var=[0])]), Line(T3, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Table, var=[[158], [160], [163]]),Child([2], type=Table, var=[[158], [160], [163]]),Child([1], type=Line, var=[[158], [160], [163]]),Child([None], type=None, var=[0])]), Line(T4, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([0], type=Line, var=[[162], [156]]),Child(["color != 'green'"], type=Unknown, var=[[162], [156]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T5, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([2], type=Line, var=[[164], [165], [15, 20, 114]]),Child([3], type=Line, var=[[164], [165], [15, 20, 114]]),Child(['S_key'], type=Unknown, var=[[164], [165], [15, 20, 114]]),Child([None], type=None, var=[0])])]
+[     2.812][MainProcess][DEBUG] Enumerator for loc 5 constructed using 115 variables and 446 constraints
+[     2.830][MainProcess][DEBUG] Enumeration time: 0.3100700378417969
+[     3.043][MainProcess][DEBUG] Synthesis time: 0.2127995491027832
+[     3.043][MainProcess][INFO] Solution found: [left_join(input1, input0), summarise(line0, 'n = n()', 'S_key'), natural_join3(input0, input2, line1), filter(line0, "color != 'green'"), anti_join(line2, line3, 'S_key')]
+[     3.045][MainProcess][DEBUG] Solution found using process 0
+[     3.045][MainProcess][INFO] Statistics:
+[     3.045][MainProcess][INFO] 	Attempted programs: 6 (approx)
+[     3.045][MainProcess][INFO] 		Rejected: 5 (approx)
+[     3.045][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.045][MainProcess][INFO] 		Empty outputs: 2 (33.3%) (approx)
+[     3.045][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.045][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.045][MainProcess][INFO] 	Total time spent in enumerator init: 0.310070 (approx)
+[     3.046][MainProcess][INFO] 	Total time spent in enumerator: 0.020697 (approx)
+[     3.046][MainProcess][INFO] 		Enumerated 289.895450 programs/s avg. (just enumeration time)
+[     3.046][MainProcess][INFO] 		Enumerated 2.543259 programs/s avg. (overall)
+[     3.046][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.179726 (approx)
+[     3.046][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.010728 (approx)
+[     3.046][MainProcess][INFO] Solution found: [left_join(input1, input0), summarise(line0, 'n = n()', 'S_key'), natural_join3(input0, input2, line1), filter(line0, "color != 'green'"), anti_join(line2, line3, 'S_key')]
+[     3.046][MainProcess][INFO] Solution size: 5
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_22_1 <- read_csv("tests-examples/textbook/tables/22-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_22_1 <- copy_to(con, df_22_1)
+df_22_2 <- read_csv("tests-examples/textbook/tables/22-2.txt", col_types = cols("P_id" = col_character(),"color" = col_character()))
+df_22_2 <- copy_to(con, df_22_2)
+df_22_3 <- read_csv("tests-examples/textbook/tables/22-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_22_3 <- copy_to(con, df_22_3)
+expected_output <- read_csv("tests-examples/textbook/tables/22.out", col_types = cols("S_name" = col_character(),"n" = col_integer()))
+
+df25 <- left_join(df_22_2, df_22_1, na_matches="never")
+df26 <- df25 %>% group_by(S_key) %>% summarise(n = n()) %>% ungroup()
+df27 <- inner_join(df_22_1, df_22_3, na_matches="never") %>% inner_join(df26, na_matches="never")
+df28 <- df25 %>% filter(color != 'green')
+df29 <- anti_join(df27, df28, by=c('S_key'), na_matches="never")
+out <- df29 %>% select(S_name, n) %>% arrange(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `S_name`,
+       `n`
+FROM
+  (SELECT *
+   FROM
+     (SELECT `LHS`.`S_key` AS `S_key`,
+             `P_id`,
+             `S_name`,
+             `n`
+      FROM
+        (SELECT `LHS`.`S_key` AS `S_key`,
+                `P_id`,
+                `S_name`
+         FROM `df_22_1` AS `LHS`
+         INNER JOIN `df_22_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+      INNER JOIN
+        (SELECT `S_key`,
+                COUNT(*) AS `n`
+         FROM
+           (SELECT `LHS`.`P_id` AS `P_id`,
+                   `color`,
+                   `S_key`
+            FROM `df_22_2` AS `LHS`
+            LEFT JOIN `df_22_1` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`))
+         GROUP BY `S_key`) AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM
+             (SELECT `LHS`.`P_id` AS `P_id`,
+                     `color`,
+                     `S_key`
+              FROM `df_22_2` AS `LHS`
+              LEFT JOIN `df_22_1` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`))
+           WHERE (`color` != 'green')) AS RHS
+        WHERE (LHS.S_key = RHS.S_key) ))
+ORDER BY S_name

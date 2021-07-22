@@ -1,0 +1,65 @@
+[     2.234][MainProcess][INFO] Parsing specification...
+[     2.241][MainProcess][INFO] File read
+[     2.242][MainProcess][DEBUG] Reading input files...
+[     2.251][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/architect.csv: ['int64', 'string', 'string', 'string']
+[     2.258][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/bridge.csv: ['int64', 'int64', 'string', 'string', 'Float64', 'Float64']
+[     2.266][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/mill.csv: ['int64', 'int64', 'string', 'string', 'string', 'int64', 'string']
+[     2.274][MainProcess][INFO] Inferred data types for table tests-examples/spider/architecture/tables/0011.csv: ['int64', 'string', 'string']
+[     2.274][MainProcess][INFO] Parsing sketch...
+[     2.274][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child(['id = architect_id'], type=Unknown, var=[])])
+[     2.275][MainProcess][DEBUG] Sketch creation: Line(T2, root=['??'], var=[], children=[Child([0], type=Line, var=[]),Child(['n = n()'], type=Unknown, var=[]),Child(['id'], type=Unknown, var=[])])
+[     2.275][MainProcess][DEBUG] Sketch creation: Line(T3, root=['??'], var=[], children=[Child([1], type=Line, var=[]),Child(['n == 2'], type=Unknown, var=[])])
+[     2.275][MainProcess][DEBUG] Sketch creation: Line(T4, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([2], type=Table, var=[]),Child(['id = architect_id'], type=Unknown, var=[])])
+[     2.275][MainProcess][DEBUG] Sketch creation: Line(T5, root=['??'], var=[], children=[Child([3], type=Line, var=[]),Child(['n = n()'], type=Unknown, var=[]),Child(['id'], type=Unknown, var=[])])
+[     2.275][MainProcess][DEBUG] Sketch creation: Line(T6, root=['??'], var=[], children=[Child([4], type=Line, var=[]),Child(['n == 1'], type=Unknown, var=[])])
+[     2.275][MainProcess][DEBUG] Sketch creation: Line(T7, root=['??'], var=[], children=[Child([2], type=Line, var=[]),Child([5], type=Line, var=[])])
+[     2.275][MainProcess][DEBUG] Sketch creation: Line(T8, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child([6], type=Line, var=[])])
+[     2.350][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 11970, 'anti_join': 603, 'left_join': 9, 'union': 9, 'intersect': 99, 'semi_join': 9, 'cross_join': 54, 'filter': 252, 'summarise': 201, 'mutate': 3}
+[     2.350][MainProcess][DEBUG] {'natural_join': 0.0006753714542998649, 'natural_join3': 0.002026114362899595, 'natural_join4': 0.006078343088698784, 'inner_join': 0.8982440342188204, 'anti_join': 0.04524988743809095, 'left_join': 0.0006753714542998649, 'union': 0.0006753714542998649, 'intersect': 0.007429085997298514, 'semi_join': 0.0006753714542998649, 'cross_join': 0.00405222872579919, 'filter': 0.01891040072039622, 'summarise': 0.015083295812696983, 'mutate': 0.00022512381809995497}
+[     2.350][MainProcess][DEBUG] {'natural_join': 0.0006753714542998649, 'natural_join3': 0.002026114362899595, 'natural_join4': 0.006078343088698784, 'inner_join': 0.8982440342188204, 'anti_join': 0.04524988743809095, 'left_join': 0.0006753714542998649, 'union': 0.0006753714542998649, 'intersect': 0.007429085997298514, 'semi_join': 0.0006753714542998649, 'cross_join': 0.00405222872579919, 'filter': 0.01891040072039622, 'summarise': 0.015083295812696983, 'mutate': 0.00022512381809995497}
+[     2.350][MainProcess][INFO] Building synthesizer...
+[     2.353][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10], children=[Child([0], type=Table, var=[[1513], [1514], [1334]]),Child([1], type=Table, var=[[1513], [1514], [1334]]),Child(['id = architect_id'], type=Unknown, var=[[1513], [1514], [1334]]),Child([None], type=None, var=[0])]), Line(T2, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([0], type=Line, var=[[1517], [1512], [17, 29, 1359]]),Child(['n = n()'], type=Unknown, var=[[1517], [1512], [17, 29, 1359]]),Child(['id'], type=Unknown, var=[[1517], [1512], [17, 29, 1359]]),Child([None], type=None, var=[0])]), Line(T3, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([1], type=Line, var=[[1518], [1428]]),Child(['n == 2'], type=Unknown, var=[[1518], [1428]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T4, root=['??'], var=[2, 4, 5, 8, 10], children=[Child([0], type=Table, var=[[1513], [1515], [1334]]),Child([2], type=Table, var=[[1513], [1515], [1334]]),Child(['id = architect_id'], type=Unknown, var=[[1513], [1515], [1334]]),Child([None], type=None, var=[0])]), Line(T5, root=['??'], var=[2, 4, 5, 8, 10, 12], children=[Child([3], type=Line, var=[[1520], [1512], [17, 29, 1359]]),Child(['n = n()'], type=Unknown, var=[[1520], [1512], [17, 29, 1359]]),Child(['id'], type=Unknown, var=[[1520], [1512], [17, 29, 1359]]),Child([None], type=None, var=[0])]), Line(T6, root=['??'], var=[1, 6, 7, 9, 11, 13], children=[Child([4], type=Line, var=[[1521], [1434]]),Child(['n == 1'], type=Unknown, var=[[1521], [1434]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T7, root=['??'], var=[1, 6, 7, 9], children=[Child([2], type=Line, var=[[1519], [1522]]),Child([5], type=Line, var=[[1519], [1522]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T8, root=['??'], var=[1, 6, 7, 9], children=[Child([0], type=Table, var=[[1513], [1523]]),Child([6], type=Line, var=[[1513], [1523]]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     3.355][MainProcess][DEBUG] Enumerator for loc 8 constructed using 232 variables and 749 constraints
+[     3.555][MainProcess][DEBUG] Enumeration time: 1.2049403190612793
+[     3.742][MainProcess][DEBUG] Synthesis time: 0.18653202056884766
+[     3.742][MainProcess][INFO] Solution found: [inner_join(input1, input1, 'id = architect_id'), summarise(line0, 'n = n()', 'id'), filter(line1, 'n == 2'), inner_join(input2, input2, 'id = architect_id'), summarise(line3, 'n = n()', 'id'), filter(line4, 'n == 1'), union(line5, line2), semi_join(input0, line6)]
+[     3.746][MainProcess][DEBUG] Solution found using process 0
+[     3.746][MainProcess][INFO] Statistics:
+[     3.746][MainProcess][INFO] 	Attempted programs: 5 (approx)
+[     3.746][MainProcess][INFO] 		Rejected: 4 (approx)
+[     3.747][MainProcess][INFO] 		Failed: 0 (approx)
+[     3.747][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     3.747][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     3.747][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     3.747][MainProcess][INFO] 	Total time spent in enumerator init: 1.204940 (approx)
+[     3.747][MainProcess][INFO] 	Total time spent in enumerator: 0.025288 (approx)
+[     3.747][MainProcess][INFO] 		Enumerated 197.723283 programs/s avg. (just enumeration time)
+[     3.747][MainProcess][INFO] 		Enumerated 1.604131 programs/s avg. (overall)
+[     3.747][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.143973 (approx)
+[     3.747][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.015032 (approx)
+[     3.747][MainProcess][INFO] Solution found: [inner_join(input1, input1, 'id = architect_id'), summarise(line0, 'n = n()', 'id'), filter(line1, 'n == 2'), inner_join(input2, input2, 'id = architect_id'), summarise(line3, 'n = n()', 'id'), filter(line4, 'n == 1'), union(line5, line2), semi_join(input0, line6)]
+[     3.747][MainProcess][INFO] Solution size: 8
+[     4.080][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_architect <- read_csv("tests-examples/spider/architecture/tables/architect.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"nationality" = col_character(),"gender" = col_character()))
+df_architect <- copy_to(con, df_architect)
+df_bridge <- read_csv("tests-examples/spider/architecture/tables/bridge.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"name" = col_character(),"location" = col_character(),"length_meters" = col_double(),"length_feet" = col_double()))
+df_bridge <- copy_to(con, df_bridge)
+df_mill <- read_csv("tests-examples/spider/architecture/tables/mill.csv", col_types = cols("architect_id" = col_integer(),"id" = col_integer(),"location" = col_character(),"name" = col_character(),"type" = col_character(),"built_year" = col_integer(),"notes" = col_character()))
+df_mill <- copy_to(con, df_mill)
+expected_output <- read_csv("tests-examples/spider/architecture/tables/0011.csv", col_types = cols("id" = col_integer(),"name" = col_character(),"gender" = col_character()))
+
+df25 <- inner_join(df_bridge, df_bridge, by=c('id' = 'architect_id'), suffix = c('', '.other'), na_matches='never') %>% mutate(architect_id = id)
+df26 <- df25 %>% group_by(id) %>% summarise(n = n()) %>% ungroup()
+df27 <- df26 %>% filter(n == 2)
+df28 <- inner_join(df_mill, df_mill, by=c('id' = 'architect_id'), suffix = c('', '.other'), na_matches='never') %>% mutate(architect_id = id)
+df29 <- df28 %>% group_by(id) %>% summarise(n = n()) %>% ungroup()
+df30 <- df29 %>% filter(n == 1)
+df31 <- bind_rows(df30, df27)
+df32 <- semi_join(df_architect, df31, na_matches="never")
+out <- df32 %>% select(id, name, gender) %>% distinct() %>% arrange(id)
+
+Failed to generate SQL query

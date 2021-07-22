@@ -1,0 +1,83 @@
+[     2.311][MainProcess][INFO] Parsing specification...
+[     2.317][MainProcess][INFO] File read
+[     2.318][MainProcess][DEBUG] Reading input files...
+[     2.325][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     2.330][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     2.336][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/34.out: ['string', 'Float64']
+[     2.407][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 120, 'anti_join': 44, 'left_join': 4, 'union': 4, 'intersect': 16, 'semi_join': 4, 'cross_join': 4440, 'filter': 12, 'summarise': 22, 'mutate': 2}
+[     2.407][MainProcess][DEBUG] {'natural_join': 0.0008517887563884157, 'natural_join3': 0.0017035775127768314, 'natural_join4': 0.0034071550255536627, 'inner_join': 0.02555366269165247, 'anti_join': 0.009369676320272573, 'left_join': 0.0008517887563884157, 'union': 0.0008517887563884157, 'intersect': 0.0034071550255536627, 'semi_join': 0.0008517887563884157, 'cross_join': 0.9454855195911414, 'filter': 0.002555366269165247, 'summarise': 0.004684838160136286, 'mutate': 0.00042589437819420784}
+[     2.407][MainProcess][DEBUG] {'natural_join': 0.0008517887563884158, 'natural_join3': 0.0017035775127768316, 'natural_join4': 0.003407155025553663, 'inner_join': 0.025553662691652473, 'anti_join': 0.009369676320272574, 'left_join': 0.0008517887563884158, 'union': 0.0008517887563884158, 'intersect': 0.003407155025553663, 'semi_join': 0.0008517887563884158, 'cross_join': 0.9454855195911415, 'filter': 0.0025553662691652473, 'summarise': 0.004684838160136287, 'mutate': 0.0004258943781942079}
+[     2.407][MainProcess][INFO] Building synthesizer...
+[     3.288][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 93 constraints
+[     3.374][MainProcess][DEBUG] There is no solution for current loc (1).
+[     3.374][MainProcess][DEBUG] Enumeration time: 0.9664900302886963
+[     3.374][MainProcess][DEBUG] Synthesis time: 0.0004112720489501953
+[     3.375][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     5.084][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 216 constraints
+[     5.254][MainProcess][DEBUG] Enumeration time: 1.8794875144958496
+[    14.089][MainProcess][DEBUG] Synthesis time: 8.83021354675293
+[    14.090][MainProcess][INFO] Increasing the number of lines of code to 3.
+[    16.616][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 371 constraints
+[    16.867][MainProcess][DEBUG] Enumeration time: 2.7767255306243896
+[   116.611][MainProcess][DEBUG] Synthesis time: 99.7393090724945
+[   116.611][MainProcess][INFO] Solution found: [anti_join(input1, input0, ''), mutate(input1, 'meansalary = mean(salary)'), cross_join(line1, line0, 'salary < salary.other & meansalary < salary.other')]
+[   116.626][MainProcess][DEBUG] Solution found using process 0
+[   116.626][MainProcess][INFO] Statistics:
+[   116.626][MainProcess][INFO] 	Attempted programs: 591 (approx)
+[   116.626][MainProcess][INFO] 		Rejected: 590 (approx)
+[   116.626][MainProcess][INFO] 		Failed: 0 (approx)
+[   116.626][MainProcess][INFO] 		Empty outputs: 93 (15.7%) (approx)
+[   116.626][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[   116.626][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[   116.626][MainProcess][INFO] 	Total time spent in enumerator init: 5.622703 (approx)
+[   116.627][MainProcess][INFO] 	Total time spent in enumerator: 4.362427 (approx)
+[   116.627][MainProcess][INFO] 		Enumerated 135.475032 programs/s avg. (just enumeration time)
+[   116.627][MainProcess][INFO] 		Enumerated 5.097612 programs/s avg. (overall)
+[   116.627][MainProcess][INFO] 	Total time spent in evaluation & testing: 103.672896 (approx)
+[   116.627][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.528913 (approx)
+[   116.627][MainProcess][INFO] Solution found: [anti_join(input1, input0, ''), mutate(input1, 'meansalary = mean(salary)'), cross_join(line1, line0, 'salary < salary.other & meansalary < salary.other')]
+[   116.627][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_certified <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols("eid" = col_integer(),"aid" = col_integer()))
+df_certified <- copy_to(con, df_certified)
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+expected_output <- read_csv("tests-examples/textbook/tables/34.out", col_types = cols("ename" = col_character(),"salary" = col_double()))
+
+df634 <- anti_join(df_employees, df_certified, by=c(), na_matches="never")
+df635 <- df_employees %>% mutate(meansalary = mean(salary))
+df636 <- full_join(df635, df634, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(salary < salary.other & meansalary < salary.other)
+out <- df636 %>% select(ename = ename.other, salary = salary.other) %>% distinct() %>% arrange(ename)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT ename_other AS ename,
+                salary_other AS salary
+FROM
+  (SELECT LHS.eid AS eid,
+          LHS.ename AS ename,
+          LHS.salary AS salary,
+          meansalary,
+          RHS.eid AS eid_other,
+          RHS.ename AS ename_other,
+          RHS.salary AS salary_other
+   FROM
+     (SELECT eid,
+             ename,
+             salary,
+             AVG(salary) OVER () AS meansalary
+      FROM df_employees) AS LHS
+   CROSS JOIN
+     (SELECT *
+      FROM df_employees AS LHS
+      WHERE NOT EXISTS
+          (SELECT 1
+           FROM df_certified AS RHS
+           WHERE (LHS.eid = RHS.eid) )) AS RHS)
+WHERE (salary < salary_other
+       AND meansalary < salary_other)
+ORDER BY ename

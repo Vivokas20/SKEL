@@ -1,0 +1,65 @@
+[     2.242][MainProcess][INFO] Parsing specification...
+[     2.246][MainProcess][INFO] File read
+[     2.247][MainProcess][DEBUG] Reading input files...
+[     2.263][MainProcess][WARNING] Using integers larger than 32 bits! Converting column phone_number to string.
+[     2.264][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i010_1.csv: ['datetime64[ns]', 'string', 'object']
+[     2.274][MainProcess][WARNING] Using integers larger than 32 bits! Converting column phone_number to string.
+[     2.275][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i010_2.csv: ['datetime64[ns]', 'datetime64[ns]', 'object']
+[     2.284][MainProcess][WARNING] Using integers larger than 32 bits! Converting column phone_number to string.
+[     2.285][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o010.csv: ['datetime64[ns]', 'datetime64[ns]', 'object']
+[     2.285][MainProcess][INFO] Parsing sketch...
+[     2.285][MainProcess][DEBUG] Sketch creation: Line(T1, root=['anti_join'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Cols, var=[])])
+[     2.350][MainProcess][DEBUG] {'natural_join': 4, 'natural_join3': 8, 'natural_join4': 16, 'inner_join': 104, 'anti_join': 44, 'left_join': 4, 'union': 4, 'intersect': 16, 'semi_join': 4, 'cross_join': 0}
+[     2.351][MainProcess][DEBUG] {'natural_join': 0.0196078431372549, 'natural_join3': 0.0392156862745098, 'natural_join4': 0.0784313725490196, 'inner_join': 0.5098039215686274, 'anti_join': 0.21568627450980393, 'left_join': 0.0196078431372549, 'union': 0.0196078431372549, 'intersect': 0.0784313725490196, 'semi_join': 0.0196078431372549, 'cross_join': 0.0}
+[     2.351][MainProcess][DEBUG] {'natural_join': 0.0196078431372549, 'natural_join3': 0.0392156862745098, 'natural_join4': 0.0784313725490196, 'inner_join': 0.5098039215686274, 'anti_join': 0.21568627450980393, 'left_join': 0.0196078431372549, 'union': 0.0196078431372549, 'intersect': 0.0784313725490196, 'semi_join': 0.0196078431372549, 'cross_join': 0.0}
+[     2.351][MainProcess][INFO] Building synthesizer...
+[     2.352][MainProcess][DEBUG] [Line(T1, root=['anti_join'], var=[5], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Cols, var=[]),Child([None], type=None, var=[0])])]
+[     2.435][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 65 constraints
+[     2.440][MainProcess][DEBUG] Enumeration time: 0.08911943435668945
+[     2.522][MainProcess][DEBUG] Synthesis time: 0.08179616928100586
+[     2.522][MainProcess][INFO] Solution found: [anti_join(input1, input0, 'phone_number')]
+[     2.523][MainProcess][DEBUG] Solution found using process 0
+[     2.523][MainProcess][INFO] Statistics:
+[     2.523][MainProcess][INFO] 	Attempted programs: 5 (approx)
+[     2.523][MainProcess][INFO] 		Rejected: 4 (approx)
+[     2.524][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.524][MainProcess][INFO] 		Empty outputs: 1 (20.0%) (approx)
+[     2.524][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.524][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.524][MainProcess][INFO] 	Total time spent in enumerator init: 0.089119 (approx)
+[     2.524][MainProcess][INFO] 	Total time spent in enumerator: 0.005622 (approx)
+[     2.524][MainProcess][INFO] 		Enumerated 889.415158 programs/s avg. (just enumeration time)
+[     2.524][MainProcess][INFO] 		Enumerated 2.659259 programs/s avg. (overall)
+[     2.524][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.072461 (approx)
+[     2.524][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.003178 (approx)
+[     2.524][MainProcess][INFO] Solution found: [anti_join(input1, input0, 'phone_number')]
+[     2.524][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i010_1 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i010_1.csv", col_types = cols("id" = col_character(),"name" = col_character(),"phone_number" = col_character()))
+df_i010_1$id <- parse_datetime(df_i010_1$id)
+df_i010_1 <- copy_to(con, df_i010_1)
+df_i010_2 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i010_2.csv", col_types = cols("id" = col_character(),"date" = col_character(),"phone_number" = col_character()))
+df_i010_2$id <- parse_datetime(df_i010_2$id)
+df_i010_2$date <- parse_datetime(df_i010_2$date)
+df_i010_2 <- copy_to(con, df_i010_2)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o010.csv", col_types = cols("id" = col_character(),"date" = col_character(),"phone_number" = col_character()))
+expected_output$id <- parse_datetime(expected_output$id)
+expected_output$date <- parse_datetime(expected_output$date)
+
+df6 <- anti_join(df_i010_2, df_i010_1, by=c('phone_number'), na_matches="never")
+out <- df6 %>% select(id, date, phone_number)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id, date, phone_number
+FROM
+  (SELECT *
+   FROM df_i010_2 AS LHS
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM df_i010_1 AS RHS
+        WHERE (LHS.phone_number = RHS.phone_number) ))

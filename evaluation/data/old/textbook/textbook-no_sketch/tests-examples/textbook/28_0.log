@@ -1,0 +1,54 @@
+[     1.507][MainProcess][INFO] Parsing specification...
+[     1.510][MainProcess][INFO] File read
+[     1.511][MainProcess][DEBUG] Reading input files...
+[     1.517][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     1.521][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     1.523][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     1.528][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/28.out: ['string']
+[     1.559][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 18, 'filter': 6}
+[     1.559][MainProcess][DEBUG] {'natural_join': 0.007957559681697613, 'natural_join3': 0.023872679045092837, 'natural_join4': 0.07161803713527852, 'inner_join': 0.6286472148541115, 'anti_join': 0.17506631299734748, 'left_join': 0.007957559681697613, 'union': 0.007957559681697613, 'intersect': 0.04774535809018567, 'semi_join': 0.007957559681697613, 'cross_join': 0.015915119363395226, 'filter': 0.005305039787798408}
+[     1.559][MainProcess][DEBUG] {'natural_join': 0.007957559681697613, 'natural_join3': 0.023872679045092837, 'natural_join4': 0.07161803713527852, 'inner_join': 0.6286472148541115, 'anti_join': 0.17506631299734748, 'left_join': 0.007957559681697613, 'union': 0.007957559681697613, 'intersect': 0.04774535809018567, 'semi_join': 0.007957559681697613, 'cross_join': 0.015915119363395226, 'filter': 0.005305039787798408}
+[     1.559][MainProcess][INFO] Building synthesizer...
+[     1.657][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 83 constraints
+[     1.666][MainProcess][DEBUG] There is no solution for current loc (1).
+[     1.666][MainProcess][DEBUG] Enumeration time: 0.10664153099060059
+[     1.667][MainProcess][DEBUG] Synthesis time: 0.00040221214294433594
+[     1.667][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     1.865][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 195 constraints
+[     1.883][MainProcess][DEBUG] Enumeration time: 0.21633577346801758
+[     1.930][MainProcess][DEBUG] Synthesis time: 0.046767234802246094
+[     1.930][MainProcess][INFO] Solution found: [filter(input1, "str_detect(aname, 'Boeing')"), natural_join3(input0, input2, line0)]
+[     1.931][MainProcess][DEBUG] Solution found using process 0
+[     1.931][MainProcess][INFO] Statistics:
+[     1.931][MainProcess][INFO] 	Attempted programs: 3 (approx)
+[     1.931][MainProcess][INFO] 		Rejected: 0 (approx)
+[     1.932][MainProcess][INFO] 		Failed: 2 (approx)
+[     1.932][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     1.932][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     1.932][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     1.932][MainProcess][INFO] 	Total time spent in enumerator init: 0.322977 (approx)
+[     1.932][MainProcess][INFO] 	Total time spent in enumerator: 0.005840 (approx)
+[     1.932][MainProcess][INFO] 		Enumerated 513.714052 programs/s avg. (just enumeration time)
+[     1.932][MainProcess][INFO] 		Enumerated 2.153753 programs/s avg. (overall)
+[     1.932][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.019922 (approx)
+[     1.932][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.001865 (approx)
+[     1.932][MainProcess][INFO] Solution found: [filter(input1, "str_detect(aname, 'Boeing')"), natural_join3(input0, input2, line0)]
+[     1.932][MainProcess][INFO] Solution size: 2
+[     2.140][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+df_aircraft <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols("aid" = col_integer(),"aname" = col_character(),"crusingrange" = col_integer()))
+df_aircraft <- copy_to(con, df_aircraft)
+df_certified <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols("eid" = col_integer(),"aid" = col_integer()))
+df_certified <- copy_to(con, df_certified)
+expected_output <- read_csv("tests-examples/textbook/tables/28.out", col_types = cols("ename" = col_character()))
+
+df6 <- df_aircraft %>% filter(str_detect(aname, 'Boeing'))
+df7 <- inner_join(df_employees, df_certified, na_matches="never") %>% inner_join(df6, na_matches="never")
+out <- df7 %>% select(ename) %>% distinct() %>% arrange(ename)
+
+Failed to generate SQL query

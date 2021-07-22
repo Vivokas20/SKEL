@@ -1,0 +1,73 @@
+[     2.265][MainProcess][INFO] Parsing specification...
+[     2.273][MainProcess][INFO] File read
+[     2.274][MainProcess][DEBUG] Reading input files...
+[     2.283][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/021.csv: ['string', 'int64']
+[     2.289][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/021_o.csv: ['int64', 'int64']
+[     2.289][MainProcess][INFO] Parsing sketch...
+[     2.289][MainProcess][DEBUG] Sketch creation: Line(T1, root=['filter'], var=[], children=[Child([0], type=Table, var=[]),Child(['id_product == 22'], type=FilterCondition, var=[])])
+[     2.289][MainProcess][DEBUG] Sketch creation: Line(T2, root=['cross_join'], var=[], children=[Child([0], type=Table, var=[]),Child([0], type=Line, var=[]),Child(['id_order == id_order.other'], type=CrossJoinCondition, var=[])])
+[     2.290][MainProcess][DEBUG] Sketch creation: Line(T3, root=['filter'], var=[], children=[Child([1], type=Line, var=[]),Child(['id_product != 22'], type=FilterCondition, var=[])])
+[     2.290][MainProcess][DEBUG] Sketch creation: Line(T4, root=[None], var=[], children=[])
+[     2.368][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 1256, 'filter': 234, 'summarise': 4, 'mutate': 1}
+[     2.368][MainProcess][DEBUG] {'natural_join': 0.0006605019815059445, 'natural_join3': 0.0006605019815059445, 'natural_join4': 0.0006605019815059445, 'inner_join': 0.004623513870541612, 'anti_join': 0.002642007926023778, 'left_join': 0.0006605019815059445, 'union': 0.0006605019815059445, 'intersect': 0.001321003963011889, 'semi_join': 0.0006605019815059445, 'cross_join': 0.8295904887714664, 'filter': 0.154557463672391, 'summarise': 0.002642007926023778, 'mutate': 0.0006605019815059445}
+[     2.368][MainProcess][DEBUG] {'natural_join': 0.0006605019815059445, 'natural_join3': 0.0006605019815059445, 'natural_join4': 0.0006605019815059445, 'inner_join': 0.004623513870541612, 'anti_join': 0.002642007926023778, 'left_join': 0.0006605019815059445, 'union': 0.0006605019815059445, 'intersect': 0.001321003963011889, 'semi_join': 0.0006605019815059445, 'cross_join': 0.8295904887714664, 'filter': 0.154557463672391, 'summarise': 0.002642007926023778, 'mutate': 0.0006605019815059445}
+[     2.368][MainProcess][INFO] Building synthesizer...
+[     2.370][MainProcess][DEBUG] [Line(T1, root=['filter'], var=[11], children=[Child([0], type=Table, var=[1518]),Child(['id_product == 22'], type=FilterCondition, var=[1283]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T2, root=['cross_join'], var=[10], children=[Child([0], type=Table, var=[1518]),Child([0], type=Line, var=[1520]),Child(['id_order == id_order.other'], type=CrossJoinCondition, var=[1281]),Child([None], type=None, var=[0])]), Line(T3, root=['filter'], var=[11], children=[Child([1], type=Line, var=[1521]),Child(['id_product != 22'], type=FilterCondition, var=[1284]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])]), Line(T4, root=[None], var=[], children=[])]
+[     3.961][MainProcess][DEBUG] Enumerator for loc 4 constructed using 84 variables and 358 constraints
+[     4.111][MainProcess][DEBUG] Enumeration time: 1.742767095565796
+[     4.245][MainProcess][DEBUG] Synthesis time: 0.13379311561584473
+[     4.245][MainProcess][INFO] Solution found: [filter(input0, 'id_product == 22'), cross_join(input0, line0, 'id_order == id_order.other'), filter(line1, 'id_product != 22'), summarise(line2, 'n = n()', 'id_product')]
+[     4.249][MainProcess][DEBUG] Solution found using process 0
+[     4.250][MainProcess][INFO] Statistics:
+[     4.250][MainProcess][INFO] 	Attempted programs: 5 (approx)
+[     4.250][MainProcess][INFO] 		Rejected: 4 (approx)
+[     4.250][MainProcess][INFO] 		Failed: 0 (approx)
+[     4.250][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     4.250][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     4.250][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     4.250][MainProcess][INFO] 	Total time spent in enumerator init: 1.742767 (approx)
+[     4.250][MainProcess][INFO] 	Total time spent in enumerator: 0.024609 (approx)
+[     4.250][MainProcess][INFO] 		Enumerated 203.174997 programs/s avg. (just enumeration time)
+[     4.250][MainProcess][INFO] 		Enumerated 1.392931 programs/s avg. (overall)
+[     4.250][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.100086 (approx)
+[     4.251][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.007714 (approx)
+[     4.251][MainProcess][INFO] Solution found: [filter(input0, 'id_product == 22'), cross_join(input0, line0, 'id_order == id_order.other'), filter(line1, 'id_product != 22'), summarise(line2, 'n = n()', 'id_product')]
+[     4.251][MainProcess][INFO] Solution size: 4
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_021 <- read_csv("tests-examples/scythe/recent_posts/tables/021.csv", col_types = cols("id_order" = col_character(),"id_product" = col_integer()))
+df_021 <- copy_to(con, df_021)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/021_o.csv", col_types = cols("product_id" = col_integer(),"count_od2" = col_integer()))
+
+df13 <- df_021 %>% filter(id_product == 22)
+df14 <- full_join(df_021, df13, by=character(), suffix = c("", ".other"), na_matches="never") %>% filter(id_order == id_order.other)
+df15 <- df14 %>% filter(id_product != 22)
+df16 <- df15 %>% group_by(id_product) %>% summarise(n = n()) %>% ungroup()
+out <- df16 %>% select(product_id = id_product, count_od2 = n) %>% arrange(count_od2)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id_product AS product_id,
+       n AS count_od2
+FROM
+  (SELECT id_product,
+          COUNT(*) AS n
+   FROM
+     (SELECT *
+      FROM
+        (SELECT LHS.id_order AS id_order,
+                LHS.id_product AS id_product,
+                RHS.id_order AS id_order_other,
+                RHS.id_product AS id_product_other
+         FROM df_021 AS LHS
+         CROSS JOIN
+           (SELECT *
+            FROM df_021
+            WHERE (id_product = 22.0)) AS RHS)
+      WHERE (id_order = id_order_other))
+   WHERE (id_product != 22.0)
+   GROUP BY id_product)
+ORDER BY count_od2

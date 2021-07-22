@@ -1,0 +1,55 @@
+[     1.539][MainProcess][INFO] Parsing specification...
+[     1.542][MainProcess][INFO] File read
+[     1.542][MainProcess][DEBUG] Reading input files...
+[     1.548][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i049.csv: ['int64', 'string']
+[     1.551][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o049.csv: ['int64', 'string']
+[     1.551][MainProcess][INFO] Parsing sketch...
+[     1.552][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child([0], type=Table, var=[]),Child(["concatAlias = string_agg(Alias, ', ')"], type=SummariseCondition, var=[]),Child(['UserId'], type=Cols, var=[])])
+[     1.580][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 130, 'unite': 4, 'summarise': 16, 'mutate': 4}
+[     1.580][MainProcess][DEBUG] {'natural_join': 0.005780346820809248, 'natural_join3': 0.005780346820809248, 'natural_join4': 0.005780346820809248, 'inner_join': 0.04046242774566474, 'anti_join': 0.023121387283236993, 'left_join': 0.005780346820809248, 'union': 0.005780346820809248, 'intersect': 0.011560693641618497, 'semi_join': 0.005780346820809248, 'cross_join': 0.7514450867052023, 'unite': 0.023121387283236993, 'summarise': 0.09248554913294797, 'mutate': 0.023121387283236993}
+[     1.580][MainProcess][DEBUG] {'natural_join': 0.005780346820809249, 'natural_join3': 0.005780346820809249, 'natural_join4': 0.005780346820809249, 'inner_join': 0.04046242774566475, 'anti_join': 0.023121387283236997, 'left_join': 0.005780346820809249, 'union': 0.005780346820809249, 'intersect': 0.011560693641618498, 'semi_join': 0.005780346820809249, 'cross_join': 0.7514450867052024, 'unite': 0.023121387283236997, 'summarise': 0.09248554913294799, 'mutate': 0.023121387283236997}
+[     1.580][MainProcess][INFO] Building synthesizer...
+[     1.581][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child([0], type=Table, var=[161]),Child(["concatAlias = string_agg(Alias, ', ')"], type=SummariseCondition, var=[160]),Child(['UserId'], type=Cols, var=[18]),Child([None], type=None, var=[0])])]
+[     1.603][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 41 constraints
+[     1.604][MainProcess][DEBUG] Enumeration time: 0.02372431755065918
+[     1.640][MainProcess][DEBUG] Synthesis time: 0.0359187126159668
+[     1.640][MainProcess][INFO] Solution found: [summarise(input0, "concatAlias = string_agg(Alias, ', ')", 'UserId')]
+[     1.641][MainProcess][DEBUG] Solution found using process 0
+[     1.641][MainProcess][INFO] Statistics:
+[     1.641][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     1.641][MainProcess][INFO] 		Rejected: 0 (approx)
+[     1.641][MainProcess][INFO] 		Failed: 0 (approx)
+[     1.641][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     1.641][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     1.641][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     1.642][MainProcess][INFO] 	Total time spent in enumerator init: 0.023724 (approx)
+[     1.642][MainProcess][INFO] 	Total time spent in enumerator: 0.000486 (approx)
+[     1.642][MainProcess][INFO] 		Enumerated 2058.049068 programs/s avg. (just enumeration time)
+[     1.642][MainProcess][INFO] 		Enumerated 0.829112 programs/s avg. (overall)
+[     1.642][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.033969 (approx)
+[     1.642][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     1.642][MainProcess][INFO] Solution found: [summarise(input0, "concatAlias = string_agg(Alias, ', ')", 'UserId')]
+[     1.642][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i049 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i049.csv", col_types = cols("UserId" = col_integer(),"Alias" = col_character()))
+df_i049 <- copy_to(con, df_i049)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o049.csv", col_types = cols("UserId" = col_integer(),"concatAlias" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df2 <- df_i049 %>% group_by(UserId) %>% summarise(concatAlias = string_agg(Alias, ', ')) %>% ungroup()
+out <- df2 %>% select(UserId, concatAlias)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `UserId`,
+       `concatAlias`
+FROM
+  (SELECT `UserId`,
+          string_agg(`Alias`, ', ') AS concatAlias
+   FROM df_i049
+   GROUP BY UserId)

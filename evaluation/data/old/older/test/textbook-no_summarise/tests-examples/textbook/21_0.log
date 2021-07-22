@@ -1,0 +1,70 @@
+[     1.647][MainProcess][INFO] Parsing specification...
+[     1.651][MainProcess][INFO] File read
+[     1.652][MainProcess][DEBUG] Reading input files...
+[     1.659][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/21-1.txt: ['string', 'string']
+[     1.664][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/21-2.txt: ['string', 'string']
+[     1.668][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/21-3.txt: ['string', 'string']
+[     1.672][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/21.out: ['string']
+[     1.672][MainProcess][INFO] Parsing sketch...
+[     1.672][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Table, var=[]),Child([2], type=Table, var=[])])
+[     1.672][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child([0], type=Line, var=[]),Child(["color == 'red' | color == 'green'"], type=FilterCondition, var=[])])
+[     1.707][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 738, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 18, 'filter': 36}
+[     1.707][MainProcess][DEBUG] {'natural_join': 0.008403361344537815, 'natural_join3': 0.025210084033613446, 'natural_join4': 0.07563025210084033, 'inner_join': 0.6890756302521008, 'anti_join': 0.09243697478991597, 'left_join': 0.008403361344537815, 'union': 0.008403361344537815, 'intersect': 0.03361344537815126, 'semi_join': 0.008403361344537815, 'cross_join': 0.01680672268907563, 'filter': 0.03361344537815126}
+[     1.707][MainProcess][DEBUG] {'natural_join': 0.008403361344537815, 'natural_join3': 0.025210084033613446, 'natural_join4': 0.07563025210084033, 'inner_join': 0.6890756302521008, 'anti_join': 0.09243697478991597, 'left_join': 0.008403361344537815, 'union': 0.008403361344537815, 'intersect': 0.03361344537815126, 'semi_join': 0.008403361344537815, 'cross_join': 0.01680672268907563, 'filter': 0.03361344537815126}
+[     1.707][MainProcess][INFO] Building synthesizer...
+[     1.708][MainProcess][DEBUG] {1: Line(T1, root=['natural_join3'], var=[2], children=[Child([0], type=Table, var=[123]),Child([1], type=Table, var=[124]),Child([2], type=Table, var=[125]),Child([None], type=None, var=[0])]), 2: Line(T2, root=['filter'], var=[11], children=[Child([0], type=Line, var=[127]),Child(["color == 'red' | color == 'green'"], type=FilterCondition, var=[116]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])}
+[     1.757][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 81 constraints
+[     1.760][MainProcess][DEBUG] Enumeration time: 0.05252361297607422
+[     1.801][MainProcess][DEBUG] Synthesis time: 0.041059255599975586
+[     1.801][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "color == 'red' | color == 'green'")]
+[     1.802][MainProcess][DEBUG] Solution found using process 0
+[     1.802][MainProcess][INFO] Statistics:
+[     1.802][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     1.802][MainProcess][INFO] 		Rejected: 0 (approx)
+[     1.802][MainProcess][INFO] 		Failed: 0 (approx)
+[     1.802][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     1.802][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     1.803][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     1.803][MainProcess][INFO] 	Total time spent in enumerator init: 0.052524 (approx)
+[     1.803][MainProcess][INFO] 	Total time spent in enumerator: 0.000753 (approx)
+[     1.803][MainProcess][INFO] 		Enumerated 1327.731561 programs/s avg. (just enumeration time)
+[     1.803][MainProcess][INFO] 		Enumerated 0.777816 programs/s avg. (overall)
+[     1.803][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.038106 (approx)
+[     1.803][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     1.803][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "color == 'red' | color == 'green'")]
+[     1.803][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_21_1 <- read_csv("tests-examples/textbook/tables/21-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_21_1 <- copy_to(con, df_21_1)
+df_21_2 <- read_csv("tests-examples/textbook/tables/21-2.txt", col_types = cols("P_id" = col_character(),"color" = col_character()))
+df_21_2 <- copy_to(con, df_21_2)
+df_21_3 <- read_csv("tests-examples/textbook/tables/21-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_21_3 <- copy_to(con, df_21_3)
+expected_output <- read_csv("tests-examples/textbook/tables/21.out", col_types = cols("S_name" = col_character()))
+
+df3 <- inner_join(df_21_1, df_21_2, na_matches="never") %>% inner_join(df_21_3, na_matches="never")
+df4 <- df3 %>% filter(color == 'red' | color == 'green')
+out <- df4 %>% select(S_name) %>% distinct() %>% arrange(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT DISTINCT `S_name`
+FROM
+  (SELECT `LHS`.`S_key` AS `S_key`,
+          `P_id`,
+          `color`,
+          `S_name`
+   FROM
+     (SELECT `S_key`,
+             `LHS`.`P_id` AS `P_id`,
+             `color`
+      FROM `df_21_1` AS `LHS`
+      INNER JOIN `df_21_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+   INNER JOIN `df_21_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`))
+WHERE (`color` = 'red'
+       OR `color` = 'green')
+ORDER BY S_name

@@ -1,0 +1,54 @@
+[     3.171][MainProcess][INFO] Parsing specification...
+[     3.194][MainProcess][INFO] File read
+[     3.194][MainProcess][DEBUG] Reading input files...
+[     3.204][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     3.208][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     3.213][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     3.216][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/31.out: ['string']
+[     3.253][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 288, 'filter': 96}
+[     3.253][MainProcess][DEBUG] {'natural_join': 0.006036217303822937, 'natural_join3': 0.018108651911468814, 'natural_join4': 0.05432595573440644, 'inner_join': 0.4768611670020121, 'anti_join': 0.13279678068410464, 'left_join': 0.006036217303822937, 'union': 0.006036217303822937, 'intersect': 0.03621730382293763, 'semi_join': 0.006036217303822937, 'cross_join': 0.193158953722334, 'filter': 0.06438631790744467}
+[     3.253][MainProcess][DEBUG] {'natural_join': 0.006036217303822937, 'natural_join3': 0.018108651911468814, 'natural_join4': 0.05432595573440644, 'inner_join': 0.4768611670020121, 'anti_join': 0.13279678068410464, 'left_join': 0.006036217303822937, 'union': 0.006036217303822937, 'intersect': 0.03621730382293763, 'semi_join': 0.006036217303822937, 'cross_join': 0.193158953722334, 'filter': 0.06438631790744467}
+[     3.253][MainProcess][INFO] Building synthesizer...
+[     3.394][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 84 constraints
+[     3.408][MainProcess][DEBUG] There is no solution for current loc (1).
+[     3.408][MainProcess][DEBUG] Enumeration time: 0.15440058708190918
+[     3.408][MainProcess][DEBUG] Synthesis time: 0.00038886070251464844
+[     3.408][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     3.693][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 196 constraints
+[     3.719][MainProcess][DEBUG] Enumeration time: 0.3103368282318115
+[     4.158][MainProcess][DEBUG] Synthesis time: 0.4391815662384033
+[     4.159][MainProcess][INFO] Solution found: [filter(input0, "str_detect(aname, 'Boeing', negate=TRUE) & crusingrange > 3000"), natural_join3(input1, input2, line0)]
+[     4.160][MainProcess][DEBUG] Solution found using process 0
+[     4.160][MainProcess][INFO] Statistics:
+[     4.160][MainProcess][INFO] 	Attempted programs: 19 (approx)
+[     4.160][MainProcess][INFO] 		Rejected: 18 (approx)
+[     4.161][MainProcess][INFO] 		Failed: 0 (approx)
+[     4.161][MainProcess][INFO] 		Empty outputs: 2 (10.5%) (approx)
+[     4.161][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     4.161][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     4.161][MainProcess][INFO] 	Total time spent in enumerator init: 0.464737 (approx)
+[     4.161][MainProcess][INFO] 	Total time spent in enumerator: 0.124988 (approx)
+[     4.161][MainProcess][INFO] 		Enumerated 152.014497 programs/s avg. (just enumeration time)
+[     4.161][MainProcess][INFO] 		Enumerated 6.065595 programs/s avg. (overall)
+[     4.161][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.303947 (approx)
+[     4.161][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.009643 (approx)
+[     4.161][MainProcess][INFO] Solution found: [filter(input0, "str_detect(aname, 'Boeing', negate=TRUE) & crusingrange > 3000"), natural_join3(input1, input2, line0)]
+[     4.161][MainProcess][INFO] Solution size: 2
+[     4.419][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_aircraft <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols("aid" = col_integer(),"aname" = col_character(),"crusingrange" = col_integer()))
+df_aircraft <- copy_to(con, df_aircraft)
+df_certified <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols("eid" = col_integer(),"aid" = col_integer()))
+df_certified <- copy_to(con, df_certified)
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+expected_output <- read_csv("tests-examples/textbook/tables/31.out", col_types = cols("ename" = col_character()))
+
+df38 <- df_aircraft %>% filter(str_detect(aname, 'Boeing', negate=TRUE) & crusingrange > 3000)
+df39 <- inner_join(df_certified, df_employees, na_matches="never") %>% inner_join(df38, na_matches="never")
+out <- df39 %>% select(ename) %>% distinct() %>% arrange(ename)
+
+Failed to generate SQL query

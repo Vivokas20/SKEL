@@ -1,0 +1,57 @@
+[     2.244][MainProcess][INFO] Parsing specification...
+[     2.249][MainProcess][INFO] File read
+[     2.250][MainProcess][DEBUG] Reading input files...
+[     2.263][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     2.270][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/009_o.csv: ['int64', 'string', 'int64']
+[     2.271][MainProcess][INFO] Parsing sketch...
+[     2.271][MainProcess][DEBUG] Sketch creation: Line(T1, root=['??'], var=[], children=[Child([0], type=Table, var=[]),Child(['n = n()'], type=Unknown, var=[]),Child(['c2, c4'], type=Unknown, var=[])])
+[     2.315][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 111, 'anti_join': 16, 'left_join': 1, 'union': 1, 'intersect': 5, 'semi_join': 1, 'cross_join': 6, 'summarise': 16, 'mutate': 1}
+[     2.315][MainProcess][DEBUG] {'natural_join': 0.006211180124223602, 'natural_join3': 0.006211180124223602, 'natural_join4': 0.006211180124223602, 'inner_join': 0.6894409937888198, 'anti_join': 0.09937888198757763, 'left_join': 0.006211180124223602, 'union': 0.006211180124223602, 'intersect': 0.031055900621118012, 'semi_join': 0.006211180124223602, 'cross_join': 0.037267080745341616, 'summarise': 0.09937888198757763, 'mutate': 0.006211180124223602}
+[     2.315][MainProcess][DEBUG] {'natural_join': 0.006211180124223603, 'natural_join3': 0.006211180124223603, 'natural_join4': 0.006211180124223603, 'inner_join': 0.68944099378882, 'anti_join': 0.09937888198757765, 'left_join': 0.006211180124223603, 'union': 0.006211180124223603, 'intersect': 0.031055900621118016, 'semi_join': 0.006211180124223603, 'cross_join': 0.03726708074534162, 'summarise': 0.09937888198757765, 'mutate': 0.006211180124223603}
+[     2.315][MainProcess][INFO] Building synthesizer...
+[     2.317][MainProcess][DEBUG] [Line(T1, root=['??'], var=[2, 4, 5, 8, 10, 11], children=[Child([0], type=Table, var=[[152], [151], [29, 140]]),Child(['n = n()'], type=Unknown, var=[[152], [151], [29, 140]]),Child(['c2, c4'], type=Unknown, var=[[152], [151], [29, 140]]),Child([None], type=None, var=[0])])]
+[     2.368][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 65 constraints
+[     2.373][MainProcess][DEBUG] Enumeration time: 0.05751967430114746
+[     2.425][MainProcess][DEBUG] Synthesis time: 0.0519099235534668
+[     2.425][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'c2,c4')]
+[     2.426][MainProcess][DEBUG] Solution found using process 0
+[     2.426][MainProcess][INFO] Statistics:
+[     2.426][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     2.426][MainProcess][INFO] 		Rejected: 0 (approx)
+[     2.426][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.426][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.427][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.427][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.427][MainProcess][INFO] 	Total time spent in enumerator init: 0.057520 (approx)
+[     2.427][MainProcess][INFO] 	Total time spent in enumerator: 0.000855 (approx)
+[     2.427][MainProcess][INFO] 		Enumerated 1168.981048 programs/s avg. (just enumeration time)
+[     2.427][MainProcess][INFO] 		Enumerated 0.559550 programs/s avg. (overall)
+[     2.427][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.049047 (approx)
+[     2.427][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     2.427][MainProcess][INFO] Solution found: [summarise(input0, 'n = n()', 'c2,c4')]
+[     2.427][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_009 <- read_csv("tests-examples/scythe/recent_posts/tables/009.csv", col_types = cols("c1" = col_integer(),"c2" = col_integer(),"c3" = col_character(),"c4" = col_character(),"c5" = col_integer()))
+df_009$c3 <- parse_datetime(df_009$c3)
+df_009 <- copy_to(con, df_009)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/009_o.csv", col_types = cols("c1" = col_integer(),"c2" = col_character(),"c3" = col_integer()))
+
+df2 <- df_009 %>% group_by(c2,c4) %>% summarise(n = n()) %>% ungroup()
+out <- df2 %>% select(c1 = c2, c2 = c4, c3 = n)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT c2 AS c1,
+       c4 AS c2,
+       n AS c3
+FROM
+  (SELECT c2,
+          c4,
+          COUNT(*) AS n
+   FROM df_009
+   GROUP BY c2,
+            c4)

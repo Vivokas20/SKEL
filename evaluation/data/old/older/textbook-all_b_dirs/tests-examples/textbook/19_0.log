@@ -1,0 +1,94 @@
+[     1.683][MainProcess][INFO] Parsing specification...
+[     1.687][MainProcess][INFO] File read
+[     1.688][MainProcess][DEBUG] Reading input files...
+[     1.695][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19-1.txt: ['string', 'string']
+[     1.700][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19-2.txt: ['string', 'string']
+[     1.704][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19-3.txt: ['string', 'string']
+[     1.708][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/19.out: ['string']
+[     1.743][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 738, 'anti_join': 99, 'left_join': 9, 'union': 9, 'intersect': 36, 'semi_join': 9, 'cross_join': 18, 'filter': 6}
+[     1.743][MainProcess][DEBUG] {'natural_join': 0.008645533141210375, 'natural_join3': 0.025936599423631124, 'natural_join4': 0.07780979827089338, 'inner_join': 0.7089337175792507, 'anti_join': 0.09510086455331412, 'left_join': 0.008645533141210375, 'union': 0.008645533141210375, 'intersect': 0.0345821325648415, 'semi_join': 0.008645533141210375, 'cross_join': 0.01729106628242075, 'filter': 0.005763688760806916}
+[     1.743][MainProcess][DEBUG] {'natural_join': 0.008645533141210374, 'natural_join3': 0.025936599423631117, 'natural_join4': 0.07780979827089336, 'inner_join': 0.7089337175792506, 'anti_join': 0.0951008645533141, 'left_join': 0.008645533141210374, 'union': 0.008645533141210374, 'intersect': 0.034582132564841495, 'semi_join': 0.008645533141210374, 'cross_join': 0.017291066282420747, 'filter': 0.005763688760806915}
+[     1.743][MainProcess][INFO] Building synthesizer...
+[     1.832][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 83 constraints
+[     1.841][MainProcess][DEBUG] There is no solution for current loc (1).
+[     1.841][MainProcess][DEBUG] Enumeration time: 0.09789037704467773
+[     1.841][MainProcess][DEBUG] Synthesis time: 0.000431060791015625
+[     1.841][MainProcess][INFO] Increasing the number of lines of code to 2.
+[     2.023][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 192 constraints
+[     2.039][MainProcess][DEBUG] Enumeration time: 0.19739937782287598
+[     2.224][MainProcess][DEBUG] Synthesis time: 0.18448185920715332
+[     2.224][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     2.508][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 331 constraints
+[     2.533][MainProcess][DEBUG] Enumeration time: 0.30916428565979004
+[   394.399][MainProcess][DEBUG] Synthesis time: 391.86535024642944
+[   394.400][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "color != 'red'"), anti_join(line0, line1, 'S_key')]
+[   394.457][MainProcess][DEBUG] Solution found using process 0
+[   394.457][MainProcess][INFO] Statistics:
+[   394.457][MainProcess][INFO] 	Attempted programs: 10526 (approx)
+[   394.457][MainProcess][INFO] 		Rejected: 10525 (approx)
+[   394.458][MainProcess][INFO] 		Failed: 0 (approx)
+[   394.458][MainProcess][INFO] 		Empty outputs: 7978 (75.8%) (approx)
+[   394.458][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[   394.458][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[   394.458][MainProcess][INFO] 	Total time spent in enumerator init: 0.604454 (approx)
+[   394.458][MainProcess][INFO] 	Total time spent in enumerator: 289.484494 (approx)
+[   394.458][MainProcess][INFO] 		Enumerated 36.361188 programs/s avg. (just enumeration time)
+[   394.458][MainProcess][INFO] 		Enumerated 26.721956 programs/s avg. (overall)
+[   394.458][MainProcess][INFO] 	Total time spent in evaluation & testing: 95.973819 (approx)
+[   394.458][MainProcess][INFO] 	Total time spent blocking cubes/programs: 6.527973 (approx)
+[   394.458][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "color != 'red'"), anti_join(line0, line1, 'S_key')]
+[   394.458][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_19_1 <- read_csv("tests-examples/textbook/tables/19-1.txt", col_types = cols("S_key" = col_character(),"P_id" = col_character()))
+df_19_1 <- copy_to(con, df_19_1)
+df_19_2 <- read_csv("tests-examples/textbook/tables/19-2.txt", col_types = cols("P_id" = col_character(),"color" = col_character()))
+df_19_2 <- copy_to(con, df_19_2)
+df_19_3 <- read_csv("tests-examples/textbook/tables/19-3.txt", col_types = cols("S_key" = col_character(),"S_name" = col_character()))
+df_19_3 <- copy_to(con, df_19_3)
+expected_output <- read_csv("tests-examples/textbook/tables/19.out", col_types = cols("S_name" = col_character()))
+
+df11049 <- inner_join(df_19_1, df_19_2, na_matches="never") %>% inner_join(df_19_3, na_matches="never")
+df11050 <- df11049 %>% filter(color != 'red')
+df11051 <- anti_join(df11049, df11050, by=c('S_key'), na_matches="never")
+out <- df11051 %>% select(S_name) %>% arrange(S_name)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `S_name`
+FROM
+  (SELECT *
+   FROM
+     (SELECT `LHS`.`S_key` AS `S_key`,
+             `P_id`,
+             `color`,
+             `S_name`
+      FROM
+        (SELECT `S_key`,
+                `LHS`.`P_id` AS `P_id`,
+                `color`
+         FROM `df_19_1` AS `LHS`
+         INNER JOIN `df_19_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+      INNER JOIN `df_19_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`)) AS `LHS`
+   WHERE NOT EXISTS
+       (SELECT 1
+        FROM
+          (SELECT *
+           FROM
+             (SELECT `LHS`.`S_key` AS `S_key`,
+                     `P_id`,
+                     `color`,
+                     `S_name`
+              FROM
+                (SELECT `S_key`,
+                        `LHS`.`P_id` AS `P_id`,
+                        `color`
+                 FROM `df_19_1` AS `LHS`
+                 INNER JOIN `df_19_2` AS `RHS` ON (`LHS`.`P_id` = `RHS`.`P_id`)) AS `LHS`
+              INNER JOIN `df_19_3` AS `RHS` ON (`LHS`.`S_key` = `RHS`.`S_key`))
+           WHERE (`color` != 'red')) AS RHS
+        WHERE (LHS.S_key = RHS.S_key) ))
+ORDER BY S_name

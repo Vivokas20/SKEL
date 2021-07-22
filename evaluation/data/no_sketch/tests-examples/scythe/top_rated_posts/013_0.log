@@ -1,0 +1,66 @@
+[     4.914][MainProcess][INFO] Parsing specification...
+[     4.922][MainProcess][INFO] File read
+[     4.923][MainProcess][DEBUG] Reading input files...
+[     4.938][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i013.csv: ['string', 'int64']
+[     4.944][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o013.csv: ['string', 'int64', 'int64']
+[     4.992][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 7, 'anti_join': 4, 'left_join': 1, 'union': 1, 'intersect': 2, 'semi_join': 1, 'cross_join': 6, 'filter': 6, 'summarise': 4, 'mutate': 1}
+[     4.992][MainProcess][DEBUG] {'natural_join': 0.027777777777777776, 'natural_join3': 0.027777777777777776, 'natural_join4': 0.027777777777777776, 'inner_join': 0.19444444444444445, 'anti_join': 0.1111111111111111, 'left_join': 0.027777777777777776, 'union': 0.027777777777777776, 'intersect': 0.05555555555555555, 'semi_join': 0.027777777777777776, 'cross_join': 0.16666666666666666, 'filter': 0.16666666666666666, 'summarise': 0.1111111111111111, 'mutate': 0.027777777777777776}
+[     4.993][MainProcess][DEBUG] {'natural_join': 0.02777777777777778, 'natural_join3': 0.02777777777777778, 'natural_join4': 0.02777777777777778, 'inner_join': 0.19444444444444448, 'anti_join': 0.11111111111111112, 'left_join': 0.02777777777777778, 'union': 0.02777777777777778, 'intersect': 0.05555555555555556, 'semi_join': 0.02777777777777778, 'cross_join': 0.16666666666666669, 'filter': 0.16666666666666669, 'summarise': 0.11111111111111112, 'mutate': 0.02777777777777778}
+[     4.993][MainProcess][INFO] Building synthesizer...
+[     5.175][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 226 constraints
+[     5.188][MainProcess][DEBUG] Enumeration time: 0.19556736946105957
+[     6.342][MainProcess][DEBUG] Synthesis time: 1.1534860134124756
+[     6.342][MainProcess][INFO] Increasing the number of lines of code to 3.
+[     6.586][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 386 constraints
+[     6.603][MainProcess][DEBUG] Enumeration time: 0.26059699058532715
+[    44.274][MainProcess][DEBUG] Synthesis time: 37.670605421066284
+[    44.275][MainProcess][INFO] Solution found: [inner_join(input0, input0, 'orgName'), summarise(line0, 'n = n()', 'id,orgName'), filter(line1, 'n != 1')]
+[    44.280][MainProcess][DEBUG] Solution found using process 0
+[    44.280][MainProcess][INFO] Statistics:
+[    44.280][MainProcess][INFO] 	Attempted programs: 447 (approx)
+[    44.280][MainProcess][INFO] 		Rejected: 446 (approx)
+[    44.281][MainProcess][INFO] 		Failed: 0 (approx)
+[    44.281][MainProcess][INFO] 		Empty outputs: 254 (56.8%) (approx)
+[    44.281][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[    44.281][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[    44.281][MainProcess][INFO] 	Total time spent in enumerator init: 0.456164 (approx)
+[    44.281][MainProcess][INFO] 	Total time spent in enumerator: 1.300073 (approx)
+[    44.281][MainProcess][INFO] 		Enumerated 343.826745 programs/s avg. (just enumeration time)
+[    44.281][MainProcess][INFO] 		Enumerated 10.388574 programs/s avg. (overall)
+[    44.281][MainProcess][INFO] 	Total time spent in evaluation & testing: 37.150551 (approx)
+[    44.281][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.370095 (approx)
+[    44.281][MainProcess][INFO] Solution found: [inner_join(input0, input0, 'orgName'), summarise(line0, 'n = n()', 'id,orgName'), filter(line1, 'n != 1')]
+[    44.281][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i013 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i013.csv", col_types = cols("orgName" = col_character(),"id" = col_integer()))
+df_i013 <- copy_to(con, df_i013)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o013.csv", col_types = cols("orgName" = col_character(),"n" = col_integer(),"id" = col_integer()))
+
+df549 <- inner_join(df_i013, df_i013, by=c('orgName'), suffix = c('', '.other'), na_matches='never')
+df550 <- df549 %>% group_by(id,orgName) %>% summarise(n = n()) %>% ungroup()
+df551 <- df550 %>% filter(n != 1)
+out <- df551 %>% select(orgName, n, id) %>% arrange(orgName)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT orgName,
+       n,
+       id
+FROM
+  (SELECT id,
+          orgName,
+          COUNT(*) AS n
+   FROM
+     (SELECT LHS.orgName AS orgName,
+             LHS.id AS id,
+             RHS.id AS id_other
+      FROM df_i013 AS LHS
+      INNER JOIN df_i013 AS RHS ON (LHS.orgName = RHS.orgName))
+   GROUP BY id,
+            orgName)
+WHERE (n != 1.0)
+ORDER BY orgName

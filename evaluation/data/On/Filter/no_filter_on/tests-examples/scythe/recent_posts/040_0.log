@@ -1,0 +1,74 @@
+[     2.413][MainProcess][INFO] Parsing specification...
+[     2.420][MainProcess][INFO] File read
+[     2.421][MainProcess][DEBUG] Reading input files...
+[     2.433][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/040.csv: ['int64', 'int64', 'string', 'string', 'string']
+[     2.442][MainProcess][INFO] Inferred data types for table tests-examples/scythe/recent_posts/tables/040_o.csv: ['int64', 'int64', 'string', 'string', 'string']
+[     2.442][MainProcess][INFO] Parsing sketch...
+[     2.443][MainProcess][DEBUG] Sketch creation: Line(T1, root=['summarise'], var=[], children=[Child([0], type=Table, var=[]),Child(['n_distinct = n_distinct(action)'], type=SummariseCondition, var=[]),Child(['first_name, last_name'], type=Cols, var=[])])
+[     2.443][MainProcess][DEBUG] Sketch creation: Line(T2, root=[None], var=[], children=[])
+[     2.443][MainProcess][DEBUG] Sketch creation: Line(T3, root=['natural_join'], var=[], children=[Child([0], type=Table, var=[]),Child([1], type=Line, var=[])])
+[     2.488][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 123, 'anti_join': 16, 'left_join': 1, 'union': 1, 'intersect': 5, 'semi_join': 1, 'cross_join': 32, 'filter': 6, 'summarise': 16, 'mutate': 1}
+[     2.488][MainProcess][DEBUG] {'natural_join': 0.004878048780487805, 'natural_join3': 0.004878048780487805, 'natural_join4': 0.004878048780487805, 'inner_join': 0.6, 'anti_join': 0.07804878048780488, 'left_join': 0.004878048780487805, 'union': 0.004878048780487805, 'intersect': 0.024390243902439025, 'semi_join': 0.004878048780487805, 'cross_join': 0.15609756097560976, 'filter': 0.02926829268292683, 'summarise': 0.07804878048780488, 'mutate': 0.004878048780487805}
+[     2.488][MainProcess][DEBUG] {'natural_join': 0.004878048780487805, 'natural_join3': 0.004878048780487805, 'natural_join4': 0.004878048780487805, 'inner_join': 0.6, 'anti_join': 0.07804878048780488, 'left_join': 0.004878048780487805, 'union': 0.004878048780487805, 'intersect': 0.024390243902439025, 'semi_join': 0.004878048780487805, 'cross_join': 0.15609756097560976, 'filter': 0.02926829268292683, 'summarise': 0.07804878048780488, 'mutate': 0.004878048780487805}
+[     2.488][MainProcess][INFO] Building synthesizer...
+[     2.490][MainProcess][DEBUG] [Line(T1, root=['summarise'], var=[12], children=[Child([0], type=Table, var=[197]),Child(['n_distinct = n_distinct(action)'], type=SummariseCondition, var=[196]),Child(['first_name, last_name'], type=Cols, var=[30]),Child([None], type=None, var=[0])]), Line(T2, root=[None], var=[], children=[]), Line(T3, root=['natural_join'], var=[1], children=[Child([0], type=Table, var=[197]),Child([1], type=Line, var=[200]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.773][MainProcess][DEBUG] Enumerator for loc 3 constructed using 57 variables and 239 constraints
+[     2.796][MainProcess][DEBUG] Enumeration time: 0.3079030513763428
+[     2.890][MainProcess][DEBUG] Synthesis time: 0.09351778030395508
+[     2.890][MainProcess][INFO] Solution found: [summarise(input0, 'n_distinct = n_distinct(action)', 'first_name,last_name'), filter(line0, 'n_distinct >= 2'), natural_join(input0, line1)]
+[     2.891][MainProcess][DEBUG] Solution found using process 0
+[     2.891][MainProcess][INFO] Statistics:
+[     2.892][MainProcess][INFO] 	Attempted programs: 2 (approx)
+[     2.892][MainProcess][INFO] 		Rejected: 1 (approx)
+[     2.892][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.892][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.892][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.892][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.892][MainProcess][INFO] 	Total time spent in enumerator init: 0.307903 (approx)
+[     2.892][MainProcess][INFO] 	Total time spent in enumerator: 0.004514 (approx)
+[     2.892][MainProcess][INFO] 		Enumerated 443.044682 programs/s avg. (just enumeration time)
+[     2.892][MainProcess][INFO] 		Enumerated 0.918496 programs/s avg. (overall)
+[     2.892][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.084237 (approx)
+[     2.892][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.003694 (approx)
+[     2.892][MainProcess][INFO] Solution found: [summarise(input0, 'n_distinct = n_distinct(action)', 'first_name,last_name'), filter(line0, 'n_distinct >= 2'), natural_join(input0, line1)]
+[     2.893][MainProcess][INFO] Solution size: 3
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_040 <- read_csv("tests-examples/scythe/recent_posts/tables/040.csv", col_types = cols("id" = col_integer(),"timestamp" = col_integer(),"first_name" = col_character(),"last_name" = col_character(),"action" = col_character()))
+df_040 <- copy_to(con, df_040)
+expected_output <- read_csv("tests-examples/scythe/recent_posts/tables/040_o.csv", col_types = cols("id" = col_integer(),"timestamp" = col_integer(),"first_name" = col_character(),"last_name" = col_character(),"action" = col_character()))
+
+df6 <- df_040 %>% group_by(first_name,last_name) %>% summarise(n_distinct = n_distinct(action)) %>% ungroup()
+df7 <- df6 %>% filter(n_distinct >= 2)
+df8 <- inner_join(df_040, df7, na_matches="never")
+out <- df8 %>% select(id, timestamp, first_name, last_name, action)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       TIMESTAMP,
+       first_name,
+       last_name,
+       action
+FROM
+  (SELECT id,
+          TIMESTAMP,
+          LHS.first_name AS first_name,
+          LHS.last_name AS last_name,
+          action,
+          n_distinct
+   FROM df_040 AS LHS
+   INNER JOIN
+     (SELECT *
+      FROM
+        (SELECT first_name,
+                last_name,
+                COUNT(DISTINCT action) AS n_distinct
+         FROM df_040
+         GROUP BY first_name,
+                  last_name)
+      WHERE (n_distinct >= 2.0)) AS RHS ON (LHS.first_name = RHS.first_name
+                                            AND LHS.last_name = RHS.last_name))

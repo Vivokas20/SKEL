@@ -1,0 +1,72 @@
+[     4.970][MainProcess][INFO] Parsing specification...
+[     4.977][MainProcess][INFO] File read
+[     4.978][MainProcess][DEBUG] Reading input files...
+[     4.999][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i007.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     5.008][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o007.csv: ['int64', 'int64', 'datetime64[ns]', 'string', 'int64']
+[     5.101][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 73, 'anti_join': 16, 'left_join': 1, 'union': 1, 'intersect': 5, 'semi_join': 1, 'cross_join': 1110, 'filter': 6, 'summarise': 16, 'mutate': 1}
+[     5.101][MainProcess][DEBUG] {'natural_join': 0.0008110300081103001, 'natural_join3': 0.0008110300081103001, 'natural_join4': 0.0008110300081103001, 'inner_join': 0.059205190592051905, 'anti_join': 0.012976480129764802, 'left_join': 0.0008110300081103001, 'union': 0.0008110300081103001, 'intersect': 0.0040551500405515, 'semi_join': 0.0008110300081103001, 'cross_join': 0.9002433090024331, 'filter': 0.004866180048661801, 'summarise': 0.012976480129764802, 'mutate': 0.0008110300081103001}
+[     5.101][MainProcess][DEBUG] {'natural_join': 0.0008110300081103001, 'natural_join3': 0.0008110300081103001, 'natural_join4': 0.0008110300081103001, 'inner_join': 0.059205190592051905, 'anti_join': 0.012976480129764802, 'left_join': 0.0008110300081103001, 'union': 0.0008110300081103001, 'intersect': 0.0040551500405515, 'semi_join': 0.0008110300081103001, 'cross_join': 0.9002433090024331, 'filter': 0.004866180048661801, 'summarise': 0.012976480129764802, 'mutate': 0.0008110300081103001}
+[     5.102][MainProcess][INFO] Building synthesizer...
+[     6.012][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 97 constraints
+[     6.098][MainProcess][DEBUG] Enumeration time: 0.9964447021484375
+[    26.775][MainProcess][DEBUG] Synthesis time: 20.67626643180847
+[    26.775][MainProcess][INFO] Increasing the number of lines of code to 2.
+[    28.527][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 225 constraints
+[    28.702][MainProcess][DEBUG] Enumeration time: 1.9264283180236816
+[   579.583][MainProcess][DEBUG] Synthesis time: 550.8791828155518
+[   579.584][MainProcess][INFO] Solution found: [summarise(input0, 'maxdatetime = max(datetime)', 'home,player'), inner_join(input0, line0, 'home = home,datetime = maxdatetime')]
+[   579.590][MainProcess][DEBUG] Solution found using process 0
+[   579.590][MainProcess][INFO] Statistics:
+[   579.590][MainProcess][INFO] 	Attempted programs: 232 (approx)
+[   579.590][MainProcess][INFO] 		Rejected: 231 (approx)
+[   579.591][MainProcess][INFO] 		Failed: 0 (approx)
+[   579.591][MainProcess][INFO] 		Empty outputs: 116 (50.0%) (approx)
+[   579.591][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[   579.591][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[   579.591][MainProcess][INFO] 	Total time spent in enumerator init: 2.922873 (approx)
+[   579.591][MainProcess][INFO] 	Total time spent in enumerator: 0.991405 (approx)
+[   579.591][MainProcess][INFO] 		Enumerated 234.011269 programs/s avg. (just enumeration time)
+[   579.591][MainProcess][INFO] 		Enumerated 0.401215 programs/s avg. (overall)
+[   579.591][MainProcess][INFO] 	Total time spent in evaluation & testing: 570.412763 (approx)
+[   579.591][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.149235 (approx)
+[   579.591][MainProcess][INFO] Solution found: [summarise(input0, 'maxdatetime = max(datetime)', 'home,player'), inner_join(input0, line0, 'home = home,datetime = maxdatetime')]
+[   579.591][MainProcess][INFO] Solution size: 2
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i007 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i007.csv", col_types = cols("id" = col_integer(),"home" = col_integer(),"datetime" = col_character(),"player" = col_character(),"resource" = col_integer()))
+df_i007$datetime <- mdy(df_i007$datetime)
+df_i007 <- copy_to(con, df_i007)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o007.csv", col_types = cols("id" = col_integer(),"home" = col_integer(),"datetime" = col_character(),"player" = col_character(),"resource" = col_integer()))
+expected_output$datetime <- mdy(expected_output$datetime)
+
+df280 <- df_i007 %>% group_by(home,player) %>% summarise(maxdatetime = max(datetime)) %>% ungroup()
+df281 <- inner_join(df_i007, df280, by=c('home' = 'home','datetime' = 'maxdatetime'), suffix = c('', '.other'), na_matches='never') %>% mutate(maxdatetime = datetime)
+out <- df281 %>% select(id, home, datetime, player, resource) %>% arrange(id)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT id,
+       home,
+       datetime,
+       player,
+       RESOURCE
+FROM
+  (SELECT id,
+          LHS.home AS home,
+          datetime,
+          LHS.player AS player,
+          RESOURCE,
+          RHS.player AS player_other
+   FROM df_i007 AS LHS
+   INNER JOIN
+     (SELECT home,
+             player,
+             MAX(datetime) AS maxdatetime
+      FROM df_i007
+      GROUP BY home,
+               player) AS RHS ON (LHS.home = RHS.home
+                                  AND LHS.datetime = RHS.maxdatetime))
+ORDER BY id

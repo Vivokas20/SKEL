@@ -1,0 +1,50 @@
+[     1.642][MainProcess][INFO] Parsing specification...
+[     1.645][MainProcess][INFO] File read
+[     1.646][MainProcess][DEBUG] Reading input files...
+[     1.652][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/i003.csv: ['string']
+[     1.656][MainProcess][INFO] Inferred data types for table tests-examples/scythe/top_rated_posts/tables/o003.csv: ['string']
+[     1.684][MainProcess][DEBUG] {'natural_join': 1, 'natural_join3': 1, 'natural_join4': 1, 'inner_join': 3, 'anti_join': 2, 'left_join': 1, 'union': 1, 'intersect': 1, 'semi_join': 1, 'cross_join': 130, 'unite': 1, 'summarise': 8, 'mutate': 4}
+[     1.684][MainProcess][DEBUG] {'natural_join': 0.0064516129032258064, 'natural_join3': 0.0064516129032258064, 'natural_join4': 0.0064516129032258064, 'inner_join': 0.01935483870967742, 'anti_join': 0.012903225806451613, 'left_join': 0.0064516129032258064, 'union': 0.0064516129032258064, 'intersect': 0.0064516129032258064, 'semi_join': 0.0064516129032258064, 'cross_join': 0.8387096774193549, 'unite': 0.0064516129032258064, 'summarise': 0.05161290322580645, 'mutate': 0.025806451612903226}
+[     1.684][MainProcess][DEBUG] {'natural_join': 0.0064516129032258064, 'natural_join3': 0.0064516129032258064, 'natural_join4': 0.0064516129032258064, 'inner_join': 0.01935483870967742, 'anti_join': 0.012903225806451613, 'left_join': 0.0064516129032258064, 'union': 0.0064516129032258064, 'intersect': 0.0064516129032258064, 'semi_join': 0.0064516129032258064, 'cross_join': 0.8387096774193549, 'unite': 0.0064516129032258064, 'summarise': 0.05161290322580645, 'mutate': 0.025806451612903226}
+[     1.684][MainProcess][INFO] Building synthesizer...
+[     1.785][MainProcess][DEBUG] Enumerator for loc 1 constructed using 15 variables and 93 constraints
+[     1.795][MainProcess][DEBUG] Enumeration time: 0.11073970794677734
+[     1.824][MainProcess][DEBUG] Synthesis time: 0.029265880584716797
+[     1.825][MainProcess][INFO] Solution found: [summarise(input0, "concatc = string_agg(c, ', ')", '')]
+[     1.825][MainProcess][DEBUG] Solution found using process 0
+[     1.825][MainProcess][INFO] Statistics:
+[     1.825][MainProcess][INFO] 	Attempted programs: 1 (approx)
+[     1.825][MainProcess][INFO] 		Rejected: 0 (approx)
+[     1.826][MainProcess][INFO] 		Failed: 0 (approx)
+[     1.826][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     1.826][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     1.826][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     1.826][MainProcess][INFO] 	Total time spent in enumerator init: 0.110740 (approx)
+[     1.826][MainProcess][INFO] 	Total time spent in enumerator: 0.000629 (approx)
+[     1.826][MainProcess][INFO] 		Enumerated 1589.956027 programs/s avg. (just enumeration time)
+[     1.826][MainProcess][INFO] 		Enumerated 0.779344 programs/s avg. (overall)
+[     1.826][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.027207 (approx)
+[     1.826][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.000000 (approx)
+[     1.826][MainProcess][INFO] Solution found: [summarise(input0, "concatc = string_agg(c, ', ')", '')]
+[     1.826][MainProcess][INFO] Solution size: 1
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_i003 <- read_csv("tests-examples/scythe/top_rated_posts/tables/i003.csv", col_types = cols("c" = col_character()))
+df_i003 <- copy_to(con, df_i003)
+expected_output <- read_csv("tests-examples/scythe/top_rated_posts/tables/o003.csv", col_types = cols("concatc" = col_character()))
+
+string_agg <- function(v,s) {paste0("", Reduce(function(x, y) paste(x, y, sep = s), v))}
+
+df2 <- df_i003 %>% group_by() %>% summarise(concatc = string_agg(c, ', ')) %>% ungroup()
+out <- df2 %>% select(concatc) %>% arrange(concatc)
+
+
++++++++++++++++++++++++++++++++++++++ SQL Solution +++++++++++++++++++++++++++++++++++++
+
+SELECT `concatc`
+FROM
+  (SELECT string_agg(`c`, ', ') AS concatc
+   FROM df_i003)
+ORDER BY concatc

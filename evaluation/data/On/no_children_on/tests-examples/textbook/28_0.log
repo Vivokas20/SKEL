@@ -1,0 +1,53 @@
+[     2.367][MainProcess][INFO] Parsing specification...
+[     2.372][MainProcess][INFO] File read
+[     2.373][MainProcess][DEBUG] Reading input files...
+[     2.382][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/employees.txt: ['int64', 'string', 'Float64']
+[     2.387][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/aircraft.txt: ['int64', 'string', 'int64']
+[     2.390][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/certified.txt: ['int64', 'int64']
+[     2.395][MainProcess][INFO] Inferred data types for table tests-examples/textbook/tables/28.out: ['string']
+[     2.395][MainProcess][INFO] Parsing sketch...
+[     2.395][MainProcess][DEBUG] Sketch creation: Line(T1, root=['natural_join3'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[]),Child(['??'], type=Table, var=[])])
+[     2.395][MainProcess][DEBUG] Sketch creation: Line(T2, root=['filter'], var=[], children=[Child(['??'], type=Table, var=[]),Child(['??'], type=FilterCondition, var=[])])
+[     2.445][MainProcess][DEBUG] {'natural_join': 9, 'natural_join3': 27, 'natural_join4': 81, 'inner_join': 711, 'anti_join': 198, 'left_join': 9, 'union': 9, 'intersect': 54, 'semi_join': 9, 'cross_join': 18, 'filter': 6}
+[     2.445][MainProcess][DEBUG] {'natural_join': 0.007957559681697613, 'natural_join3': 0.023872679045092837, 'natural_join4': 0.07161803713527852, 'inner_join': 0.6286472148541115, 'anti_join': 0.17506631299734748, 'left_join': 0.007957559681697613, 'union': 0.007957559681697613, 'intersect': 0.04774535809018567, 'semi_join': 0.007957559681697613, 'cross_join': 0.015915119363395226, 'filter': 0.005305039787798408}
+[     2.445][MainProcess][DEBUG] {'natural_join': 0.007957559681697613, 'natural_join3': 0.023872679045092837, 'natural_join4': 0.07161803713527852, 'inner_join': 0.6286472148541115, 'anti_join': 0.17506631299734748, 'left_join': 0.007957559681697613, 'union': 0.007957559681697613, 'intersect': 0.04774535809018567, 'semi_join': 0.007957559681697613, 'cross_join': 0.015915119363395226, 'filter': 0.005305039787798408}
+[     2.445][MainProcess][INFO] Building synthesizer...
+[     2.446][MainProcess][DEBUG] [Line(T1, root=['natural_join3'], var=[2], children=[Child(['??'], type=Table, var=[123, 124, 125]),Child(['??'], type=Table, var=[123, 124, 125]),Child(['??'], type=Table, var=[123, 124, 125]),Child([None], type=None, var=[0])]), Line(T2, root=['filter'], var=[11], children=[Child(['??'], type=Table, var=[123, 124, 125]),Child(['??'], type=FilterCondition, var=[121, 122]),Child([None], type=None, var=[0]),Child([None], type=None, var=[0])])]
+[     2.527][MainProcess][DEBUG] Enumerator for loc 2 constructed using 34 variables and 98 constraints
+[     2.532][MainProcess][DEBUG] Enumeration time: 0.08724570274353027
+[     2.608][MainProcess][DEBUG] Synthesis time: 0.07572317123413086
+[     2.608][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "str_detect(aname, 'Boeing')")]
+[     2.609][MainProcess][DEBUG] Solution found using process 0
+[     2.609][MainProcess][INFO] Statistics:
+[     2.609][MainProcess][INFO] 	Attempted programs: 3 (approx)
+[     2.609][MainProcess][INFO] 		Rejected: 2 (approx)
+[     2.609][MainProcess][INFO] 		Failed: 0 (approx)
+[     2.610][MainProcess][INFO] 		Empty outputs: 0 (0.0%) (approx)
+[     2.610][MainProcess][INFO] 		Redundant lines: 0 (approx)
+[     2.610][MainProcess][INFO] 	Blocked programs: 0 (0.000000 / attempted avg.) (approx)
+[     2.610][MainProcess][INFO] 	Total time spent in enumerator init: 0.087246 (approx)
+[     2.610][MainProcess][INFO] 	Total time spent in enumerator: 0.004496 (approx)
+[     2.610][MainProcess][INFO] 		Enumerated 667.280692 programs/s avg. (just enumeration time)
+[     2.610][MainProcess][INFO] 		Enumerated 1.563135 programs/s avg. (overall)
+[     2.610][MainProcess][INFO] 	Total time spent in evaluation & testing: 0.067049 (approx)
+[     2.610][MainProcess][INFO] 	Total time spent blocking cubes/programs: 0.003357 (approx)
+[     2.610][MainProcess][INFO] Solution found: [natural_join3(input0, input1, input2), filter(line0, "str_detect(aname, 'Boeing')")]
+[     2.610][MainProcess][INFO] Solution size: 2
+[     3.001][MainProcess][ERROR] Error while trying to convert R code to SQL.
+
+------------------------------------- R Solution ---------------------------------------
+
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+df_employees <- read_csv("tests-examples/textbook/tables/employees.txt", col_types = cols("eid" = col_integer(),"ename" = col_character(),"salary" = col_double()))
+df_employees <- copy_to(con, df_employees)
+df_aircraft <- read_csv("tests-examples/textbook/tables/aircraft.txt", col_types = cols("aid" = col_integer(),"aname" = col_character(),"crusingrange" = col_integer()))
+df_aircraft <- copy_to(con, df_aircraft)
+df_certified <- read_csv("tests-examples/textbook/tables/certified.txt", col_types = cols("eid" = col_integer(),"aid" = col_integer()))
+df_certified <- copy_to(con, df_certified)
+expected_output <- read_csv("tests-examples/textbook/tables/28.out", col_types = cols("ename" = col_character()))
+
+df5 <- full_join(df_employees, df_aircraft, by=character(), na_matches="never") %>% inner_join(df_certified, na_matches="never")
+df6 <- df5 %>% filter(str_detect(aname, 'Boeing'))
+out <- df6 %>% select(ename) %>% distinct()
+
+Failed to generate SQL query
