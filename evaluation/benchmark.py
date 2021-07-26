@@ -93,8 +93,8 @@ def test_file(filename: str, run: str = ''):
                     gt = False
                     gt_status = 0
             except:
-                gt = False
-                gt_status = 0
+                gt = None
+                gt_status = None
 
     real = float(re.search('Real time \(s\): (.*)', p.stdout)[1])
     cpu = float(re.search('CPU time \(s\): (.*)', p.stdout)[1])

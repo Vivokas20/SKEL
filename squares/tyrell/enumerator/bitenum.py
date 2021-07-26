@@ -68,8 +68,12 @@ class Root(Node):
                     ctr.append(var == p.id)
                     self.all_vars.append(p.id)
 
-        enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
-        enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'root_{self.id}_range')
+        if len(ctr) > 1:
+            enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
+            enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'root_{self.id}_range')
+        else:
+            enumerator.assert_expr(ctr[0], f'root_{self.id}_domain')
+
         return var
 
     def _create_type_variable(self, enumerator: 'BitEnumerator') -> z3.ExprRef:
@@ -141,8 +145,11 @@ class Leaf(Node):
                     else:
                         self.all_vars_lhs[line_production.lhs].append(line_production.id)
 
-        enumerator.assert_expr(z3.Or(ctr), f'leaf_{self.parent.id}_{self.child_id}_domain')
-        enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'leaf_{self.parent.id}_{self.child_id}_range')
+        if len(ctr) > 1:
+            enumerator.assert_expr(z3.Or(ctr), f'leaf_{self.parent.id}_{self.child_id}_domain')
+            enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'leaf_{self.parent.id}_{self.child_id}_range')
+        else:
+            enumerator.assert_expr(ctr[0], f'leaf_{self.parent.id}_{self.child_id}_domain')
 
         return var
 

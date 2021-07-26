@@ -293,6 +293,35 @@ def get_comments(instances):
                 # with open("evaluation/file_extractions/tb_sql.yaml", "a") as tb:
                 #     tb.write(output + "\n")
 
+def get_output():
+    s = glob.glob("evaluation/data/no_sketch/tests-examples/scythe/**/*.log")
+    sp = glob.glob("evaluation/data/no_sketch/tests-examples/spider/**/*.log")
+    t = glob.glob("evaluation/data/no_sketch/tests-examples/textbook/*.log")
+
+    files = s+sp+t
+
+    for file in files:
+        with open(file, "r") as f:
+            log = f.read()
+            out = {}
+
+            try:
+                file_solution = re.search('Solution found: \[(.+)]', log)[0]
+                file_solution = file_solution.replace("Solution found: ", "")[1:-1]
+                file_select = re.search('out <- df[0-9]+ %>% select(.+)', log)[0]
+                file_select = file_select.split("%>% ", 1)[1]
+
+                out[file] = literal(file_solution+"\n"+file_select)
+
+            except:
+                continue
+
+        if out:
+            with open("solutions.yaml", "a") as tb:
+                output = yaml.dump(out, default_flow_style=False, sort_keys=False)
+                tb.write(output + "\n")
+
+
 if __name__ == '__main__':
     # parse_sketch(['tests-examples/textbook/35.yaml'])
     filter = ['tests-examples/textbook/1.yaml', 'tests-examples/textbook/10.yaml', 'tests-examples/textbook/14.yaml', 'tests-examples/textbook/15.yaml', 'tests-examples/textbook/16.yaml', 'tests-examples/textbook/17.yaml', 'tests-examples/textbook/19.yaml', 'tests-examples/textbook/2.yaml', 'tests-examples/textbook/20.yaml', 'tests-examples/textbook/21.yaml', 'tests-examples/textbook/22.yaml', 'tests-examples/textbook/23.yaml', 'tests-examples/textbook/24.yaml', 'tests-examples/textbook/25.yaml', 'tests-examples/textbook/26.yaml', 'tests-examples/textbook/28.yaml', 'tests-examples/textbook/29.yaml', 'tests-examples/textbook/3.yaml', 'tests-examples/textbook/31.yaml', 'tests-examples/textbook/35.yaml', 'tests-examples/textbook/4.yaml', 'tests-examples/textbook/5.yaml', 'tests-examples/textbook/6.yaml', 'tests-examples/textbook/8.yaml', 'tests-examples/textbook/9.yaml', 'tests-examples/scythe/top_rated_posts/002.yaml', 'tests-examples/scythe/top_rated_posts/013.yaml', 'tests-examples/scythe/top_rated_posts/017.yaml', 'tests-examples/scythe/top_rated_posts/025.yaml', 'tests-examples/scythe/top_rated_posts/031.yaml', 'tests-examples/scythe/top_rated_posts/032.yaml', 'tests-examples/scythe/top_rated_posts/038.yaml', 'tests-examples/scythe/top_rated_posts/043.yaml', 'tests-examples/scythe/recent_posts/004.yaml', 'tests-examples/scythe/recent_posts/016.yaml', 'tests-examples/scythe/recent_posts/019.yaml', 'tests-examples/scythe/recent_posts/021.yaml', 'tests-examples/scythe/recent_posts/028.yaml', 'tests-examples/scythe/recent_posts/031.yaml', 'tests-examples/scythe/recent_posts/040.yaml', 'tests-examples/scythe/recent_posts/046.yaml', 'tests-examples/spider/architecture/0007.yaml', 'tests-examples/spider/architecture/0008.yaml', 'tests-examples/spider/architecture/0009.yaml', 'tests-examples/spider/architecture/0011.yaml', 'tests-examples/spider/architecture/0012.yaml', 'tests-examples/spider/architecture/0013.yaml', 'tests-examples/spider/architecture/0017.yaml']
@@ -302,6 +331,7 @@ if __name__ == '__main__':
     recent = glob.glob('tests-examples/scythe/recent_posts/*.yaml')
     spider = glob.glob('tests-examples/spider/architecture/*.yaml')
 
-    parse_sketch(textbook + top + recent + spider, check = True)
+    # parse_sketch(textbook + top + recent + spider, check = True)
     # parse_sketch(filter, "filter")
     # parse_sketch(summarise, "summarise")
+    get_output()
