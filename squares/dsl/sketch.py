@@ -53,18 +53,20 @@ class Child:
                 if name == "T??":
                     self.names[n] = "??"
                     self.type = "Line"
-                    return
 
-                for i in range(len(tables_names)):
-                    if tables_names[i] == name:
-                        self.names[n] = i
-                        return
-
-                for i in lines_names:
-                    if lines_names[i] == name:
-                        self.names[n] = i - 1
-                        self.type = "Line"
-                        return
+                else:
+                    flag = True
+                    for i in range(len(tables_names)):
+                        if tables_names[i] == name:
+                            self.names[n] = i
+                            flag = False
+                            break
+                    if flag:
+                        for i in lines_names:
+                            if lines_names[i] == name:
+                                self.names[n] = i - 1
+                                self.type = "Line"
+                                break
 
             elif child_type != "Unknown" and name != '??':
 
