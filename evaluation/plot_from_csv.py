@@ -2,6 +2,7 @@ import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import pyplot as plt
 from matplotlib import rcParams
+import numpy as np
 
 flag_filter = False
 flag_summarise = False
@@ -12,10 +13,13 @@ filter = ['tests-examples/textbook/1', 'tests-examples/textbook/10', 'tests-exam
 summarise = ['tests-examples/textbook/10', 'tests-examples/textbook/14', 'tests-examples/textbook/15', 'tests-examples/textbook/17', 'tests-examples/textbook/18', 'tests-examples/textbook/22', 'tests-examples/textbook/25', 'tests-examples/textbook/3', 'tests-examples/textbook/4', 'tests-examples/textbook/5', 'tests-examples/textbook/6', 'tests-examples/textbook/7', 'tests-examples/textbook/8', 'tests-examples/textbook/9', 'tests-examples/scythe/top_rated_posts/001', 'tests-examples/scythe/top_rated_posts/002', 'tests-examples/scythe/top_rated_posts/004', 'tests-examples/scythe/top_rated_posts/005', 'tests-examples/scythe/top_rated_posts/006', 'tests-examples/scythe/top_rated_posts/007', 'tests-examples/scythe/top_rated_posts/008', 'tests-examples/scythe/top_rated_posts/009', 'tests-examples/scythe/top_rated_posts/011', 'tests-examples/scythe/top_rated_posts/012', 'tests-examples/scythe/top_rated_posts/013', 'tests-examples/scythe/top_rated_posts/014', 'tests-examples/scythe/top_rated_posts/016', 'tests-examples/scythe/top_rated_posts/019', 'tests-examples/scythe/top_rated_posts/021', 'tests-examples/scythe/top_rated_posts/027', 'tests-examples/scythe/top_rated_posts/028', 'tests-examples/scythe/top_rated_posts/029', 'tests-examples/scythe/top_rated_posts/034', 'tests-examples/scythe/top_rated_posts/036', 'tests-examples/scythe/top_rated_posts/037', 'tests-examples/scythe/top_rated_posts/038', 'tests-examples/scythe/top_rated_posts/043', 'tests-examples/scythe/top_rated_posts/047', 'tests-examples/scythe/top_rated_posts/048', 'tests-examples/scythe/top_rated_posts/049', 'tests-examples/scythe/top_rated_posts/051', 'tests-examples/scythe/top_rated_posts/055', 'tests-examples/scythe/top_rated_posts/057', 'tests-examples/scythe/recent_posts/007', 'tests-examples/scythe/recent_posts/009', 'tests-examples/scythe/recent_posts/011', 'tests-examples/scythe/recent_posts/012', 'tests-examples/scythe/recent_posts/016', 'tests-examples/scythe/recent_posts/032', 'tests-examples/scythe/recent_posts/040', 'tests-examples/scythe/recent_posts/045', 'tests-examples/scythe/recent_posts/051', 'tests-examples/spider/architecture/0003', 'tests-examples/spider/architecture/0009', 'tests-examples/spider/architecture/0011']
 
 
-def greater_than(datas):
+def greater_than(datas):        # 1st data that must take the longest
     big = datas[0]
     small = datas[1]
-    for n in range(len(big)):
+    big = big[big.name.isin(small.name)].reset_index(drop=True)
+    small = small[small.name.isin(big.name)].reset_index(drop=True)
+
+    for n in big.index:
         if (float(big.real[n]) + 5) < float(small.real[n]):
             print(big.name[n])
 
@@ -68,40 +72,80 @@ def programs_plot(datas, names):
     return fig
 
 def solved_plot(datas, names):
+    fig, ax = plt.subplots()
+
     index = []
     values = []
 
+    fig.patch.set_visible(False)
+    ax.axis('off')
+    ax.axis('tight')
+
     for n in range(len(datas)):
-        data = datas[n]
-        df = data[data.timeout == False]
+        df = datas[n]
         index.append(names[n])
-        values.append(len(df.index))
 
-    df = pd.DataFrame({"solved": values}, index=index)
+        if n == 0:
+            common = df[df.timeout == False]
+        else:
+            common_names = df[df.timeout == False].name
+            common = common[common.name.isin(common_names)]
 
-    rcParams.update({'figure.autolayout': True})
-    fig = df.plot(kind="barh", xlabel="Benchmark", ylabel="Solved Instances") # figsize = (6.4, 4.8)
-    fig.get_legend().remove()
+        tp = len(df[(df.timeout == False) & (df.ground_truth == True)])
+        fp = len(df[(df.timeout == False) & (df.ground_truth == False)])
+        fn = len(df[df.timeout == True])
+
+        values.append([round(tp/(tp+fp+fn), 4), round(tp/(tp+fp), 4), round(tp/(tp+fn), 4)])
+
+    for n in range(len(datas)):
+        df = datas[n][datas[n].name.isin(common.name)]
+        avg = df['real'].mean()
+        values[n].append(round(avg, 4))
+        values[n].append(len(datas[n][datas[n].timeout == False]))
+
+
+    ax.table(cellText=values, rowLabels=index, colLabels=["Accuracy", "Precision", "Recall", "Real", "Solved"], loc='center')
+
+    fig.tight_layout()
+
     fig = fig.get_figure()
     return fig
 
-def gt_plot(datas, names):
-    index = []
-    values = []
+# def solved_plot(datas, names):
+    # index = []
+    # values = []
+    #
+    # for n in range(len(datas)):
+    #     data = datas[n]
+    #     df = data[data.timeout == False]
+    #     index.append(names[n])
+    #     values.append(len(df.index))
+    #
+    # df = pd.DataFrame({"solved": values}, index=index)
+    #
+    # rcParams.update({'figure.autolayout': True})
+    # fig = df.plot(kind="barh", xlabel="Benchmark", ylabel="Solved Instances") # figsize = (6.4, 4.8)
+    # fig.get_legend().remove()
+    # fig = fig.get_figure()
+    # return fig
 
-    for n in range(len(datas)):
-        data = datas[n]
-        df = data[data.ground_truth == True]
-        index.append(names[n])
-        values.append(len(df.index))
-
-    df = pd.DataFrame({"solved": values}, index=index)
-
-    rcParams.update({'figure.autolayout': True})
-    fig = df.plot(kind="barh", xlabel="Benchmark", ylabel="Solved Instances") # figsize = (6.4, 4.8)
-    fig.get_legend().remove()
-    fig = fig.get_figure()
-    return fig
+# def gt_plot(datas, names):
+#     index = []
+#     values = []
+#
+#     for n in range(len(datas)):
+#         data = datas[n]
+#         df = data[data.ground_truth == True]
+#         index.append(names[n])
+#         values.append(len(df.index))
+#
+#     df = pd.DataFrame({"solved": values}, index=index)
+#
+#     rcParams.update({'figure.autolayout': True})
+#     fig = df.plot(kind="barh", xlabel="Benchmark", ylabel="Solved Instances") # figsize = (6.4, 4.8)
+#     fig.get_legend().remove()
+#     fig = fig.get_figure()
+#     return fig
 
 
 #################### FILES ####################
@@ -111,26 +155,29 @@ dir = "evaluation/data/"
 # files = [dir+"st-no_sketch.csv", dir+"st-no_children.csv", dir+"st-no_root.csv"]
 # files = [dir+"st-no_sketch.csv", dir+"st-no_sketch_no_out_ctr.csv", dir+"st-no_sketch_no_out_ctr_new_opt.csv"]
 # files = [dir+"st-no_sketch_no_out_ctr_new_opt.csv", dir+"st-sketch_no_children_ctr_new_opt.csv", dir+"st-no_sketch_no_children_ctr_new_opt_flag.csv", dir+"new_no_children_off.csv", dir+"new_no_children_on.csv", dir+"new_no_sketch.csv", dir+"new_no_sketch_both.csv", dir+"new_no_children_on_both.csv", dir+"new_no_children_off_both.csv"]
-files = [dir+'no_sketch.csv', dir+'Off/no_children.csv', dir+'Off/no_root.csv', dir+'On/no_children_on.csv', dir+'On/no_root_on.csv']
 
+files = [dir+'no_sketch.csv', dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
 out_file = "plots"
 
+# files = [dir+'no_sketch.csv', dir+'Off/no_children_off.csv', dir+'Off/no_root_off.csv', dir+'On/no_children_on.csv', dir+'On/no_root_on.csv', dir+'new_children_off.csv', dir+'new_children_on.csv', dir+'all_new_no_children_off.csv', dir+'all_new_no_children_on.csv']
+# out_file = "plots_new"
+
 # flag_filter = True
-# flag_summarise = True
+flag_summarise = True
 
 
 ################# PREPARATIONS #################
 
 if flag_filter:
-    # files = [dir + 'no_sketch.csv', dir + 'On/no_children_on.csv', dir + 'On/no_root_on.csv', dir + 'On/Filter/no_filter_on.csv', dir + 'On/Filter/only_filter_on.csv']
-    files = [dir + 'no_sketch.csv', dir + 'Off/no_children_off.csv', dir + 'Off/no_root_off.csv', dir + 'Off/Filter/no_filter_off.csv', dir + 'Off/Filter/only_filter_off.csv']
-    # out_file = "filter_on"
-    out_file = "filter_off"
+    files = [dir + 'no_sketch.csv', dir + 'New/On/no_children_on.csv', dir + 'New/On/no_root_on.csv', dir + 'New/On/Filter/no_filter_on.csv', dir + 'New/On/Filter/only_filter_on.csv']
+    # files = [dir + 'no_sketch.csv', dir + 'New/Off/no_children_off.csv', dir + 'New/Off/no_root_off.csv', dir + 'New/Off/Filter/no_filter_off.csv', dir + 'New/Off/Filter/only_filter_off.csv']
+    out_file = "filter_on"
+    # out_file = "filter_off"
 elif flag_summarise:
-    # files = [dir + 'no_sketch.csv', dir + 'On/no_children_on.csv', dir + 'On/no_root_on.csv', dir + 'On/Summarise/no_summarise_on.csv', dir+'On/Summarise/only_summarise_on.csv']
-    files = [dir + 'no_sketch.csv', dir + 'Off/no_children_off.csv', dir + 'Off/no_root_off.csv', dir + 'Off/Summarise/no_summarise_off.csv', dir + 'Off/Summarise/only_summarise_off.csv']
-    # out_file = "summarise_on"
-    out_file = "summarise_off"
+    files = [dir + 'no_sketch.csv', dir + 'New/On/no_children_on.csv', dir + 'New/On/no_root_on.csv', dir + 'New/On/Summarise/no_summarise_on.csv', dir+'New/On/Summarise/only_summarise_on.csv']
+    # files = [dir + 'no_sketch.csv', dir + 'New/Off/no_children_off.csv', dir + 'New/Off/no_root_off.csv', dir + 'New/Off/Summarise/no_summarise_off.csv', dir + 'New/Off/Summarise/only_summarise_off.csv']
+    out_file = "summarise_on"
+    # out_file = "summarise_off"
 
 for file in files:
     csv_list.append(pd.read_csv(file))
@@ -158,7 +205,7 @@ sol = check(csv_list, name_list)
 if sol[0]:
     print("There are errors in csv: " + sol[1])
 else:
-    figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), solved_plot(csv_list, name_list), gt_plot(csv_list, name_list)]
+    figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), solved_plot(csv_list, name_list)]
 
     with PdfPages("evaluation/plots/"+out_file+".pdf") as pdf:
         for fig in figs:

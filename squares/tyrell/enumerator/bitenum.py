@@ -68,11 +68,8 @@ class Root(Node):
                     ctr.append(var == p.id)
                     self.all_vars.append(p.id)
 
-        if len(ctr) > 1:
-            enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
-            enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'root_{self.id}_range')
-        else:
-            enumerator.assert_expr(ctr[0], f'root_{self.id}_domain')
+        enumerator.assert_expr(z3.Or(ctr), f'root_{self.id}_domain')
+        enumerator.assert_expr(z3.And([var >= min(self.all_vars), var <= max(self.all_vars)]), f'root_{self.id}_range')
 
         return var
 

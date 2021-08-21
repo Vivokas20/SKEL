@@ -283,20 +283,20 @@ def get_comments(instances):
         with open(file, "r") as f:
             spec = yaml.safe_load(f)
 
-            if 'sql' in spec:
+            if 'full_sketch' in spec:
                 out = {}
-                comment = spec['sql']
+                comment = spec['full_sketch']
 
                 out[file] = literal(comment)
 
                 output = yaml.dump(out, default_flow_style=False, sort_keys=False)
-                # with open("evaluation/file_extractions/tb_sql.yaml", "a") as tb:
-                #     tb.write(output + "\n")
+                with open("evaluation/file_extractions/full_sketches.yaml", "a") as tb:
+                    tb.write(output + "\n")
 
 def get_output():
-    s = glob.glob("evaluation/data/no_sketch/tests-examples/scythe/**/*.log")
-    sp = glob.glob("evaluation/data/no_sketch/tests-examples/spider/**/*.log")
-    t = glob.glob("evaluation/data/no_sketch/tests-examples/textbook/*.log")
+    s = glob.glob("evaluation/data/New/On/no_children_on/tests-examples/scythe/**/*.log")
+    sp = glob.glob("evaluation/data/New/On/no_children_on/tests-examples/spider/**/*.log")
+    t = glob.glob("evaluation/data/New/On/no_children_on/tests-examples/textbook/*.log")
 
     files = s+sp+t
 
@@ -335,3 +335,4 @@ if __name__ == '__main__':
     # parse_sketch(filter, "filter")
     # parse_sketch(summarise, "summarise")
     get_output()
+    # get_comments(textbook + top + recent + spider)
