@@ -15,6 +15,7 @@ class Config:
 
     sketch: str
     flag_types: bool
+    generate_sketch_dsl: bool
 
     subsume_conditions: bool
     transitive_blocking: bool

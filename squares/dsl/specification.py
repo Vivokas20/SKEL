@@ -41,29 +41,11 @@ class Specification:
     def __init__(self, spec) -> None:
         self.inputs = spec['inputs']
         self.output = spec['output']
-        self.consts = spec['constants'] or []
-
-        if util.get_config().ignore_aggrs:
-            self.aggrs = util.get_config().aggregation_functions
-        else:
-            self.aggrs = spec['functions'] or []
-
-        self.attrs = spec['columns'] or []
-        self.dateorder = spec['dateorder'] or 'parse_datetime'
-        self.filters = spec['filters'] or []
-
-        if 'solution' in spec:
-            self.solution = spec['solution']
-        else:
-            self.solution = None
-
-        if util.get_config().use_solution_dsl and self.solution:
-            util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
-
-        self.aggrs_use_const = False
 
         self.tables = []
         self.data_frames = {}
+
+        self.aggrs_use_const = False
 
         self.columns = OrderedSet()
         self.column_replacements = defaultdict(dict)
@@ -71,9 +53,6 @@ class Specification:
         self.columns_by_type = types.empty_type_map()
         self.types_by_const = {}
         self.consts_by_type = types.empty_type_map()
-
-        if 'max(n)' in self.aggrs:
-            raise SquaresException('max(n) is not a valid aggregator. Use a filter instead.')
 
         logger.debug("Reading input files...")
         for input in self.inputs:
@@ -94,13 +73,26 @@ class Specification:
         self.data_frames['expected_output'] = self.read_table(self.output, 'expected_output')
         self.output_cols = self.data_frames['expected_output'].columns
 
-        for const in self.consts:
-            self.types_by_const[const] = []
 
-            for type in types.Type:
-                if types.is_type(const, type):
-                    self.types_by_const[const].append(type)
-                    self.consts_by_type[type].append(const)
+        self.consts = spec['constants'] or []
+
+        if util.get_config().ignore_aggrs:
+            self.aggrs = util.get_config().aggregation_functions
+        else:
+            self.aggrs = spec['functions'] or []
+
+        self.attrs = spec['columns'] or []
+        self.dateorder = spec['dateorder'] or 'parse_datetime'
+        self.filters = spec['filters'] or []
+
+        if 'solution' in spec:
+            self.solution = spec['solution']
+        else:
+            self.solution = None
+
+        if util.get_config().use_solution_dsl and self.solution:
+            util.get_config().disabled = OrderedSet(util.get_config().disabled) | (dsl.functions - OrderedSet(self.solution))
+
 
         if spec[util.get_config().sketch]:
             self.sketch = Sketch(spec[util.get_config().sketch])
@@ -110,13 +102,30 @@ class Specification:
                 self.max_loc = self.sketch.max_loc
             else:
                 self.max_loc = util.get_config().maximum_loc
-            # self.aggrs = self.sketch.get_aggrs()
-            # self.attrs = self.sketch.get_attrs()
+
+            if util.get_config().generate_sketch_dsl:
+                pass
+                # self.consts = self.sketch.get_consts()
+                # self.aggrs = self.sketch.get_aggrs()
+                # self.attrs = self.sketch.get_attrs()
+                # self.dateorder = self.sketch.get_dateorder()
+                # self.filters = self.sketch.get_filters()
         else:
             self.sketch = None
             self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (
                 1 if self.filters or self.consts else 0), util.get_config().minimum_loc)
             self.max_loc = util.get_config().maximum_loc
+
+        if 'max(n)' in self.aggrs:
+            raise SquaresException('max(n) is not a valid aggregator. Use a filter instead.')
+
+        for const in self.consts:
+            self.types_by_const[const] = []
+
+            for type in types.Type:
+                if types.is_type(const, type):
+                    self.types_by_const[const].append(type)
+                    self.consts_by_type[type].append(const)
 
         self.condition_generator = ConditionGenerator(self)
         self.condition_generator.generate()

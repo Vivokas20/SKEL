@@ -35,7 +35,7 @@ def main():
     random.seed(args.seed)
     seed = random.randrange(2 ** 16)
 
-    base_config = Config(seed=seed, sketch=args.sketch, flag_types=args.flag_types, verbosity=args.verbose,
+    base_config = Config(seed=seed, sketch=args.sketch, flag_types=args.flag_types, generate_sketch_dsl=args.generate_sketch_dsl, verbosity=args.verbose,
                          print_r=not args.no_r, cache_ops=args.cache_operations, minimum_loc=args.min_lines,
                          maximum_loc=args.max_lines, max_filter_combinations=args.max_filter_combo,
                          max_column_combinations=args.max_cols_combo, max_join_combinations=args.max_join_combo,
