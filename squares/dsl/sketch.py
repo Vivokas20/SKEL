@@ -11,7 +11,11 @@ tables_names = []
 lines_names = {}
 columns_names = []
 aggregate_functions = ['max', 'min', 'sum', 'count', 'avg']
+consts = []
+aggrs = []
 attrs = []
+dateorder = 'parse_datetime'
+filters = []
 
 ######## AUXILIARY SKETCH CLASSES ########
 
@@ -206,23 +210,99 @@ def check_underscore_args(function: str, arg: str) -> str:
     return arg
 
 def redundant_conditions(condition: str) -> List[str]:
-    conditions = []
+    conditions = [condition]
     final = []
+    new_conditions = []
 
-    if "," in condition and "concat" not in condition and "str_detect" not in condition and "str_count" not in condition and "row_number" not in condition and "pmin" not in condition and "pmax" not in condition:
+    global aggrs
+    global consts
+    global attrs
+    global dateorder
+    global filters
+    global columns_names
+
+    if "," in condition and "(" not in condition: # and "concat" not in condition and "str_detect" not in condition and "str_count" not in condition and "row_number" not in condition and "pmin" not in condition and "pmax" not in condition:
         conditions = condition.split(",")
 
-    if conditions and len(conditions) > 1:
-        final.append(str(conditions[0].strip() + "," + conditions[1].strip()))
-        final.append(str(conditions[1].strip() + "," + conditions[0].strip()))
-
-    else:
-        if "=" in condition:
+    for condition in conditions:
+        if "=" in condition and "(" not in condition:
             parts = condition.split("=")
-            final.append(str(parts[0].strip() + " = " + parts[1].strip()))
-            final.append(str(parts[1].strip() + " = " + parts[0].strip()))
+            if parts[0].strip() != parts[1].strip():
+                new_conditions.append([str(parts[0].strip() + " = " + parts[1].strip()),str(parts[1].strip() + " = " + parts[0].strip())])
+            else:
+                new_conditions.append([str(parts[0].strip() + " = " + parts[1].strip())])
         else:
-            final.append(condition)
+            parts = [condition]
+            if "(" in condition and "=" in condition:
+                parts = condition.split("=")
+                condition = str(parts[0].strip() + " = " + parts[1].strip())
+            new_conditions.append([condition.strip()])
+
+        ### DSL generation ###
+        for part in parts:
+            p = part.replace(".other", "").strip()
+            cont = False
+            for column in columns_names:
+                if column == p:
+                    if "(" not in p:
+                        cont = True
+                    if column not in attrs:
+                        attrs.append(column)
+                    break
+            if cont:
+                continue
+
+            if 'str_detect' in part:
+                if "like" not in filters:
+                    filters.append("like")
+                new = condition.split("(", 1)[1].rsplit(")", 1)[0].strip()
+                args = args_in_brackets(new)[0]
+                if args[0] not in attrs:
+                    attrs.append(args[0])
+                c = args[1].replace("'","").replace("\"","")
+                if c and c not in consts:
+                    consts.append(c)
+
+            elif "$" in part:
+                new = part.split("$")[1].strip()
+                if new not in aggrs:
+                    aggrs.append(new)
+
+            elif "(" in part:
+                all_parts = part.split("(")
+                aggr = all_parts[0].strip()
+                if aggr == "string_agg":
+                    aggr = "concat"
+                if aggr not in aggrs:
+                    aggrs.append(aggr)
+
+                args = args_in_brackets(all_parts[1].rsplit(")", 1)[0].strip())[0]
+
+                if args:
+                    if "string_agg" == aggr:
+                        if args[0] not in attrs:
+                            attrs.append(args[0])
+                    else:
+                        for arg in args:
+                            arg = arg.strip()
+                            if "'" in arg:
+                                arg = arg.replace("'","").replace("\"","")
+                                if arg and arg not in consts:
+                                    consts.append(arg)
+                            elif arg.isnumeric() and arg not in consts:
+                                arg = int(arg)
+                                consts.append(arg)
+                            elif arg not in attrs:
+                                attrs.append(arg)
+
+
+    if len(new_conditions) > 1:
+        combinations = list(product(*new_conditions))
+        for combination in combinations:
+            final.append(str(combination[0].strip() + "," + combination[1].strip()))
+            final.append(str(combination[1].strip() + "," + combination[0].strip()))
+    else:
+        final = new_conditions[0]
 
     return final
 
@@ -233,9 +313,12 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
     conditions = []
     productions = []
     condition = condition.replace("=>", ">=").replace("=<", "<=")
-
-    if 'str_detect' in condition:
-        return [condition]
+    global aggrs
+    global consts
+    global attrs
+    global dateorder
+    global filters
+    global columns_names
 
     for separator in separators:
         if separator in condition:
@@ -248,6 +331,20 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
     for condition in conditions:
         production_part = []
         condition = condition.strip()
+
+        if 'str_detect' in condition:
+            if "like" not in filters:
+                filters.append("like")
+            new = condition.split("(", 1)[1].rsplit(")", 1)[0].strip()
+            args = args_in_brackets(new)[0]
+            if args[0] not in attrs:
+                attrs.append(args[0])
+            c = args[1].replace("'", "").replace("\"", "")
+            if c and c not in consts:
+                consts.append(c)
+            productions.append(["str_detect(" + args[0] + ", " + args[1] + ")"])
+            continue
+
         for comparator in comparators:
             if comparator in condition:
 
@@ -263,6 +360,42 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
                     comparator = "<"
                 production_part.append(str(parts[1].strip()) + " " + str(comparator) + " " + str(parts[0].strip()))
                 productions.append(production_part)
+
+                ### DSL generation ###
+                for part in parts:
+                    p = part.strip().replace(".other","")
+                    cont = False
+                    for column in columns_names:
+                        if column == p:
+                            cont = True
+                            if column not in attrs:
+                                attrs.append(column)
+                            break
+                    if cont:
+                        continue
+
+                    if "'" in p:
+                        p = p.replace("'","").replace("\"","")
+                        if p and p not in consts:
+                            for date in ["mdy", "ymd", "dmy", "ydm"]:
+                                if date in p:
+                                    dateorder = date
+                                    p = p.split("(", 1)[1].rsplit(")", 1)[0].replace("'","").replace("\"","").strip()
+                                    break
+                            consts.append(p)
+                    elif p.isnumeric() and p not in consts:
+                        p = int(p)
+                        consts.append(p)
+                    elif p != "n":
+                        if "(" in p:
+                            if p not in filters:
+                                filters.append(p)
+                        else:
+                            if p == "string_agg":
+                                p = "concat"
+                            if p not in aggrs:
+                                aggrs.append(p)
+
                 break
 
     if productions and len(productions) > 1:
@@ -293,7 +426,12 @@ class Sketch:
         self.free_children = []
         self.free_lines = []
         self.all_lines = []
+
+        self.consts = []
         self.aggrs = []
+        self.attrs = []
+        self.dateorder = 'parse_datetime'
+        self.filters = []
 
     def sketch_parser(self, tables: List[str], columns: List[str] = None) -> None:
         logger.info("Parsing sketch...")
@@ -309,6 +447,7 @@ class Sketch:
         for sketch_line in self.lines:
             sketch_line = sketch_line.strip()
 
+            ##### Select line #####
             if sketch_line.startswith("out"):
                 line = sketch_line.partition("=")[2]
 
@@ -352,6 +491,7 @@ class Sketch:
                 elif "select ??" not in line:
                     self.select["distinct"] = ['']
 
+            ##### Unknown line #####
             elif sketch_line.startswith("??"):
                 if sketch_line == "??":
                     self.max_loc += 1
@@ -369,6 +509,7 @@ class Sketch:
                     parsed = False
                     break
 
+            ##### Normal line #####
             else:
                 line_type = None
                 line_free_hole = False
@@ -395,11 +536,13 @@ class Sketch:
                 children = []
 
                 try:
+                    #### Options function ####
                     if "[" in function: # TODO create more than 1 line and add both to synthesizer
                         # Maybe restrict children vars in creation of leaf since children constraints already does some restrictions
                         functions = args_in_brackets(function)[0]
                         function = functions[0]
 
+                    #### Unknown function ####
                     if "??" == function or isinstance(function, list):
                         # A line with no function. Can have children or not
                         n_children = len(args)
@@ -423,6 +566,7 @@ class Sketch:
                             n_children = None
                             line_type = "Empty"
 
+                    #### Known functions ####
                     elif "natural_join" == function:
                         n_children = 2
                         if len(args) > 4:
@@ -532,6 +676,18 @@ class Sketch:
         if not parsed:
             raise RuntimeError("Could not parse sketch")
 
+        global aggrs
+        global consts
+        global attrs
+        global dateorder
+        global filters
+
+        self.consts = consts
+        self.aggrs = aggrs
+        self.attrs = attrs
+        self.dateorder = dateorder
+        self.filters = filters
+
     def fill_vars(self, spec, line_productions) -> None:
         if self.filled:
             return
@@ -608,7 +764,7 @@ class Sketch:
                                                 break
                                     else:
                                         for name in child.productions[n]:
-                                            prod = spec.get_enum_production_with_rhs(name.replace("'", ""))
+                                            prod = spec.get_enum_production_with_rhs(name.replace("'", "").replace("\"",""))
                                             if prod:
                                                 for p in prod:
                                                     child.var.append(p.id)  # Not very efficient

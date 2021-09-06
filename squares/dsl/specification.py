@@ -104,12 +104,13 @@ class Specification:
                 self.max_loc = util.get_config().maximum_loc
 
             if util.get_config().generate_sketch_dsl:
-                pass
-                # self.consts = self.sketch.get_consts()
-                # self.aggrs = self.sketch.get_aggrs()
-                # self.attrs = self.sketch.get_attrs()
-                # self.dateorder = self.sketch.get_dateorder()
-                # self.filters = self.sketch.get_filters()
+                self.consts = self.sketch.consts
+                self.aggrs = self.sketch.aggrs
+                self.attrs = self.sketch.attrs
+                if self.sketch.dateorder != "parse_datetime":
+                    self.dateorder = self.sketch.dateorder
+                self.filters = self.sketch.filters
+
         else:
             self.sketch = None
             self.min_loc = max((len(self.aggrs) if util.get_config().force_summarise else 0) + (
