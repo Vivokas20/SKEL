@@ -9,6 +9,7 @@ import random
 import glob
 import subprocess
 from squares.dsl.sketch import Sketch
+import pandas as pd
 
 last = ""
 functions = ['natural_join', 'inner_join', 'anti_join', 'left_join', 'union', 'intersect', 'semi_join', 'cross_join', 'unite', 'filter', 'summarise', 'mutate']
@@ -283,22 +284,22 @@ def get_comments(instances):
         with open(file, "r") as f:
             spec = yaml.safe_load(f)
 
-            if 'full_sketch' in spec:
+            if 'sql' in spec:
                 out = {}
-                comment = spec['full_sketch']
+                comment = spec['sql']
 
                 out[file] = literal(comment)
 
                 output = yaml.dump(out, default_flow_style=False, sort_keys=False)
-                with open("evaluation/file_extractions/full_sketches.yaml", "a") as tb:
+                with open("evaluation/file_extractions/sql_solutions.yaml", "a") as tb:
                     tb.write(output + "\n")
 
 def get_output():
-    s = glob.glob("evaluation/data/New/On/no_children_on/tests-examples/scythe/**/*.log")
-    sp = glob.glob("evaluation/data/New/On/no_children_on/tests-examples/spider/**/*.log")
-    t = glob.glob("evaluation/data/New/On/no_children_on/tests-examples/textbook/*.log")
+    s = glob.glob("evaluation/data/New/Off/no_children_off/tests-examples/scythe/**/*.log")
+    sp = glob.glob("evaluation/data/New/Off/no_children_off/tests-examples/spider/**/*.log")
+    t = glob.glob("evaluation/data/New/Off/no_children_off/tests-examples/textbook/*.log")
 
-    files = s+sp+t
+    files = t+s+sp
 
     for file in files:
         with open(file, "r") as f:
@@ -317,10 +318,59 @@ def get_output():
                 continue
 
         if out:
-            with open("solutions.yaml", "a") as tb:
+            with open("evaluation/file_extractions/solutions.yaml", "a") as tb:
                 output = yaml.dump(out, default_flow_style=False, sort_keys=False)
                 tb.write(output + "\n")
 
+
+def get_false_gt(name_dir):
+    df = pd.read_csv(name_dir + ".csv")
+
+    df = df[(df.timeout == False) & (df.ground_truth == False)]
+
+    first = True
+    for file_name in df.name:
+        file = name_dir + "/" + file_name + "_0.log"
+        with open(file, "r") as f:
+            log = f.read()
+            out = {}
+
+            try:
+                file_solution = re.search('Solution found: \[(.+)]', log)[0]
+                file_solution = file_solution.replace("Solution found: ", "")[1:-1]
+                file_solution = file_solution.replace("), ",")\n")
+                file_select = re.search('out <- df[0-9]+ %>% select(.+)', log)[0]
+                file_select = file_select.split("%>% ", 1)[1]
+
+                out[file] = literal(file_solution+"\n"+file_select)
+
+            except:
+                continue
+
+        if out:
+            if first:
+                first = False
+                with open("evaluation/file_extractions/solutions.yaml", "w") as tb:
+                    output = yaml.dump(out, default_flow_style=False, sort_keys=False)
+                    tb.write(output + "\n")
+                continue
+            with open("evaluation/file_extractions/solutions.yaml", "a") as tb:
+                output = yaml.dump(out, default_flow_style=False, sort_keys=False)
+                tb.write(output + "\n")
+
+def get_lines(instances):
+    lines = {}
+    for file in instances:
+        with open(file, "r") as f:
+            spec = yaml.safe_load(f)
+
+            if 'full_sketch' in spec:
+                loc = len(spec["full_sketch"].splitlines())-1
+                if loc in lines:
+                    lines[loc] += 1
+                else:
+                    lines[loc] = 1
+    print(lines)
 
 if __name__ == '__main__':
     # parse_sketch(['tests-examples/textbook/35.yaml'])
@@ -334,5 +384,7 @@ if __name__ == '__main__':
     # parse_sketch(textbook + top + recent + spider, check = True)
     # parse_sketch(filter, "filter")
     # parse_sketch(summarise, "summarise")
-    get_output()
-    # get_comments(textbook + top + recent + spider)
+    # get_false_gt("evaluation/data/New/Off/no_children_off")
+    get_lines(textbook + top + recent + spider)
+    print(len(filter))
+    print(len(summarise))

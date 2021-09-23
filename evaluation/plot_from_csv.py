@@ -48,7 +48,7 @@ def time_plot(datas, names):
         df.index += 1
         df = df.reset_index()
 
-        fig = df.plot(label= names[n], xlabel="Solved Instances", ylabel="Real Time (s)", x="index", y="real", style='.-', subplots=False, ax=ax)
+        fig = df.plot(label= names[n], xlabel="#Solved Instances", ylabel="Real Time (s)", x="index", y="real", style='.-', subplots=False, ax=ax)
         # df.plot(style='.-', markevery=5)
 
     fig = fig.get_figure()
@@ -64,7 +64,7 @@ def programs_plot(datas, names):
         df.index += 1
         df = df.reset_index()
 
-        fig = df.plot(label= names[n], xlabel="Solved Instances", ylabel="Attempted programs", x="index", y="programs", style='.-', subplots=False, ax=ax)
+        fig = df.plot(label= names[n], xlabel="#Solved Instances", ylabel="#Attempted programs", x="index", y="programs", style='.-', subplots=False, ax=ax)
         # fig.yaxis.set_major_formatter(mtick.PercentFormatter())
         # fig = df.plot(label=names[n], xlabel="Instance", ylabel="Attempted programs", x="name", y="programs", subplots=False, ax=ax)
 
@@ -99,53 +99,19 @@ def solved_plot(datas, names):
 
     for n in range(len(datas)):
         df = datas[n][datas[n].name.isin(common.name)]
-        avg = df['real'].mean()
-        values[n].append(round(avg, 4))
+        avg_time = df['real'].mean()
+        avg_programs = df['programs'].mean()
+        values[n].append(round(avg_time, 4))
+        values[n].append(round(avg_programs, 4))
         values[n].append(len(datas[n][datas[n].timeout == False]))
 
 
-    ax.table(cellText=values, rowLabels=index, colLabels=["Accuracy", "Precision", "Recall", "Real", "Solved"], loc='center')
+    ax.table(cellText=values, rowLabels=index, colLabels=["Accuracy", "Precision", "Recall", "Real", "Programs", "Solved"], loc='center')
 
     fig.tight_layout()
 
     fig = fig.get_figure()
     return fig
-
-# def solved_plot(datas, names):
-    # index = []
-    # values = []
-    #
-    # for n in range(len(datas)):
-    #     data = datas[n]
-    #     df = data[data.timeout == False]
-    #     index.append(names[n])
-    #     values.append(len(df.index))
-    #
-    # df = pd.DataFrame({"solved": values}, index=index)
-    #
-    # rcParams.update({'figure.autolayout': True})
-    # fig = df.plot(kind="barh", xlabel="Benchmark", ylabel="Solved Instances") # figsize = (6.4, 4.8)
-    # fig.get_legend().remove()
-    # fig = fig.get_figure()
-    # return fig
-
-# def gt_plot(datas, names):
-#     index = []
-#     values = []
-#
-#     for n in range(len(datas)):
-#         data = datas[n]
-#         df = data[data.ground_truth == True]
-#         index.append(names[n])
-#         values.append(len(df.index))
-#
-#     df = pd.DataFrame({"solved": values}, index=index)
-#
-#     rcParams.update({'figure.autolayout': True})
-#     fig = df.plot(kind="barh", xlabel="Benchmark", ylabel="Solved Instances") # figsize = (6.4, 4.8)
-#     fig.get_legend().remove()
-#     fig = fig.get_figure()
-#     return fig
 
 
 #################### FILES ####################
@@ -158,12 +124,19 @@ dir = "evaluation/data/"
 
 files = [dir+'no_sketch.csv', dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
 out_file = "plots"
+files = [dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
+name_list = ["Sketch with no children", "Sketch with no children optimized", "Sketch with no root", "Sketch with no root optimized"]
+out_file = "Tese/baseline_optimization"
+
+# files = [dir+'no_sketch.csv', dir+'New/Off/no_children_off.csv', dir+'New/Off/no_root_off.csv']
+# name_list = ["No sketch", "Sketch with no children", "Sketch with no root"]
+# out_file = "Tese/baseline"
 
 # files = [dir+'no_sketch.csv', dir+'Off/no_children_off.csv', dir+'Off/no_root_off.csv', dir+'On/no_children_on.csv', dir+'On/no_root_on.csv', dir+'new_children_off.csv', dir+'new_children_on.csv', dir+'all_new_no_children_off.csv', dir+'all_new_no_children_on.csv']
 # out_file = "plots_new"
 
 # flag_filter = True
-flag_summarise = True
+# flag_summarise = True
 
 
 ################# PREPARATIONS #################
@@ -179,10 +152,12 @@ elif flag_summarise:
     out_file = "summarise_on"
     # out_file = "summarise_off"
 
+
 for file in files:
     csv_list.append(pd.read_csv(file))
-    name_list.append(file.rsplit("/", 1)[1][:-4])
-
+if not name_list:
+    for file in files:
+        name_list.append(file.rsplit("/", 1)[1][:-4])
 
 if flag_filter:
     new_list = []
