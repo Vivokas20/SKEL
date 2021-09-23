@@ -242,13 +242,14 @@ def redundant_conditions(condition: str) -> List[str]:
         for part in parts:
             p = part.replace(".other", "").strip()
             cont = False
-            for column in columns_names:
-                if column == p:
-                    if "(" not in p:
-                        cont = True
-                    if column not in attrs:
-                        attrs.append(column)
-                    break
+            if columns_names:
+                for column in columns_names:
+                    if column == p:
+                        if "(" not in p:
+                            cont = True
+                        if column not in attrs:
+                            attrs.append(column)
+                        break
             if cont:
                 continue
 
@@ -365,12 +366,13 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
                 for part in parts:
                     p = part.strip().replace(".other","")
                     cont = False
-                    for column in columns_names:
-                        if column == p:
-                            cont = True
-                            if column not in attrs:
-                                attrs.append(column)
-                            break
+                    if columns_names:
+                        for column in columns_names:
+                            if column == p:
+                                cont = True
+                                if column not in attrs:
+                                    attrs.append(column)
+                                break
                     if cont:
                         continue
 
