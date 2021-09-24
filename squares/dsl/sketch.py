@@ -352,13 +352,13 @@ def redundant_boolean_conditions(condition: str) -> List[str]:
                 parts = condition.split(comparator)
                 production_part.append(str(parts[0].strip()) + " " + str(comparator) + " " + str(parts[1].strip()))
                 if comparator == ">":
-                    comparator = "<="
-                elif comparator == "<":
-                    comparator = ">="
-                elif comparator == "<=":
-                    comparator = ">"
-                elif comparator == ">=":
                     comparator = "<"
+                elif comparator == "<":
+                    comparator = ">"
+                elif comparator == "<=":
+                    comparator = ">="
+                elif comparator == ">=":
+                    comparator = "<="
                 production_part.append(str(parts[1].strip()) + " " + str(comparator) + " " + str(parts[0].strip()))
                 productions.append(production_part)
 
