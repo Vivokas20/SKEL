@@ -71,6 +71,28 @@ def programs_plot(datas, names):
     fig = fig.get_figure()
     return fig
 
+def ground_truth(datas, names):
+    index = []
+    solved = []
+    gtruth = []
+
+    for n in range(len(datas)):
+        data = datas[n]
+        df = data[data.timeout == False]
+        df2 = data[data.ground_truth == True]
+        name = names[n]
+        name = name[:14] + "\n" + name[14:]
+        index.append(name)
+        solved.append(len(df.index))
+        gtruth.append(len(df2.index))
+
+    df = pd.DataFrame({"solved": solved, "correct": gtruth}, index=index)
+
+    rcParams.update({'figure.autolayout': True})
+    fig = df.plot(kind="bar", xlabel="Benchmark", ylabel="Solved Instances", rot=0).legend(loc=(0.003,0.88))  # figsize = (6.4, 4.8)
+    fig = fig.get_figure()
+    return fig
+
 def solved_plot(datas, names):
     fig, ax = plt.subplots()
 
@@ -146,11 +168,19 @@ if flag_filter:
     # files = [dir + 'no_sketch.csv', dir + 'New/Off/no_children_off.csv', dir + 'New/Off/no_root_off.csv', dir + 'New/Off/Filter/no_filter_off.csv', dir + 'New/Off/Filter/only_filter_off.csv']
     out_file = "filter_on"
     # out_file = "filter_off"
+
+    files = [dir + 'New/On/no_children_on.csv', dir + 'New/On/Filter/no_root_no_filter_on.csv', dir + 'New/On/Filter/no_child_only_filter_on.csv', dir+'New/On/no_root_on.csv']
+    name_list = ["Sketch with no children", "Sketch with no root and no filter", "Sketch with no children except filter", "Sketch with no root"]
+    out_file = "Tese/only_filter_optimized"
 elif flag_summarise:
     files = [dir + 'no_sketch.csv', dir + 'New/On/no_children_on.csv', dir + 'New/On/no_root_on.csv', dir + 'New/On/Summarise/no_summarise_on.csv', dir+'New/On/Summarise/only_summarise_on.csv']
     # files = [dir + 'no_sketch.csv', dir + 'New/Off/no_children_off.csv', dir + 'New/Off/no_root_off.csv', dir + 'New/Off/Summarise/no_summarise_off.csv', dir + 'New/Off/Summarise/only_summarise_off.csv']
     out_file = "summarise_on"
     # out_file = "summarise_off"
+
+    files = [dir + 'New/On/no_children_on.csv', dir + 'New/On/Summarise/no_root_no_summarise_on.csv', dir + 'New/On/Summarise/no_child_only_summarise.csv', dir+'New/On/no_root_on.csv']
+    name_list = ["Sketch with no children", "Sketch with no root and no summarise", "Sketch with no children except summarise", "Sketch with no root"]
+    out_file = "Tese/only_summarise_optimized"
 
 
 for file in files:
@@ -180,7 +210,7 @@ sol = check(csv_list, name_list)
 if sol[0]:
     print("There are errors in csv: " + sol[1])
 else:
-    figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), solved_plot(csv_list, name_list)]
+    figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), ground_truth(csv_list, name_list), solved_plot(csv_list, name_list)]
 
     with PdfPages("evaluation/plots/"+out_file+".pdf") as pdf:
         for fig in figs:

@@ -134,6 +134,41 @@ def sketch_only_filter(sketch, spec):
 
     return sketch_out
 
+def sketch_no_child_only_filter(sketch, spec):
+    sketch_out = ''
+
+    for line in sketch.lines_encoding:
+        root = sketch.lines_encoding[line]
+        sketch_out += f'{root.name} = {root.real_root}('
+        if root.real_root != "filter":
+            sketch_out += f'??, ' * len(root.children)
+        else:
+            sketch_out += f'??, {root.children[1].real_name}, '
+        sketch_out = sketch_out[:-2] + ")\n"
+
+    sketch_out += spec['full_sketch'].splitlines()[-1]
+
+    return sketch_out
+
+def sketch_no_root_no_filter(sketch, spec):
+    sketch_out = ''
+
+    for line in sketch.lines_encoding:
+        root = sketch.lines_encoding[line]
+        sketch_out += f'{root.name} = ??('
+        for child in root.children:
+            if child.type == "FilterCondition":
+                sketch_out += f'??, '
+            elif child.real_name:
+                sketch_out += f'{child.real_name}, '
+            else:
+                sketch_out += f'\'\', '
+        sketch_out = sketch_out[:-2] + ")\n"
+
+    sketch_out += spec['full_sketch'].splitlines()[-1]
+
+    return sketch_out
+
 def sketch_only_summarise(sketch, spec):
     sketch_out = ''
     for line in sketch.lines_encoding:
@@ -148,6 +183,42 @@ def sketch_only_summarise(sketch, spec):
                 elif child.real_name:
                     sketch_out += f'{child.real_name}, '
             sketch_out = sketch_out[:-2] + ")\n"
+
+    sketch_out += spec['full_sketch'].splitlines()[-1]
+
+    return sketch_out
+
+def sketch_no_child_only_summarise(sketch, spec):
+    sketch_out = ''
+
+    for line in sketch.lines_encoding:
+        root = sketch.lines_encoding[line]
+        sketch_out += f'{root.name} = {root.real_root}('
+        if root.real_root != "summarise":
+            sketch_out += f'??, ' * len(root.children)
+        else:
+            sketch_out += f'??, {root.children[1].real_name}, {root.children[2].real_name}, '
+        sketch_out = sketch_out[:-2] + ")\n"
+
+    sketch_out += spec['full_sketch'].splitlines()[-1]
+
+    return sketch_out
+
+def sketch_no_root_no_summarise(sketch, spec):
+    sketch_out = ''
+
+    for line in sketch.lines_encoding:
+        root = sketch.lines_encoding[line]
+        sketch_out += f'{root.name} = ??('
+        for child in root.children:
+            if child.type == "SummariseCondition":
+                sketch_out += f'??, ??, '
+                break
+            elif child.real_name:
+                sketch_out += f'{child.real_name}, '
+            else:
+                sketch_out += f'\'\', '
+        sketch_out = sketch_out[:-2] + ")\n"
 
     sketch_out += spec['full_sketch'].splitlines()[-1]
 
@@ -202,12 +273,25 @@ def parse_sketch(instances, type_s = None, check = False):
                         if not 'sketch_only_filter' in spec:
                             out['sketch_only_filter'] = literal(sketch_only_filter(sketch, spec))
 
+                        if not 'sketch_no_child_only_filter' in spec:
+                            out['sketch_no_child_only_filter'] = literal(sketch_no_child_only_filter(sketch, spec))
+
+                        if not 'sketch_no_root_no_filter' in spec:
+                            out['sketch_no_root_no_filter'] = literal(sketch_no_root_no_filter(sketch, spec))
+
                     if type_s == "summarise":
                         if not 'sketch_no_summarise' in spec:
                             out['sketch_no_summarise'] = literal(sketch_no_summarise(sketch, spec))
 
                         if not 'sketch_only_summarise' in spec:
                             out['sketch_only_summarise'] = literal(sketch_only_summarise(sketch, spec))
+
+                        if not 'sketch_no_child_only_summarise' in spec:
+                            out['sketch_no_child_only_summarise'] = literal(sketch_no_child_only_summarise(sketch, spec))
+
+                        if not 'sketch_no_root_no_summarise' in spec:
+                            out['sketch_no_root_no_summarise'] = literal(sketch_no_root_no_summarise(sketch, spec))
+
 
                 if out != {}:
                     output = yaml.dump(out, default_flow_style=False, sort_keys=False)
@@ -381,10 +465,12 @@ if __name__ == '__main__':
     recent = glob.glob('tests-examples/scythe/recent_posts/*.yaml')
     spider = glob.glob('tests-examples/spider/architecture/*.yaml')
 
-    # parse_sketch(textbook + top + recent + spider, check = True)
+    # parse_sketch(textbook + top + recent + spider)
     # parse_sketch(filter, "filter")
     # parse_sketch(summarise, "summarise")
-    # get_false_gt("evaluation/data/New/Off/no_children_off")
-    get_lines(textbook + top + recent + spider)
-    print(len(filter))
-    print(len(summarise))
+
+    # get_false_gt("evaluation/data/New/On/Summarise/no_root_no_summarise_on")
+
+    # get_lines(textbook + top + recent + spider)
+    # print(len(filter))
+    # print(len(summarise))
