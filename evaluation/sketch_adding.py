@@ -224,11 +224,55 @@ def sketch_no_root_no_summarise(sketch, spec):
 
     return sketch_out
 
+
+def sketch_no_child_only_both(sketch, spec):
+    sketch_out = ''
+
+    for line in sketch.lines_encoding:
+        root = sketch.lines_encoding[line]
+        sketch_out += f'{root.name} = {root.real_root}('
+        if root.real_root != "summarise":
+            sketch_out += f'??, ' * len(root.children)
+        else:
+            sketch_out += f'??, {root.children[1].real_name}, {root.children[2].real_name}, '
+        if root.real_root != "filter":
+            sketch_out += f'??, ' * len(root.children)
+        else:
+            sketch_out += f'??, {root.children[1].real_name}, '
+        sketch_out = sketch_out[:-2] + ")\n"
+
+    sketch_out += spec['full_sketch'].splitlines()[-1]
+
+    return sketch_out
+
+
+def sketch_no_root_no_both(sketch, spec):
+    sketch_out = ''
+
+    for line in sketch.lines_encoding:
+        root = sketch.lines_encoding[line]
+        sketch_out += f'{root.name} = ??('
+        for child in root.children:
+            if child.type == "SummariseCondition":
+                sketch_out += f'??, ??, '
+                break
+            elif child.type == "FilterCondition":
+                sketch_out += f'??, '
+            elif child.real_name:
+                sketch_out += f'{child.real_name}, '
+            else:
+                sketch_out += f'\'\', '
+        sketch_out = sketch_out[:-2] + ")\n"
+
+    sketch_out += spec['full_sketch'].splitlines()[-1]
+
+    return sketch_out
+
 # NOTE: Don't forget to copy sketch if we're going to change variables
 
 ######################################################
 
-def parse_sketch(instances, type_s = None, check = False):
+def parse_sketch(instances, type_s = [], check = False):
     global last
     all = []
     summarise = []
@@ -266,7 +310,7 @@ def parse_sketch(instances, type_s = None, check = False):
                     if not 'sketch_no_root' in spec:
                         out['sketch_no_root'] = literal(sketch_no_root(sketch, spec))
 
-                    if type_s == "filter":
+                    if "filter" in type_s:
                         if not 'sketch_no_filter' in spec:
                             out['sketch_no_filter'] = literal(sketch_no_filter(sketch, spec))
 
@@ -279,7 +323,7 @@ def parse_sketch(instances, type_s = None, check = False):
                         if not 'sketch_no_root_no_filter' in spec:
                             out['sketch_no_root_no_filter'] = literal(sketch_no_root_no_filter(sketch, spec))
 
-                    if type_s == "summarise":
+                    if "summarise" in type_s:
                         if not 'sketch_no_summarise' in spec:
                             out['sketch_no_summarise'] = literal(sketch_no_summarise(sketch, spec))
 
@@ -291,6 +335,13 @@ def parse_sketch(instances, type_s = None, check = False):
 
                         if not 'sketch_no_root_no_summarise' in spec:
                             out['sketch_no_root_no_summarise'] = literal(sketch_no_root_no_summarise(sketch, spec))
+
+                    if "union" in type_s:
+                        if not 'sketch_no_child_only_both' in spec:
+                            out['sketch_no_child_only_both'] = literal(sketch_no_child_only_both(sketch, spec))
+
+                        if not 'sketch_no_root_no_both' in spec:
+                            out['sketch_no_root_no_both'] = literal(sketch_no_root_no_both(sketch, spec))
 
 
                 if out != {}:
@@ -460,16 +511,22 @@ if __name__ == '__main__':
     # parse_sketch(['tests-examples/textbook/35.yaml'])
     filter = ['tests-examples/textbook/1.yaml', 'tests-examples/textbook/10.yaml', 'tests-examples/textbook/14.yaml', 'tests-examples/textbook/15.yaml', 'tests-examples/textbook/16.yaml', 'tests-examples/textbook/17.yaml', 'tests-examples/textbook/19.yaml', 'tests-examples/textbook/2.yaml', 'tests-examples/textbook/20.yaml', 'tests-examples/textbook/21.yaml', 'tests-examples/textbook/22.yaml', 'tests-examples/textbook/23.yaml', 'tests-examples/textbook/24.yaml', 'tests-examples/textbook/25.yaml', 'tests-examples/textbook/26.yaml', 'tests-examples/textbook/28.yaml', 'tests-examples/textbook/29.yaml', 'tests-examples/textbook/3.yaml', 'tests-examples/textbook/31.yaml', 'tests-examples/textbook/35.yaml', 'tests-examples/textbook/4.yaml', 'tests-examples/textbook/5.yaml', 'tests-examples/textbook/6.yaml', 'tests-examples/textbook/8.yaml', 'tests-examples/textbook/9.yaml', 'tests-examples/scythe/top_rated_posts/002.yaml', 'tests-examples/scythe/top_rated_posts/013.yaml', 'tests-examples/scythe/top_rated_posts/017.yaml', 'tests-examples/scythe/top_rated_posts/025.yaml', 'tests-examples/scythe/top_rated_posts/031.yaml', 'tests-examples/scythe/top_rated_posts/032.yaml', 'tests-examples/scythe/top_rated_posts/038.yaml', 'tests-examples/scythe/top_rated_posts/043.yaml', 'tests-examples/scythe/recent_posts/004.yaml', 'tests-examples/scythe/recent_posts/016.yaml', 'tests-examples/scythe/recent_posts/019.yaml', 'tests-examples/scythe/recent_posts/021.yaml', 'tests-examples/scythe/recent_posts/028.yaml', 'tests-examples/scythe/recent_posts/031.yaml', 'tests-examples/scythe/recent_posts/040.yaml', 'tests-examples/scythe/recent_posts/046.yaml', 'tests-examples/spider/architecture/0007.yaml', 'tests-examples/spider/architecture/0008.yaml', 'tests-examples/spider/architecture/0009.yaml', 'tests-examples/spider/architecture/0011.yaml', 'tests-examples/spider/architecture/0012.yaml', 'tests-examples/spider/architecture/0013.yaml', 'tests-examples/spider/architecture/0017.yaml']
     summarise = ['tests-examples/textbook/10.yaml', 'tests-examples/textbook/14.yaml', 'tests-examples/textbook/15.yaml', 'tests-examples/textbook/17.yaml', 'tests-examples/textbook/18.yaml', 'tests-examples/textbook/2.yaml', 'tests-examples/textbook/22.yaml', 'tests-examples/textbook/23.yaml', 'tests-examples/textbook/25.yaml', 'tests-examples/textbook/26.yaml', 'tests-examples/textbook/29.yaml', 'tests-examples/textbook/3.yaml', 'tests-examples/textbook/4.yaml', 'tests-examples/textbook/5.yaml', 'tests-examples/textbook/6.yaml', 'tests-examples/textbook/7.yaml', 'tests-examples/textbook/8.yaml', 'tests-examples/textbook/9.yaml', 'tests-examples/scythe/top_rated_posts/001.yaml', 'tests-examples/scythe/top_rated_posts/002.yaml', 'tests-examples/scythe/top_rated_posts/004.yaml', 'tests-examples/scythe/top_rated_posts/005.yaml', 'tests-examples/scythe/top_rated_posts/006.yaml', 'tests-examples/scythe/top_rated_posts/007.yaml', 'tests-examples/scythe/top_rated_posts/008.yaml', 'tests-examples/scythe/top_rated_posts/009.yaml', 'tests-examples/scythe/top_rated_posts/011.yaml', 'tests-examples/scythe/top_rated_posts/012.yaml', 'tests-examples/scythe/top_rated_posts/013.yaml', 'tests-examples/scythe/top_rated_posts/014.yaml', 'tests-examples/scythe/top_rated_posts/016.yaml', 'tests-examples/scythe/top_rated_posts/017.yaml', 'tests-examples/scythe/top_rated_posts/019.yaml', 'tests-examples/scythe/top_rated_posts/021.yaml', 'tests-examples/scythe/top_rated_posts/027.yaml', 'tests-examples/scythe/top_rated_posts/028.yaml', 'tests-examples/scythe/top_rated_posts/029.yaml', 'tests-examples/scythe/top_rated_posts/034.yaml', 'tests-examples/scythe/top_rated_posts/036.yaml', 'tests-examples/scythe/top_rated_posts/037.yaml', 'tests-examples/scythe/top_rated_posts/038.yaml', 'tests-examples/scythe/top_rated_posts/043.yaml', 'tests-examples/scythe/top_rated_posts/047.yaml', 'tests-examples/scythe/top_rated_posts/048.yaml', 'tests-examples/scythe/top_rated_posts/049.yaml', 'tests-examples/scythe/top_rated_posts/051.yaml', 'tests-examples/scythe/top_rated_posts/055.yaml', 'tests-examples/scythe/top_rated_posts/057.yaml', 'tests-examples/scythe/recent_posts/004.yaml', 'tests-examples/scythe/recent_posts/007.yaml', 'tests-examples/scythe/recent_posts/009.yaml', 'tests-examples/scythe/recent_posts/011.yaml', 'tests-examples/scythe/recent_posts/012.yaml', 'tests-examples/scythe/recent_posts/016.yaml', 'tests-examples/scythe/recent_posts/021.yaml', 'tests-examples/scythe/recent_posts/028.yaml', 'tests-examples/scythe/recent_posts/032.yaml', 'tests-examples/scythe/recent_posts/040.yaml', 'tests-examples/scythe/recent_posts/045.yaml', 'tests-examples/scythe/recent_posts/051.yaml', 'tests-examples/spider/architecture/0003.yaml', 'tests-examples/spider/architecture/0009.yaml', 'tests-examples/spider/architecture/0011.yaml']
+    both = ['tests-examples/scythe/top_rated_posts/043.yaml', 'tests-examples/textbook/14.yaml', 'tests-examples/textbook/25.yaml', 'tests-examples/scythe/top_rated_posts/013.yaml', 'tests-examples/spider/architecture/0009.yaml', 'tests-examples/textbook/10.yaml', 'tests-examples/textbook/23.yaml', 'tests-examples/scythe/top_rated_posts/017.yaml', 'tests-examples/scythe/recent_posts/040.yaml', 'tests-examples/textbook/2.yaml', 'tests-examples/textbook/4.yaml', 'tests-examples/scythe/recent_posts/021.yaml', 'tests-examples/textbook/8.yaml', 'tests-examples/textbook/22.yaml', 'tests-examples/textbook/6.yaml', 'tests-examples/textbook/5.yaml', 'tests-examples/scythe/recent_posts/004.yaml', 'tests-examples/scythe/top_rated_posts/038.yaml', 'tests-examples/textbook/15.yaml', 'tests-examples/scythe/top_rated_posts/002.yaml', 'tests-examples/textbook/26.yaml', 'tests-examples/scythe/recent_posts/016.yaml', 'tests-examples/scythe/recent_posts/028.yaml', 'tests-examples/textbook/9.yaml', 'tests-examples/textbook/29.yaml', 'tests-examples/spider/architecture/0011.yaml', 'tests-examples/textbook/3.yaml', 'tests-examples/textbook/17.yaml']
+    union = ['tests-examples/scythe/top_rated_posts/047.yaml', 'tests-examples/textbook/8.yaml', 'tests-examples/scythe/top_rated_posts/048.yaml', 'tests-examples/scythe/recent_posts/045.yaml', 'tests-examples/scythe/top_rated_posts/001.yaml', 'tests-examples/scythe/top_rated_posts/029.yaml', 'tests-examples/spider/architecture/0008.yaml', 'tests-examples/scythe/top_rated_posts/011.yaml', 'tests-examples/scythe/top_rated_posts/036.yaml', 'tests-examples/scythe/top_rated_posts/013.yaml', 'tests-examples/scythe/top_rated_posts/027.yaml', 'tests-examples/textbook/28.yaml', 'tests-examples/textbook/15.yaml', 'tests-examples/textbook/35.yaml', 'tests-examples/scythe/top_rated_posts/031.yaml', 'tests-examples/scythe/top_rated_posts/016.yaml', 'tests-examples/scythe/top_rated_posts/034.yaml', 'tests-examples/spider/architecture/0011.yaml', 'tests-examples/spider/architecture/0012.yaml', 'tests-examples/scythe/recent_posts/007.yaml', 'tests-examples/scythe/recent_posts/004.yaml', 'tests-examples/scythe/top_rated_posts/005.yaml', 'tests-examples/scythe/top_rated_posts/025.yaml', 'tests-examples/scythe/top_rated_posts/055.yaml', 'tests-examples/textbook/17.yaml', 'tests-examples/scythe/recent_posts/046.yaml', 'tests-examples/spider/architecture/0017.yaml', 'tests-examples/textbook/18.yaml', 'tests-examples/textbook/4.yaml', 'tests-examples/scythe/recent_posts/016.yaml', 'tests-examples/textbook/6.yaml', 'tests-examples/textbook/7.yaml', 'tests-examples/textbook/5.yaml', 'tests-examples/scythe/recent_posts/040.yaml', 'tests-examples/spider/architecture/0007.yaml', 'tests-examples/scythe/recent_posts/051.yaml', 'tests-examples/textbook/22.yaml', 'tests-examples/scythe/recent_posts/028.yaml', 'tests-examples/scythe/top_rated_posts/043.yaml', 'tests-examples/scythe/top_rated_posts/032.yaml', 'tests-examples/textbook/23.yaml', 'tests-examples/scythe/recent_posts/011.yaml', 'tests-examples/scythe/recent_posts/012.yaml', 'tests-examples/scythe/top_rated_posts/004.yaml', 'tests-examples/textbook/24.yaml', 'tests-examples/scythe/top_rated_posts/019.yaml', 'tests-examples/scythe/top_rated_posts/008.yaml', 'tests-examples/textbook/16.yaml', 'tests-examples/textbook/2.yaml', 'tests-examples/scythe/recent_posts/019.yaml', 'tests-examples/scythe/top_rated_posts/021.yaml', 'tests-examples/scythe/recent_posts/021.yaml', 'tests-examples/spider/architecture/0009.yaml', 'tests-examples/scythe/top_rated_posts/049.yaml', 'tests-examples/textbook/9.yaml', 'tests-examples/scythe/top_rated_posts/007.yaml', 'tests-examples/scythe/top_rated_posts/002.yaml', 'tests-examples/scythe/top_rated_posts/006.yaml', 'tests-examples/textbook/26.yaml', 'tests-examples/scythe/top_rated_posts/057.yaml', 'tests-examples/scythe/recent_posts/032.yaml', 'tests-examples/textbook/29.yaml', 'tests-examples/scythe/top_rated_posts/017.yaml', 'tests-examples/spider/architecture/0003.yaml', 'tests-examples/textbook/19.yaml', 'tests-examples/textbook/20.yaml', 'tests-examples/scythe/top_rated_posts/051.yaml', 'tests-examples/textbook/31.yaml', 'tests-examples/scythe/top_rated_posts/038.yaml', 'tests-examples/textbook/21.yaml', 'tests-examples/textbook/1.yaml', 'tests-examples/scythe/top_rated_posts/014.yaml', 'tests-examples/scythe/top_rated_posts/037.yaml', 'tests-examples/scythe/recent_posts/031.yaml', 'tests-examples/textbook/10.yaml', 'tests-examples/scythe/top_rated_posts/012.yaml', 'tests-examples/textbook/25.yaml', 'tests-examples/textbook/14.yaml', 'tests-examples/scythe/top_rated_posts/009.yaml', 'tests-examples/scythe/top_rated_posts/028.yaml', 'tests-examples/scythe/recent_posts/009.yaml', 'tests-examples/textbook/3.yaml', 'tests-examples/spider/architecture/0013.yaml']
     textbook = glob.glob('tests-examples/textbook/*.yaml')
     top = glob.glob('tests-examples/scythe/top_rated_posts/*.yaml')
     recent = glob.glob('tests-examples/scythe/recent_posts/*.yaml')
     spider = glob.glob('tests-examples/spider/architecture/*.yaml')
 
     # parse_sketch(textbook + top + recent + spider)
-    # parse_sketch(filter, "filter")
-    # parse_sketch(summarise, "summarise")
+    # parse_sketch(filter, ["filter"])
+    # parse_sketch(summarise, ["summarise"])
+    # parse_sketch(both, ["union"])
 
-    # get_false_gt("evaluation/data/New/On/Summarise/no_root_no_summarise_on")
+    # print(list(set(summarise) | set(filter)))
+    # print(list(set(filter).intersection(summarise)))
+
+    get_false_gt("evaluation/data/New/On/Summarise/no_root_no_summarise_on")
 
     # get_lines(textbook + top + recent + spider)
     # print(len(filter))

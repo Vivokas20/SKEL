@@ -182,7 +182,7 @@ def create_argparser(all_inputs=False):
     parser.add_argument('--sketch', nargs='?', const='sketch', type=str, help='name of the sketch in the specification file')
     parser.add_argument('--flag_types', dest='flag_types', action='store_true', help='use types optimization to parse sketch')
     parser.add_argument('--generate_sketch_dsl', dest='generate_sketch_dsl', action='store_true',
-                        help='generate dsl using sketch children')
+                        help='generate dsl using sketch productions')
 
     return parser
 

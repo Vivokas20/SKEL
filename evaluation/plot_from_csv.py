@@ -6,11 +6,15 @@ import numpy as np
 
 flag_filter = False
 flag_summarise = False
+flag_both = False
+flag_union = False
 csv_list = []
 name_list = []
 
 filter = ['tests-examples/textbook/1', 'tests-examples/textbook/10', 'tests-examples/textbook/14', 'tests-examples/textbook/15', 'tests-examples/textbook/16', 'tests-examples/textbook/17', 'tests-examples/textbook/19', 'tests-examples/textbook/2', 'tests-examples/textbook/20', 'tests-examples/textbook/21', 'tests-examples/textbook/22', 'tests-examples/textbook/23', 'tests-examples/textbook/24', 'tests-examples/textbook/25', 'tests-examples/textbook/26', 'tests-examples/textbook/28', 'tests-examples/textbook/29', 'tests-examples/textbook/3', 'tests-examples/textbook/31', 'tests-examples/textbook/35', 'tests-examples/textbook/4', 'tests-examples/textbook/5', 'tests-examples/textbook/6', 'tests-examples/textbook/8', 'tests-examples/textbook/9', 'tests-examples/scythe/top_rated_posts/002', 'tests-examples/scythe/top_rated_posts/013', 'tests-examples/scythe/top_rated_posts/017', 'tests-examples/scythe/top_rated_posts/025', 'tests-examples/scythe/top_rated_posts/031', 'tests-examples/scythe/top_rated_posts/032', 'tests-examples/scythe/top_rated_posts/038', 'tests-examples/scythe/top_rated_posts/043', 'tests-examples/scythe/recent_posts/004', 'tests-examples/scythe/recent_posts/016', 'tests-examples/scythe/recent_posts/019', 'tests-examples/scythe/recent_posts/021', 'tests-examples/scythe/recent_posts/028', 'tests-examples/scythe/recent_posts/031', 'tests-examples/scythe/recent_posts/040', 'tests-examples/scythe/recent_posts/046', 'tests-examples/spider/architecture/0007', 'tests-examples/spider/architecture/0008', 'tests-examples/spider/architecture/0009', 'tests-examples/spider/architecture/0011', 'tests-examples/spider/architecture/0012', 'tests-examples/spider/architecture/0013', 'tests-examples/spider/architecture/0017']
-summarise = ['tests-examples/textbook/10', 'tests-examples/textbook/14', 'tests-examples/textbook/15', 'tests-examples/textbook/17', 'tests-examples/textbook/18', 'tests-examples/textbook/22', 'tests-examples/textbook/25', 'tests-examples/textbook/3', 'tests-examples/textbook/4', 'tests-examples/textbook/5', 'tests-examples/textbook/6', 'tests-examples/textbook/7', 'tests-examples/textbook/8', 'tests-examples/textbook/9', 'tests-examples/scythe/top_rated_posts/001', 'tests-examples/scythe/top_rated_posts/002', 'tests-examples/scythe/top_rated_posts/004', 'tests-examples/scythe/top_rated_posts/005', 'tests-examples/scythe/top_rated_posts/006', 'tests-examples/scythe/top_rated_posts/007', 'tests-examples/scythe/top_rated_posts/008', 'tests-examples/scythe/top_rated_posts/009', 'tests-examples/scythe/top_rated_posts/011', 'tests-examples/scythe/top_rated_posts/012', 'tests-examples/scythe/top_rated_posts/013', 'tests-examples/scythe/top_rated_posts/014', 'tests-examples/scythe/top_rated_posts/016', 'tests-examples/scythe/top_rated_posts/019', 'tests-examples/scythe/top_rated_posts/021', 'tests-examples/scythe/top_rated_posts/027', 'tests-examples/scythe/top_rated_posts/028', 'tests-examples/scythe/top_rated_posts/029', 'tests-examples/scythe/top_rated_posts/034', 'tests-examples/scythe/top_rated_posts/036', 'tests-examples/scythe/top_rated_posts/037', 'tests-examples/scythe/top_rated_posts/038', 'tests-examples/scythe/top_rated_posts/043', 'tests-examples/scythe/top_rated_posts/047', 'tests-examples/scythe/top_rated_posts/048', 'tests-examples/scythe/top_rated_posts/049', 'tests-examples/scythe/top_rated_posts/051', 'tests-examples/scythe/top_rated_posts/055', 'tests-examples/scythe/top_rated_posts/057', 'tests-examples/scythe/recent_posts/007', 'tests-examples/scythe/recent_posts/009', 'tests-examples/scythe/recent_posts/011', 'tests-examples/scythe/recent_posts/012', 'tests-examples/scythe/recent_posts/016', 'tests-examples/scythe/recent_posts/032', 'tests-examples/scythe/recent_posts/040', 'tests-examples/scythe/recent_posts/045', 'tests-examples/scythe/recent_posts/051', 'tests-examples/spider/architecture/0003', 'tests-examples/spider/architecture/0009', 'tests-examples/spider/architecture/0011']
+summarise = ['tests-examples/textbook/10', 'tests-examples/textbook/14', 'tests-examples/textbook/15', 'tests-examples/textbook/17', 'tests-examples/textbook/18', 'tests-examples/textbook/22', 'tests-examples/textbook/25', 'tests-examples/textbook/4', 'tests-examples/textbook/5', 'tests-examples/textbook/6', 'tests-examples/textbook/7', 'tests-examples/textbook/8', 'tests-examples/textbook/9', 'tests-examples/scythe/top_rated_posts/001', 'tests-examples/scythe/top_rated_posts/002', 'tests-examples/scythe/top_rated_posts/004', 'tests-examples/scythe/top_rated_posts/006', 'tests-examples/scythe/top_rated_posts/007', 'tests-examples/scythe/top_rated_posts/008', 'tests-examples/scythe/top_rated_posts/009', 'tests-examples/scythe/top_rated_posts/012', 'tests-examples/scythe/top_rated_posts/013', 'tests-examples/scythe/top_rated_posts/014', 'tests-examples/scythe/top_rated_posts/016', 'tests-examples/scythe/top_rated_posts/019', 'tests-examples/scythe/top_rated_posts/021', 'tests-examples/scythe/top_rated_posts/027', 'tests-examples/scythe/top_rated_posts/028', 'tests-examples/scythe/top_rated_posts/029', 'tests-examples/scythe/top_rated_posts/034', 'tests-examples/scythe/top_rated_posts/036', 'tests-examples/scythe/top_rated_posts/037', 'tests-examples/scythe/top_rated_posts/038', 'tests-examples/scythe/top_rated_posts/043', 'tests-examples/scythe/top_rated_posts/047', 'tests-examples/scythe/top_rated_posts/048', 'tests-examples/scythe/top_rated_posts/049', 'tests-examples/scythe/top_rated_posts/051', 'tests-examples/scythe/top_rated_posts/055', 'tests-examples/scythe/top_rated_posts/057', 'tests-examples/scythe/recent_posts/009', 'tests-examples/scythe/recent_posts/011', 'tests-examples/scythe/recent_posts/016', 'tests-examples/scythe/recent_posts/040', 'tests-examples/scythe/recent_posts/045', 'tests-examples/scythe/recent_posts/051', 'tests-examples/spider/architecture/0003', 'tests-examples/spider/architecture/0009', 'tests-examples/spider/architecture/0011']
+both = ['tests-examples/textbook/15', 'tests-examples/scythe/recent_posts/021', 'tests-examples/spider/architecture/0009', 'tests-examples/textbook/4', 'tests-examples/scythe/top_rated_posts/002', 'tests-examples/textbook/29', 'tests-examples/textbook/8', 'tests-examples/textbook/25', 'tests-examples/scythe/top_rated_posts/038', 'tests-examples/scythe/recent_posts/004', 'tests-examples/textbook/2', 'tests-examples/textbook/26', 'tests-examples/textbook/14', 'tests-examples/scythe/top_rated_posts/017', 'tests-examples/scythe/top_rated_posts/013', 'tests-examples/scythe/top_rated_posts/043', 'tests-examples/textbook/10', 'tests-examples/textbook/23', 'tests-examples/textbook/22', 'tests-examples/textbook/9', 'tests-examples/textbook/5', 'tests-examples/scythe/recent_posts/028', 'tests-examples/textbook/17', 'tests-examples/textbook/6', 'tests-examples/scythe/recent_posts/016', 'tests-examples/scythe/recent_posts/040', 'tests-examples/spider/architecture/0011', 'tests-examples/textbook/3']
+union = ['tests-examples/scythe/top_rated_posts/029', 'tests-examples/textbook/29', 'tests-examples/textbook/31', 'tests-examples/textbook/4', 'tests-examples/textbook/21', 'tests-examples/textbook/28', 'tests-examples/textbook/15', 'tests-examples/textbook/20', 'tests-examples/scythe/recent_posts/045', 'tests-examples/scythe/top_rated_posts/057', 'tests-examples/spider/architecture/0009', 'tests-examples/scythe/recent_posts/016', 'tests-examples/scythe/top_rated_posts/031', 'tests-examples/scythe/top_rated_posts/013', 'tests-examples/scythe/top_rated_posts/027', 'tests-examples/spider/architecture/0007', 'tests-examples/scythe/recent_posts/051', 'tests-examples/scythe/recent_posts/021', 'tests-examples/scythe/top_rated_posts/036', 'tests-examples/scythe/top_rated_posts/007', 'tests-examples/scythe/recent_posts/028', 'tests-examples/scythe/top_rated_posts/038', 'tests-examples/scythe/recent_posts/004', 'tests-examples/scythe/top_rated_posts/021', 'tests-examples/scythe/top_rated_posts/037', 'tests-examples/scythe/top_rated_posts/051', 'tests-examples/textbook/8', 'tests-examples/spider/architecture/0003', 'tests-examples/textbook/16', 'tests-examples/scythe/top_rated_posts/016', 'tests-examples/scythe/top_rated_posts/048', 'tests-examples/scythe/top_rated_posts/028', 'tests-examples/scythe/top_rated_posts/004', 'tests-examples/textbook/3', 'tests-examples/scythe/top_rated_posts/006', 'tests-examples/scythe/recent_posts/009', 'tests-examples/scythe/top_rated_posts/009', 'tests-examples/textbook/9', 'tests-examples/textbook/2', 'tests-examples/scythe/top_rated_posts/017', 'tests-examples/spider/architecture/0011', 'tests-examples/textbook/19', 'tests-examples/scythe/recent_posts/046', 'tests-examples/textbook/14', 'tests-examples/scythe/recent_posts/040', 'tests-examples/scythe/recent_posts/019', 'tests-examples/textbook/24', 'tests-examples/spider/architecture/0012', 'tests-examples/textbook/25', 'tests-examples/textbook/5', 'tests-examples/scythe/top_rated_posts/001', 'tests-examples/spider/architecture/0013', 'tests-examples/textbook/1', 'tests-examples/scythe/top_rated_posts/049', 'tests-examples/textbook/23', 'tests-examples/textbook/17', 'tests-examples/scythe/recent_posts/011', 'tests-examples/scythe/top_rated_posts/012', 'tests-examples/scythe/top_rated_posts/032', 'tests-examples/textbook/10', 'tests-examples/scythe/recent_posts/031', 'tests-examples/scythe/top_rated_posts/047', 'tests-examples/textbook/7', 'tests-examples/scythe/top_rated_posts/019', 'tests-examples/scythe/top_rated_posts/008', 'tests-examples/textbook/26', 'tests-examples/scythe/top_rated_posts/025', 'tests-examples/textbook/6', 'tests-examples/scythe/top_rated_posts/043', 'tests-examples/scythe/top_rated_posts/014', 'tests-examples/textbook/22', 'tests-examples/scythe/top_rated_posts/002', 'tests-examples/textbook/18', 'tests-examples/scythe/top_rated_posts/034', 'tests-examples/scythe/top_rated_posts/055', 'tests-examples/spider/architecture/0008', 'tests-examples/textbook/35', 'tests-examples/spider/architecture/0017']
 
 
 def greater_than(datas):        # 1st data that must take the longest
@@ -81,6 +85,8 @@ def ground_truth(datas, names):
         df = data[data.timeout == False]
         df2 = data[data.ground_truth == True]
         name = names[n]
+        if name.endswith("aggregate"):
+            name = name[:-9] + "\n" + name[-9:]
         name = name[:14] + "\n" + name[14:]
         index.append(name)
         solved.append(len(df.index))
@@ -89,7 +95,7 @@ def ground_truth(datas, names):
     df = pd.DataFrame({"solved": solved, "correct": gtruth}, index=index)
 
     rcParams.update({'figure.autolayout': True})
-    fig = df.plot(kind="bar", xlabel="Benchmark", ylabel="Solved Instances", rot=0).legend(loc=(0.003,0.88))  # figsize = (6.4, 4.8)
+    fig = df.plot(kind="bar", xlabel="Benchmark", ylabel="#Solved Instances", rot=0).legend(loc=(0.004,0.875))  # figsize = (6.4, 4.8)
     fig = fig.get_figure()
     return fig
 
@@ -146,19 +152,31 @@ dir = "evaluation/data/"
 
 files = [dir+'no_sketch.csv', dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
 out_file = "plots"
-files = [dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
-name_list = ["Sketch with no children", "Sketch with no children optimized", "Sketch with no root", "Sketch with no root optimized"]
-out_file = "Tese/baseline_optimization"
 
-# files = [dir+'no_sketch.csv', dir+'New/Off/no_children_off.csv', dir+'New/Off/no_root_off.csv']
-# name_list = ["No sketch", "Sketch with no children", "Sketch with no root"]
-# out_file = "Tese/baseline"
+############ Baseline ##################
+files = [dir+'no_sketch.csv', dir+'New/Off/no_children_off.csv', dir+'New/Off/no_root_off.csv']
+name_list = ["No sketch", "Sketch with no children", "Sketch with no root"]
+out_file = "Tese/baseline"
 
-# files = [dir+'no_sketch.csv', dir+'Off/no_children_off.csv', dir+'Off/no_root_off.csv', dir+'On/no_children_on.csv', dir+'On/no_root_on.csv', dir+'new_children_off.csv', dir+'new_children_on.csv', dir+'all_new_no_children_off.csv', dir+'all_new_no_children_on.csv']
-# out_file = "plots_new"
+############ Optimization ################
+# files = [dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
+# name_list = ["Sketch with no children", "Sketch with no children optimized", "Sketch with no root", "Sketch with no root optimized"]
+# out_file = "Tese/baseline_optimization"
+#
+# files = [dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv']
+# name_list = ["Sketch with no children", "Sketch with no children optimized"]
+# out_file = "Tese/baseline_optimization_children"
+
+# files = [dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
+# name_list = ["Sketch with no root", "Sketch with no root optimized"]
+# out_file = "Tese/baseline_optimization_roots"
+
+
 
 # flag_filter = True
 # flag_summarise = True
+# flag_both = True
+flag_union = True
 
 
 ################# PREPARATIONS #################
@@ -179,8 +197,16 @@ elif flag_summarise:
     # out_file = "summarise_off"
 
     files = [dir + 'New/On/no_children_on.csv', dir + 'New/On/Summarise/no_root_no_summarise_on.csv', dir + 'New/On/Summarise/no_child_only_summarise.csv', dir+'New/On/no_root_on.csv']
-    name_list = ["Sketch with no children", "Sketch with no root and no summarise", "Sketch with no children except summarise", "Sketch with no root"]
+    name_list = ["Sketch with no children", "Sketch with no root and no aggregate", "Sketch with no children except aggregate", "Sketch with no root"]
     out_file = "Tese/only_summarise_optimized"
+elif flag_both:
+    files = [dir + 'New/On/no_children_on.csv', dir + 'New/On/Both/no_root_no_both_on.csv', dir + 'New/On/Both/sketch_no_child_only_both_on.csv', dir + 'New/On/no_root_on.csv']
+    # name_list = ["Sketch with no children", "Sketch with no root and no aggregate", "Sketch with no children except aggregate", "Sketch with no root"]
+    out_file = "only_both_optimized"
+elif flag_union:
+    files = [dir + 'New/On/no_children_on.csv', dir + 'New/On/Union/no_root_no_union_on.csv', dir + 'New/On/Union/sketch_no_child_only_both_on.csv', dir + 'New/On/no_root_on.csv']
+    # name_list = ["Sketch with no children", "Sketch with no root and no aggregate", "Sketch with no children except aggregate", "Sketch with no root"]
+    out_file = "only_union_optimized"
 
 
 for file in files:
@@ -201,6 +227,17 @@ elif flag_summarise:
         new_list.append(data[data.name.isin(summarise)])
     csv_list = new_list
 
+elif flag_both:
+    new_list = []
+    for data in csv_list:
+        new_list.append(data[data.name.isin(both)])
+    csv_list = new_list
+
+elif flag_union:
+    new_list = []
+    for data in csv_list:
+        new_list.append(data[data.name.isin(union)])
+    csv_list = new_list
 
 ##################### RUN #####################
 

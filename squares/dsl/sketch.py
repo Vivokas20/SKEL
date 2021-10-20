@@ -481,7 +481,7 @@ class Sketch:
 
                 try:
                     args = args_in_brackets(line.split('(')[1].split(')')[0])[0]
-                    if args:
+                    if args and args[0] != "??":
                         self.select["cols"] = args
                 except:
                     logger.error('Could not parse select line', sketch_line)
@@ -713,8 +713,8 @@ class Sketch:
                                 continue
 
                             if line.line_type == "Free" and len(
-                                    production.rhs) == line.n_children or line.line_type == "Incomplete" and len(
-                                    production.rhs) >= line.n_children:
+                                    production.rhs) == line.n_children or (line.line_type == "Incomplete" and len(
+                                    production.rhs) >= line.n_children):
                                 line.var.append(production.id)
                             else:
                                 continue
