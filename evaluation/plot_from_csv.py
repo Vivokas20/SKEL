@@ -27,6 +27,19 @@ def greater_than(datas):        # 1st data that must take the longest
         if (float(big.real[n]) + 5) < float(small.real[n]):
             print(big.name[n])
 
+def miscellaneous(datas):        # 1st data that must take the longest
+    no_opt = datas[0]
+    opt = datas[1]
+
+    a = no_opt[(no_opt.timeout == False) & (no_opt.ground_truth == True)]
+    b = opt[(opt.timeout == False) & (opt.ground_truth == True)]
+    c = a[a.name.isin(b.name)]
+    d = a[~a.name.isin(b.name)]
+
+    print(len(a))
+    print(len(b))
+    print(len(c))
+    print(d)
 
 ####################### Plot Functions ########################
 
@@ -52,7 +65,10 @@ def time_plot(datas, names):
         df.index += 1
         df = df.reset_index()
 
+
         fig = df.plot(label= names[n], xlabel="#Solved Instances", ylabel="Real Time (s)", x="index", y="real", style='.-', subplots=False, ax=ax)
+        fig.set_ylim(-2,100)    # baseline / filter
+        fig.set_ylim(-1, 50)    # summarise
         # df.plot(style='.-', markevery=5)
 
     fig = fig.get_figure()
@@ -69,6 +85,9 @@ def programs_plot(datas, names):
         df = df.reset_index()
 
         fig = df.plot(label= names[n], xlabel="#Solved Instances", ylabel="#Attempted programs", x="index", y="programs", style='.-', subplots=False, ax=ax)
+        fig.set_ylim(-100, 2000)    # baseline/summarise
+        # fig.set_ylim(-100, 4000)  # filter
+
         # fig.yaxis.set_major_formatter(mtick.PercentFormatter())
         # fig = df.plot(label=names[n], xlabel="Instance", ylabel="Attempted programs", x="name", y="programs", subplots=False, ax=ax)
 
@@ -92,10 +111,18 @@ def ground_truth(datas, names):
         solved.append(len(df.index))
         gtruth.append(len(df2.index))
 
+
     df = pd.DataFrame({"solved": solved, "correct": gtruth}, index=index)
 
     rcParams.update({'figure.autolayout': True})
-    fig = df.plot(kind="bar", xlabel="Benchmark", ylabel="#Solved Instances", rot=0).legend(loc=(0.004,0.875))  # figsize = (6.4, 4.8)
+    fig = df.plot(kind="bar", xlabel="Benchmark", ylabel="#Solved Instances", rot=0)  # figsize = (6.4, 4.8)
+
+    for p in fig.patches:
+        fig.annotate(str(p.get_height()), (p.get_x() + p.get_width()/2, p.get_height() * 1.005), ha="center")
+
+    # fig.legend(loc=(0.004,0.875))
+    fig.legend(loc="lower left")
+
     fig = fig.get_figure()
     return fig
 
@@ -159,10 +186,10 @@ name_list = ["No sketch", "Sketch with no children", "Sketch with no root"]
 out_file = "Tese/baseline"
 
 ############ Optimization ################
-# files = [dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
-# name_list = ["Sketch with no children", "Sketch with no children optimized", "Sketch with no root", "Sketch with no root optimized"]
-# out_file = "Tese/baseline_optimization"
-#
+files = [dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv', dir+'New/Off/no_root_off.csv', dir+'New/On/no_root_on.csv']
+name_list = ["Sketch with no children", "Sketch with no children optimized", "Sketch with no root", "Sketch with no root optimized"]
+out_file = "Tese/baseline_optimization"
+
 # files = [dir+'New/Off/no_children_off.csv', dir+'New/On/no_children_on.csv']
 # name_list = ["Sketch with no children", "Sketch with no children optimized"]
 # out_file = "Tese/baseline_optimization_children"
@@ -176,24 +203,24 @@ out_file = "Tese/baseline"
 # flag_filter = True
 # flag_summarise = True
 # flag_both = True
-flag_union = True
+# flag_union = True
 
 
 ################# PREPARATIONS #################
 
 if flag_filter:
-    files = [dir + 'no_sketch.csv', dir + 'New/On/no_children_on.csv', dir + 'New/On/no_root_on.csv', dir + 'New/On/Filter/no_filter_on.csv', dir + 'New/On/Filter/only_filter_on.csv']
+    # files = [dir + 'no_sketch.csv', dir + 'New/On/no_children_on.csv', dir + 'New/On/no_root_on.csv', dir + 'New/On/Filter/no_filter_on.csv', dir + 'New/On/Filter/only_filter_on.csv']
     # files = [dir + 'no_sketch.csv', dir + 'New/Off/no_children_off.csv', dir + 'New/Off/no_root_off.csv', dir + 'New/Off/Filter/no_filter_off.csv', dir + 'New/Off/Filter/only_filter_off.csv']
-    out_file = "filter_on"
+    # out_file = "filter_on"
     # out_file = "filter_off"
 
     files = [dir + 'New/On/no_children_on.csv', dir + 'New/On/Filter/no_root_no_filter_on.csv', dir + 'New/On/Filter/no_child_only_filter_on.csv', dir+'New/On/no_root_on.csv']
     name_list = ["Sketch with no children", "Sketch with no root and no filter", "Sketch with no children except filter", "Sketch with no root"]
     out_file = "Tese/only_filter_optimized"
 elif flag_summarise:
-    files = [dir + 'no_sketch.csv', dir + 'New/On/no_children_on.csv', dir + 'New/On/no_root_on.csv', dir + 'New/On/Summarise/no_summarise_on.csv', dir+'New/On/Summarise/only_summarise_on.csv']
+    # files = [dir + 'no_sketch.csv', dir + 'New/On/no_children_on.csv', dir + 'New/On/no_root_on.csv', dir + 'New/On/Summarise/no_summarise_on.csv', dir+'New/On/Summarise/only_summarise_on.csv']
     # files = [dir + 'no_sketch.csv', dir + 'New/Off/no_children_off.csv', dir + 'New/Off/no_root_off.csv', dir + 'New/Off/Summarise/no_summarise_off.csv', dir + 'New/Off/Summarise/only_summarise_off.csv']
-    out_file = "summarise_on"
+    # out_file = "summarise_on"
     # out_file = "summarise_off"
 
     files = [dir + 'New/On/no_children_on.csv', dir + 'New/On/Summarise/no_root_no_summarise_on.csv', dir + 'New/On/Summarise/no_child_only_summarise.csv', dir+'New/On/no_root_on.csv']
@@ -241,14 +268,14 @@ elif flag_union:
 
 ##################### RUN #####################
 
-# greater_than(csv_list)
+miscellaneous(csv_list)
 
-sol = check(csv_list, name_list)
-if sol[0]:
-    print("There are errors in csv: " + sol[1])
-else:
-    figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), ground_truth(csv_list, name_list), solved_plot(csv_list, name_list)]
-
-    with PdfPages("evaluation/plots/"+out_file+".pdf") as pdf:
-        for fig in figs:
-            pdf.savefig(fig)
+# sol = check(csv_list, name_list)
+# if sol[0]:
+#     print("There are errors in csv: " + sol[1])
+# else:
+#     figs = [time_plot(csv_list, name_list), programs_plot(csv_list, name_list), ground_truth(csv_list, name_list), solved_plot(csv_list, name_list)]
+#
+#     with PdfPages("evaluation/plots/"+out_file+".pdf") as pdf:
+#         for fig in figs:
+#             pdf.savefig(fig)

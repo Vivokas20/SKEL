@@ -1,45 +1,9 @@
 inputs:
-  - tests-examples/demo/tables/grades.csv
+  - tests-examples/demo/tables/bridge.csv
+  - tests-examples/demo/tables/architect.csv
 output: tests-examples/demo/tables/test.out
-functions:
-  - min
-columns:
-  - grade
-  - courseId
-constants:
-  - 11
-sql: |
-  SELECT MIN(grade) FROM grades WHERE courseId = 11
-#sketch: |
-#  df1 <- grades %>% filter(courseId == 11)
-#  df2 <- df1 %>% group_by() %>% summarise(grade = min(grade)) %>% ungroup()
-#  out <- df2 %>% select(mingrade = grade) %>% arrange(mingrade)
-#  T1 = ?? courseId == 11
 
-#sketch: |
-#  T1 = ??(??, courseId == 11)
-#  T2 = summarise(T1, grade = min(grade))
-#  out = select(grade)
-#sketch: |
-#  T1 = [filter,anti_join](grades, ??)
-#  T2 = summarise(T1, grade = min(grade))
-#  out = select(grade)
-
-#sketch: |
-#  T1 = filter(grades, [courseId == 11, courseId >= 11])
-#  T2 = summarise(T1, grade = min(grade))
-#  out = select(grade)
-
-#sketch: |
-#  T1 = [filter,anti_join](grades, courseId == 11)
-#  T2 = summarise(T??, grade = min(grade))
-#  out = select(grade)
-#sketch: |
-#  T1 = ??(grades, [courseId == 11, courseId >= 11], ??*)
-#  T2 = summarise(T1, grade = min(grade))
-#  out = select(grade)
-
-full_sketch: |
-  T1 = filter(grades, courseId == 11)
-  T2 = summarise(T1, grade = min(grade))
-  out = select(grade)
+sketch: |
+  T1 = filter(??, nationality == 'American')
+  ??+
+  out = select(name) order by(name)
